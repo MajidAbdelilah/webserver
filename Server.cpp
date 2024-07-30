@@ -12,7 +12,10 @@ int Server::getsocketfd()const{
     return (_Tcpsocketfd);
 }
 
+// handle signal for interupting server 
+
 int Server::run(){
+    signal(SIGINT, handle_inter);
     struct sockaddr_in hostAddr;
     char resp[] = "HTTP/1.0 200 OK\r\n"
                   "Server: webserver-c\r\n"
@@ -34,15 +37,38 @@ int Server::run(){
     int serversize = sizeof(hostAddr);
     // handle client connections 
     while (1) {
+        /* accept client connection to socket and creates a socket for the client.*/
         int clientfd = accept(_Tcpsocketfd, (struct sockaddr *) &hostAddr, (socklen_t *)&serversize);
         if (clientfd < 0)
             throw ("Clientfd error");
         std::cout << "connection accepted" << std::endl;
-        write(clientfd, resp , strlen(resp));
+        
+        // Getting the addr of the client , and the port used in the sockaddr_in struct 
         int _socknameclient = getsockname(clientfd, (struct sockaddr *)&client_sock, (socklen_t *)&client_addrlen );
-        if (_socknameclient == -1)
+        if (_socknameclient == -1){
             throw ("Clientname error");
-        std::cout  << "[ " << inet_ntoa(client_sock.sin_addr) << " , " << ntohs(client_sock.sin_port) << " ]" << std::endl;
+        }
+        std::cout  << "Client ip && Port [ " << inet_ntoa(client_sock.sin_addr) << " , " << ntohs(client_sock.sin_port) << " ]" << std::endl;
+
+        std::vector <char> buf(BUFFER_SIZE);
+        std::string _Fullbuffer;
+        int _Readbuffer = recv(clientfd, &buf[0], BUFFER_SIZE, 0);
+        if (_Readbuffer == -1)
+            throw ("Recv error");
+        for (int i = 0 ; (size_t)i < buf.size() ; i++)
+            std::cout << buf[i];
+        std::cout << std::endl;
+        while (_Readbuffer){
+            _Fullbuffer.append(buf.begin(), buf.end());
+            buf.clear();
+            _Readbuffer = recv(clientfd, &buf[0], BUFFER_SIZE, 0);
+            if (_Readbuffer == -1)
+                throw ("Recv error");
+        }
+        std::cout << _Fullbuffer << std::endl;
+        // write(clientfd, resp , strlen(resp)); /* write a response containing Hello world */
+        send(clientfd, resp, strlen(resp), 0);
+        close(clientfd);
     }
 }
 

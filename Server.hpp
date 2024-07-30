@@ -6,9 +6,13 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <unistd.h>
-
+#include <vector>
+#include <map>
+#include <string>
+#include <signal.h>
 #define PORT 8080
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 4096
+
 
 class Server {
     private:
@@ -20,5 +24,9 @@ class Server {
         int run();
 };
 
+void handle_inter(int fd){
+    close(fd);
+    return ;
+}
 
 #endif
