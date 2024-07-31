@@ -8,9 +8,11 @@ int main (int ac, char **av){
         return (1);
     }
     try{
-        Server *webserv = new Server();
-        webserv->run();
-        delete webserv;
+        //get the info from config file
+        // Server *webserv = new Server(AF_INET, SOCK_STREAM, 0, PORT, INADDR_ANY, SOMAXCONN); /* for now i'll use custom ones */
+        Server webserv(AF_INET, SOCK_STREAM, 0, PORT, INADDR_ANY, SOMAXCONN);
+        webserv.Filldata();
+        webserv.run();
     }
     catch(const char * e){
         std::cout << e << std::endl;

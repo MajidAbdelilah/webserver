@@ -10,23 +10,32 @@
 #include <map>
 #include <string>
 #include <signal.h>
-#define PORT 8080
-#define BUFFER_SIZE 4096
+#include <poll.h>
+#include <algorithm>
+#include <sys/event.h>
 
+#define PORT 8080
+#define BUFFER_SIZE 30000
+#define MAX_EVENTS 10
 
 class Server {
     private:
-        int _Tcpsocketfd;
-    public:
         Server();
+        int _Tcpsocketfd;
+        int _domain;
+        int _type;
+        int _protocol;
+        int _port;
+        int _interface;
+        int _backlog;
+        struct sockaddr_in hostaddr;
+
+    public:
+        Server(int , int , int , int , u_int32_t , int);
         ~Server();
         int getsocketfd() const;
+        int Filldata();
         int run();
 };
-
-void handle_inter(int fd){
-    close(fd);
-    return ;
-}
 
 #endif
