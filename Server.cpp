@@ -40,16 +40,41 @@ int Server::run(){
     int kernel_queue = kqueue();
     if (kernel_queue < 0)
         throw("Kq failure");
+
     struct kevent Server_k;
     EV_SET(&Server_k, _Tcpsocketfd, EVFILT_READ, EV_ADD ,0 ,0 ,NULL);
     if(kevent(kernel_queue, &Server_k, 1, NULL, 0 , NULL) < 0)
         throw("kevent error");
+
     while (1){
         struct kevent events[MAX_EVENTS];
-        int c = kevent(kernel_queue, NULL, 0, events, MAX_EVENTS, NULL);
+        int count = kevent(kernel_queue, NULL, 0, events, MAX_EVENTS, NULL);
+        for (int i = 0 ; i < count; i++){
+            if (events[i].ident == _Tcpsocketfd){
+                int sizeHost = sizeof(hostaddr);
+                int client_socketfd = accept(_Tcpsocketfd, (struct sockaddr *)&hostaddr, (socklen_t*)&sizeHost); 
+                if (client_socketfd < 0)
+                    throw("Client fd accept error"); // accepting client connection
+                struct sockaddr_in clin;
+                int sizecli = sizeof(clin);
+                getsockname(client_socketfd, (struct sockaddr *)&clin, (socklen_t *)&sizecli);
+                std::cout << "Client address and port : " << inet_ntoa(clin.sin_addr) 
+                    << " " << ntohs(clin.sin_port) << std::endl;
+                getting_req(events, kernel_queue, client_socket);
+            }
+        }
     }
 }
 
+int Server::getting_req(struct kevent events[MAX_EVENTS], int kernal_q, int client_soc){
+    std::vector < char > buffer(BUFFER_SIZE);
+    ssize_t _bytesread = recv(client_soc, &buffer[0], BUFFER_SIZE, 0); // continue the req part
+    if (_bytesread < 0)
+        throw ("recv error");
+        for (size_t i = 0 ; i < buffer.size(); i++)
+            std::cout << buffer[i];
+    std::cout << std::endl;
+}
 
 int Server::Filldata(){
     _Tcpsocketfd = socket(_domain, _type, _protocol);
