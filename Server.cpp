@@ -23,7 +23,9 @@ int Server::run(){
                 "Server: webserver-c\r\n"
                 "Content-type: text/html\r\n\r\n"
                 "<html>hello, world. This is webserver</html>\r\n";
-    int client_socket;
+    (void)resp;
+    (void)sizesocket;
+    // int client_socket;
     // while (1){
     //     std::cout << "** Waiting for connection **\n";
     //     client_socket = accept(_Tcpsocketfd, (struct sockaddr *)&hostaddr, (socklen_t *)&sizesocket);
@@ -50,7 +52,7 @@ int Server::run(){
         struct kevent events[MAX_EVENTS];
         int count = kevent(kernel_queue, NULL, 0, events, MAX_EVENTS, NULL);
         for (int i = 0 ; i < count; i++){
-            if (events[i].ident == _Tcpsocketfd){
+            if (events[i].ident == (unsigned long)_Tcpsocketfd){
                 int sizeHost = sizeof(hostaddr);
                 int client_socketfd = accept(_Tcpsocketfd, (struct sockaddr *)&hostaddr, (socklen_t*)&sizeHost); 
                 if (client_socketfd < 0)
@@ -60,13 +62,15 @@ int Server::run(){
                 getsockname(client_socketfd, (struct sockaddr *)&clin, (socklen_t *)&sizecli);
                 std::cout << "Client address and port : " << inet_ntoa(clin.sin_addr) 
                     << " " << ntohs(clin.sin_port) << std::endl;
-                getting_req(events, kernel_queue, client_socket);
+                getting_req(events, kernel_queue, client_socketfd);
             }
         }
     }
 }
 
-int Server::getting_req(struct kevent events[MAX_EVENTS], int kernal_q, int client_soc){
+int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int client_soc){
+    (void)events;
+    (void)kernel_q;
     std::vector < char > buffer(BUFFER_SIZE);
     ssize_t _bytesread = recv(client_soc, &buffer[0], BUFFER_SIZE, 0); // continue the req part
     if (_bytesread < 0)
@@ -74,6 +78,7 @@ int Server::getting_req(struct kevent events[MAX_EVENTS], int kernal_q, int clie
         for (size_t i = 0 ; i < buffer.size(); i++)
             std::cout << buffer[i];
     std::cout << std::endl;
+    return (0);
 }
 
 int Server::Filldata(){
