@@ -19,10 +19,11 @@ int Server::getsocketfd()const{
 int Server::run(){
     std::vector < char > buffer(BUFFER_SIZE);
     int sizesocket = sizeof(hostaddr);
-    char resp[] = "HTTP/1.0 200 OK\r\n"
-                "Server: webserver-c\r\n"
-                "Content-type: text/html\r\n\r\n"
-                "<html>hello, world. This is webserver</html>\r\n";
+char resp[] = "HTTP/1.1 200 OK\r\n"
+                  "Content-Type: text/html\r\n"
+                  "Content-Length: 39\r\n"
+                  "Connection: keep-alive\r\n\r\n"
+                  "<html><body><h1>test</h1></body></html>";
     (void)resp;
     (void)sizesocket;
     // int client_socket;
@@ -62,7 +63,14 @@ int Server::run(){
                 getsockname(client_socketfd, (struct sockaddr *)&clin, (socklen_t *)&sizecli);
                 std::cout << "Client address and port : " << inet_ntoa(clin.sin_addr) 
                     << " " << ntohs(clin.sin_port) << std::endl;
-                getting_req(events, kernel_queue, client_socketfd);
+                EV_SET(events, client_socketfd, EVFILT_READ, EV_ADD ,0 ,0 ,NULL);
+                kevent(kernel_queue, events, 1 , NULL, 0, NULL);
+                // close (client_socketfd);
+            }
+            else{
+                getting_req(events, kernel_queue, events[i].ident);
+                send(events[i].ident, resp ,strlen(resp),0);
+                // close(events[i].ident);
             }
         }
     }
@@ -75,10 +83,23 @@ int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int clie
     ssize_t _bytesread = recv(client_soc, &buffer[0], BUFFER_SIZE, 0); // continue the req part
     if (_bytesread < 0)
         throw ("recv error");
-        for (size_t i = 0 ; i < buffer.size(); i++)
-            std::cout << buffer[i];
-    std::cout << std::endl;
+    if (_bytesread == 0){
+        close (client_soc);
+        return (1);
+    }
+    // for (size_t i = 0 ; i < buffer.size(); i++)
+        // std::cout << buffer[i];
+    // std::cout << std::endl;
+    Server::ParseRequest(buffer);
+    //handle request 
     return (0);
+}
+
+int Server::ParseRequest(std::vector < char > &buf){
+    std::string hold(buf.begin(), buf.end());
+    for (size_t i = 0 ; i < hold.size(); i++) {
+        //continue this part with majid implementation
+    }
 }
 
 int Server::Filldata(){
