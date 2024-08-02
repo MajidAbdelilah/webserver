@@ -68,7 +68,7 @@ char resp[] = "HTTP/1.1 200 OK\r\n"
                 // close (client_socketfd);
             }
             else{
-                getting_req(events, kernel_queue, events[i].ident);
+                getting_req(events, kernel_queue, events[i].ident); // parse request send to majid;
                 send(events[i].ident, resp ,strlen(resp),0);
                 // close(events[i].ident);
             }
@@ -80,26 +80,23 @@ int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int clie
     (void)events;
     (void)kernel_q;
     std::vector < char > buffer(BUFFER_SIZE);
-    ssize_t _bytesread = recv(client_soc, &buffer[0], BUFFER_SIZE, 0); // continue the req part
+    ssize_t _bytesread = recv(client_soc, &buffer[0], BUFFER_SIZE, 0);
     if (_bytesread < 0)
         throw ("recv error");
     if (_bytesread == 0){
         close (client_soc);
         return (1);
     }
-    // for (size_t i = 0 ; i < buffer.size(); i++)
-        // std::cout << buffer[i];
-    // std::cout << std::endl;
-    Server::ParseRequest(buffer);
-    //handle request 
+    for (size_t i = 0 ; i < buffer.size(); i++)
+        std::cout << buffer[i];
+    std::cout << std::endl;
+    std::string _Recv_request(buffer.begin(), buffer.end());
+    // call majid's request implementation 
     return (0);
 }
 
-int Server::ParseRequest(std::vector < char > &buf){
-    std::string hold(buf.begin(), buf.end());
-    for (size_t i = 0 ; i < hold.size(); i++) {
-        //continue this part with majid implementation
-    }
+std::string Server::GetRequestToParse() {
+    return (_Recv_request);
 }
 
 int Server::Filldata(){

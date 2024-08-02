@@ -29,7 +29,7 @@ class Server {
         int _interface;
         int _backlog;
         struct sockaddr_in hostaddr;
-        std::map<std::string , std::string > req_head;
+        std::string _Recv_request;
 
     public:
         Server(int , int , int , int , u_int32_t , int);
@@ -38,7 +38,7 @@ class Server {
         int Filldata();
         int run();
         int getting_req(struct kevent* , int kq, int cli_sock);
-        int ParseRequest(std::vector<char> &);
+        std::string GetRequestToParse();
 };
 
 #endif
