@@ -10,7 +10,10 @@ int main (int ac, char **av){
     try{
         //get the info from config file
         // Server *webserv = new Server(AF_INET, SOCK_STREAM, 0, PORT, INADDR_ANY, SOMAXCONN); /* for now i'll use custom ones */
-        Server webserv(AF_INET, SOCK_STREAM, 0, PORT, INADDR_ANY, SOMAXCONN);
+        std::vector < std::pair < std::string , std::string  > >st;
+        st.push_back(std::make_pair("127.0.0.1", "8080"));
+        st.push_back(std::make_pair("10.13.10.14", "8080"));
+        Server webserv(AF_INET, SOCK_STREAM, 0, PORT, INADDR_ANY, SOMAXCONN, st);
         webserv.Filldata();
         webserv.run();
     }

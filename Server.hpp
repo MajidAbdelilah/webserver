@@ -13,26 +13,30 @@
 #include <poll.h>
 #include <algorithm>
 #include <sys/event.h>
+#include <netdb.h>
 
 #define PORT 8080
 #define BUFFER_SIZE 30000
-#define MAX_EVENTS 10
+#define MAX_EVENTS 10000
 
 class Server {
     private:
         Server();
-        int _Tcpsocketfd;
+        // int _Tcpsocketfd;
         int _domain;
         int _type;
         int _protocol;
         int _port;
         int _interface;
+        std::vector < std::pair < std::string , std::string > > _interfaces;
         int _backlog;
-        struct sockaddr_in hostaddr;
-        std::string _Recv_request;
+        struct sockaddr_in hostaddr; //convert into an array of struct 
+        std::string _Recv_request; // request send lmajid
+        std::vector < int > _Socketsfd; // save the fd's
+        std::vector < sockaddr_in > _Addresses;
 
     public:
-        Server(int , int , int , int , u_int32_t , int);
+        Server(int , int , int , int , u_int32_t , int, std::vector < std::pair < std::string , std::string  > > &);
         ~Server();
         int getsocketfd() const;
         int Filldata();
