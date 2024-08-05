@@ -22,9 +22,9 @@ int Server::run(){
 
     char resp[] = "HTTP/1.1 200 OK\r\n"
                     "Content-Type: text/html\r\n"
-                    "Content-Length: 39\r\n"
+                    "Content-Length: 70\r\n"
                     "Connection: keep-alive\r\n\r\n"
-                    "<html><body><h1>wa ras l9lwa</h1></body></html>";
+                    "<html><body><h1 style=\"color: #567810;\"> wa ras asalah l9lwa</h1></body></html>";
 
     int kernel_queue = kqueue();
     if (kernel_queue < 0)
@@ -114,6 +114,9 @@ int Server::Filldata(){
             freeaddrinfo(res);
             throw("Setsockopt error");
         }
+
+        if (fcntl(_Tcpsocketfd, F_SETFL, O_NONBLOCK) == -1)
+            throw("Fcntl error");
 
         if (bind(_Tcpsocketfd, (struct sockaddr *) addr, sizeof(*addr)) < 0){
             freeaddrinfo(res);

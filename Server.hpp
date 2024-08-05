@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <sys/event.h>
 #include <netdb.h>
+#include <fcntl.h>
 
 #define PORT 8080
 #define BUFFER_SIZE 30000
