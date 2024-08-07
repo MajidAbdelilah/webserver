@@ -1,174 +1,166 @@
-#include "server.hpp"
+#include <stdio.h>
+#include <stdlib.h>
+#include <netinet/in.h>
 #include <sys/socket.h>
-
-bool Server::Signal = false; //-> initialize the static boolean
-
-void Server::ServerInit()
+#include <sys/event.h>
+#include <string.h>
+#include <unistd.h>
+#include <iostream>
+#include <regex>
+class Server
 {
-	this->Port = 8080;
-	SerSocket(); //-> create the server socket
+public:
+	Server(int port);
+	~Server();
+public:
+	int port;
+	int socket_listen_fd;
+	int kq;
+	struct kevent change_event[4];
+	struct kevent event[4];
+	struct sockaddr_in serv_addr;
+	int new_events;
+};
 
-	std::cout << GRE << "Server <" << SerSocketFd << "> Connected" << WHI << std::endl;
-	std::cout << "Waiting to accept a connection...\n";
+Server::Server(int port)
+{
+	this->port = port;
+}
+
+Server::~Server()
+{
+}
+
+
+class Client
+{
+public:
+	Client();
+	~Client();
+public:
+	sockaddr_in client_addr;
+	int socket_connection_fd;
+};
+
+Client::Client()
+{
+}
+Client::~Client()
+{
+}
+int main()
+{
+	Server server(8080);
 	
-	while (Server::Signal == false) //-> run the server until the signal is received
-	{
-		if((poll(&fds[0],fds.size(),-1) == -1) && Server::Signal == false) //-> wait for an event
-			throw(std::runtime_error("poll() faild"));
-		size_t i = 0;
-		while(i < fds.size()) //-> check all file descriptors
-		{
-			if (fds[i].revents & POLLIN)//-> check if there is data to read
-			{
-				if (fds[i].fd == SerSocketFd)
-				{
-					AcceptNewClient(); //-> accept new client
+    // Create socket.
+    if (((server.socket_listen_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0))
+    {
+        std::cout << ("ERROR opening socket");
+        exit(1);
+    }
+
+    // Create socket structure and bind to ip address.
+    bzero((char *)&server.serv_addr, sizeof(server.serv_addr));
+    server.serv_addr.sin_family = AF_INET;
+    server.serv_addr.sin_addr.s_addr = INADDR_ANY;
+    server.serv_addr.sin_port = htons(server.port);
+
+    if (bind(server.socket_listen_fd, (struct sockaddr *)&server.serv_addr, sizeof(server.serv_addr)) < 0)
+    {
+        std::cout << ("Error binding socket");
+        exit(1);
+    }
+	Client client;
+    // Start listening.
+    listen(server.socket_listen_fd, 3);
+    int client_len = sizeof(client.client_addr);
+
+    // Prepare the kqueue.
+    server.kq = kqueue();
+
+    // Create server.event 'filter', these are the events we want to monitor.
+    // Here we want to monitor: server.socket_listen_fd, for the events: EVFILT_READ 
+    // (when there is data to be read on the socket), and perform the following
+    // actions on this kevent: EV_ADD and EV_ENABLE (add the server.event to the kqueue 
+    // and enable it).
+    EV_SET(server.change_event, server.socket_listen_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+
+    // Register kevent with the kqueue.
+    if (kevent(server.kq, server.change_event, 1, NULL, 0, NULL) == -1)
+    {
+        std::cout << ("kevent");
+        exit(1);
+    }
+
+    // Actual server.event loop.
+    for (;;)
+    {
+        // Check for new events, but do not register new events with
+        // the kqueue. Hence the 2nd and 3rd arguments are NULL, 0.
+        // Only handle 1 new server.event per iteration in the loop; 5th
+        // argument is 1.
+        server.new_events = kevent(server.kq, NULL, 0, server.event, 1, NULL);
+        if (server.new_events == -1)
+        {
+            std::cout << ("kevent");
+            exit(1);
+        }
+
+        for (int i = 0; server.new_events > i; i++)
+        {
+            int event_fd = server.event[i].ident;
+
+            // When the client disconnects an EOF is sent. By closing the file
+            // descriptor the server.event is automatically removed from the kqueue.
+            if (server.event[i].flags & EV_EOF)
+            {
+                std::cout << ("Client has disconnected");
+                close(event_fd);
+            }
+            // If the new server.event's file descriptor is the same as the listening
+            // socket's file descriptor, we are sure that a new client wants 
+            // to connect to our socket.
+            else if (event_fd == server.socket_listen_fd)
+            {
+                // Incoming socket connection on the listening socket.
+                // Create a new socket for the actual connection to client.
+                client.socket_connection_fd = accept(event_fd, (struct sockaddr *)&client.client_addr, (socklen_t *)&client_len);
+                if (client.socket_connection_fd == -1)
+                {
+                    std::cout << ("Accept socket error");
+                }
+
+                // Put this new socket connection also as a 'filter' server.event
+                // to watch in kqueue, so we can now watch for events on this
+                // new socket.
+                EV_SET(server.change_event, client.socket_connection_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+                if (kevent(server.kq, server.change_event, 1, NULL, 0, NULL) < 0)
+                {
+                    std::cout << ("kevent error");
+                }
+            }
+
+            else if (server.event[i].filter & EVFILT_READ)
+            {
+                // Read bytes from socket
+                char buf[1024];
+                size_t bytes_read = recv(event_fd, buf, sizeof(buf), 0);
+				buf[bytes_read] = '\0';
+                std::cout << "read " << bytes_read << " bytes\n";
+				std::cout << buf << "\n";
+				if(std::regex_match(buf, std::regex("GET / HTTP/1.1*"))){
+					std::cout << "HTTP/1.1 200 OK\n";
+					std::cout << "Content-Type: text/html\n\n";
+					std::cout << "<html><body><h1>Hello, World!</h1></body></html>\n";
 				}
-					else
-					ReceiveNewData(fds[i].fd); //-> receive new data from a registered client
-			}
-			i++;
-		}
-	}
-	CloseFds(); //-> close the file descriptors when the server stops
-}
+				std::cout << std::regex_match(buf, std::regex("GET / HTTP/1.1*")) << "\n";
+				if (bytes_read == 0)
+				{
+					close(event_fd);
+				}
+            }
+        }
+    }
 
-
-void Server::AcceptNewClient()
-{
-	Client cli; //-> create a new client
-	struct sockaddr_in cliadd;
-	struct pollfd NewPoll;
-	socklen_t len = sizeof(cliadd);
-
-	int incofd = accept(SerSocketFd, (sockaddr *)&(cliadd), &len); //-> accept the new client
-	if (incofd == -1)
-	{
-		std::cout << "accept() failed" << std::endl;
-		return;
-	}
-
-	if (fcntl(incofd, F_SETFL, O_NONBLOCK) == -1) //-> set the socket option (O_NONBLOCK) for non-blocking socket
-	{
-		std::cout << "fcntl() failed" << std::endl;
-		return;
-	}
-
-	NewPoll.fd = incofd; //-> add the client socket to the pollfd
-	NewPoll.events = POLLIN; //-> set the event to POLLIN for reading data
-	NewPoll.revents = 0; //-> set the revents to 0
-
-	cli.SetFd(incofd); //-> set the client file descriptor
-	cli.setIpAdd(inet_ntoa((cliadd.sin_addr))); //-> convert the ip address to string and set it
-	clients.push_back(cli); //-> add the client to the vector of clients
-	fds.push_back(NewPoll); //-> add the client socket to the pollfd
-
-	std::cout << GRE << "Client <" << incofd << "> Connected" << WHI << std::endl;
-}
-
-void Server::SignalHandler(int signum)
-{
-	(void)signum;
-	std::cout << std::endl << "Signal Received!" << std::endl;
-	Server::Signal = true; //-> set the static boolean to true to stop the server
-}
-
-void Server::ClearClients(int fd){ //-> clear the clients
-	size_t i = 0;
-	while(i < fds.size()){ //-> remove the client from the pollfd
-		if (fds[i].fd == fd)
-		{
-			fds.erase(fds.begin() + i); break;
-		}
-		i++;
-	}
-	i = 0;
-	while(i < clients.size()){ //-> remove the client from the vector of clients
-		if (clients[i].GetFd() == fd)
-		{
-			clients.erase(clients.begin() + i); break;
-		}
-		i++;
-	}
-
-}
-
-void Server::CloseFds(){
-	size_t i = 0;
-	while(i < clients.size()){ //-> close all the clients
-		std::cout << RED << "Client <" << clients[i].GetFd() << "> Disconnected" << WHI << std::endl;
-		close(clients[i].GetFd());
-		i++;
-	}
-	if (SerSocketFd != -1){ //-> close the server socket
-		std::cout << RED << "Server <" << SerSocketFd << "> Disconnected" << WHI << std::endl;
-		close(SerSocketFd);
-	}
-}
-
-void Server::SerSocket()
-{
-	struct sockaddr_in add;
-	struct pollfd NewPoll;
-	add.sin_family = AF_INET; //-> set the address family to ipv4
-	add.sin_port = htons(this->Port); //-> convert the port to network byte order (big endian)
-	add.sin_addr.s_addr = INADDR_ANY; //-> set the address to any local machine address
-
-	SerSocketFd = socket(AF_INET, SOCK_STREAM, 0); //-> create the server socket
-	if(SerSocketFd == -1) //-> check if the socket is created
-		throw(std::runtime_error("faild to create socket"));
-
-	int en = 1;
-	if(setsockopt(SerSocketFd, SOL_SOCKET, SO_REUSEADDR, &en, sizeof(en)) == -1) //-> set the socket option (SO_REUSEADDR) to reuse the address
-		throw(std::runtime_error("faild to set option (SO_REUSEADDR) on socket"));
-	if (fcntl(SerSocketFd, F_SETFL, O_NONBLOCK) == -1) //-> set the socket option (O_NONBLOCK) for non-blocking socket
-		throw(std::runtime_error("faild to set option (O_NONBLOCK) on socket"));
-	if (bind(SerSocketFd, (struct sockaddr *)&add, sizeof(add)) == -1) //-> bind the socket to the address
-		throw(std::runtime_error("faild to bind socket"));
-	if (listen(SerSocketFd, SOMAXCONN) == -1) //-> listen for incoming connections and making the socket a passive socket
-		throw(std::runtime_error("listen() faild"));
-
-	NewPoll.fd = SerSocketFd; //-> add the server socket to the pollfd
-	NewPoll.events = POLLIN; //-> set the event to POLLIN for reading data
-	NewPoll.revents = 0; //-> set the revents to 0
-	fds.push_back(NewPoll); //-> add the server socket to the pollfd
-}
-
-
-
-void Server::ReceiveNewData(int fd)
-{
-	char buff[1024] = {0}; //-> buffer for the received data
-	// memset(buff, 0, sizeof(buff)); //-> clear the buffer
-	
-	ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0); //-> receive the data
-
-	if(bytes <= 0)
-	{ //-> check if the client disconnected
-		std::cout << RED << "Client <" << fd << "> Disconnected" << WHI << std::endl;
-		ClearClients(fd); //-> clear the client
-		close(fd); //-> close the client socket
-	}
-	else
-	{ //-> print the received data
-		buff[bytes] = '\0';
-		std::cout << YEL << "Client <" << fd << "> Data: " << WHI << buff;
-		//write the irc code for handling: parse, check, authenticate, handle the command, etc...
-		std::string data = buff;
-		Client client = getClient(fd);
-		
-		
-	}
-}
-
-Client Server::getClient(int fd)
-{
-	size_t i = 0;
-	while(i < clients.size())
-	{
-		if (clients[i].GetFd() == fd)
-			return clients[i];
-		i++;
-	}
-	return Client();
+    return 0;
 }
