@@ -1,4 +1,4 @@
-SRCS=  src/main.cpp src/server.cpp
+SRCS=  src/main.cpp src/server.cpp src/http_req.cpp
 OBJS= $(SRCS:.cpp=.o)
 CFLAGS= -Wall -Wextra -Werror -std=c++98 -fsanitize=address
 CPP= c++
