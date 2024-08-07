@@ -1,4 +1,5 @@
 #include "server.hpp"
+#include "http_req.hpp"
 
 Server::Server(int domain, int type, int protocol, int port, u_int32_t interface, int backlog, std::vector < std::pair < std::string , std::string > > &addresses){
     this->_domain = domain;
@@ -57,7 +58,8 @@ int Server::run(){
             }
             else{
                 getting_req(events, kernel_queue, events[i].ident); // parse request send to majid;
-                send(events[i].ident, resp ,strlen(resp),0);
+                // send(events[i].ident, resp ,strlen(resp),0);
+				(void)resp;
                 // close(events[i].ident);
             }
         }
@@ -78,10 +80,20 @@ int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int clie
     for (size_t i = 0 ; i < buffer.size(); i++)
         std::cout << buffer[i];
     std::cout << std::endl;
-    std::string _Recv_request(buffer.begin(), buffer.end());
+    Server::_Recv_request = std::string(buffer.begin(), buffer.end());
     // call majid's request implementation 
+	std::string resp = "HTTP/1.1 200 OK\r\n"
+					"Content-Type: text/html\r\n"
+					"Content-Length: 101\r\n"
+					"Connection: keep-alive\r\n\r\n";
+	std::string body;
+	GET(body);
+    send(client_soc, (resp+body).c_str() , (resp+body).size(),0);
+
     return (0);
 }
+
+std::string Server::_Recv_request = "";
 
 std::string Server::GetRequestToParse() {
     return (_Recv_request);

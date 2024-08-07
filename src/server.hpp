@@ -32,7 +32,7 @@ class Server {
         std::vector < std::pair < std::string , std::string > > _interfaces;
         int _backlog;
         struct sockaddr_in hostaddr; //convert into an array of struct 
-        std::string _Recv_request; // request send lmajid
+        static std::string _Recv_request; // request send lmajid
         std::vector < int > _Socketsfd; // save the fd's
         std::vector < sockaddr_in > _Addresses;
 
@@ -43,7 +43,7 @@ class Server {
         int Filldata();
         int run();
         int getting_req(struct kevent* , int kq, int cli_sock);
-        std::string GetRequestToParse();
+        static std::string GetRequestToParse();
 };
 
 #endif
