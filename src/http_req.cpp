@@ -39,7 +39,7 @@ int parse_headers(std::string line, std::map<std::string, std::string> &req)
 	return 0;
 }
 
-int GET(std::string &file_content)
+int GET(std::string &file_content, size_t &content_len)
 {
 	std::string req = Server::GetRequestToParse();
 	std::cout << "\n\n\nGET REQUEST START \n\n";
@@ -104,6 +104,7 @@ int GET(std::string &file_content)
 	std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 	std::cout << content << std::endl;
 	file_content = content;
-	std::cout << "content_len: " << content.length() << std::endl;
+	content_len = content.size();
+	std::cout << "content_len: " << content.size() << std::endl;
 	return 0;
 }

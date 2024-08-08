@@ -1,6 +1,6 @@
 SRCS=  src/main.cpp src/server.cpp src/http_req.cpp
 OBJS= $(SRCS:.cpp=.o)
-CFLAGS= -Wall -Wextra -Werror -std=c++98 -fsanitize=address
+CFLAGS= -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3  -g
 CPP= c++
 NAME= webserv
 

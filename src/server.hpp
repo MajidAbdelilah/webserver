@@ -44,6 +44,8 @@ class Server {
         int run();
         int getting_req(struct kevent* , int kq, int cli_sock);
         static std::string GetRequestToParse();
+		void close_remove_event(int &socket_fd, int &kqueue);
+
 };
 
 #endif

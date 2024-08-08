@@ -1,5 +1,6 @@
 #include "server.hpp"
 #include "http_req.hpp"
+#include <sys/_types/_size_t.h>
 
 Server::Server(int domain, int type, int protocol, int port, u_int32_t interface, int backlog, std::vector < std::pair < std::string , std::string > > &addresses){
     this->_domain = domain;
@@ -82,12 +83,13 @@ int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int clie
     std::cout << std::endl;
     Server::_Recv_request = std::string(buffer.begin(), buffer.end());
     // call majid's request implementation 
+	std::string body;
+	size_t body_len;
+	GET(body, body_len);
 	std::string resp = "HTTP/1.1 200 OK\r\n"
 					"Content-Type: text/html\r\n"
-					"Content-Length: 101\r\n"
+					"Content-Length: " + std::to_string(body_len) + "\r\n"
 					"Connection: keep-alive\r\n\r\n";
-	std::string body;
-	GET(body);
     send(client_soc, (resp+body).c_str() , (resp+body).size(),0);
 
     return (0);
