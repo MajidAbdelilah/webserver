@@ -59,6 +59,8 @@ int Server::run(){
                     std::cout << _Recv_request;
                     std::cout << "\n---------------------end of request : ---------------------\n";
                 }
+                //request parsing section
+
                 send(events[i].ident, resp ,strlen(resp),0);
                 _Recv_request.clear();
             }
@@ -76,15 +78,16 @@ void Server::close_remove_event(int &socket_fd, int &kqueue){
 int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int client_soc){
     (void)events;
     (void)kernel_q;
-    std::vector < char > buffer(200, 0);
-    char s[200];
+    char s[200]={0};
 
     int _bytesread = 0;
 
     while ((_bytesread = recv(client_soc, s, 199, 0)) > 0){
-        for (size_t i = 0 ; i < strlen(s); i++)
-            _Recv_request.push_back(s[i]);
-        buffer.clear();
+        std::vector < char > l(200);
+        memcpy(&l[0], s, 199);
+        // std::string str(l.begin(), l.end());
+        _Recv_request.insert(_Recv_request.end(), l.begin(), l.end());
+        // for (size_t i = 0 ; i < strlen(s); i++)
     }
      if (_bytesread == 0){ // connection closed
         std::cout << "bytesread == 0 connection closed \n";
