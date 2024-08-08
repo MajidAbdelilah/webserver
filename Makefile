@@ -1,5 +1,5 @@
 CC = c++
-CFLAGS = -std=c++98 #-Wall -Wextra -Werror -std=c++98
+CFLAGS = -fsanitize=address -g -std=c++98 #-Wall -Wextra -Werror -std=c++98
 SRCS = main.cpp Server.cpp
 OBJS = $(SRCS:.cpp=.o)
 NAME = webserv

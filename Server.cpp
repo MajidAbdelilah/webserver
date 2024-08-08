@@ -48,7 +48,7 @@ int Server::run(){
                 if (client_socketfd < 0)
                     throw("Client fd accept error"); // accepting client connection
                 std::cout << "---------------------Client socket fd: " << client_socketfd << "-------------------" <<'\n';
-                EV_SET(&events[i], client_socketfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+                EV_SET(&events[i], client_socketfd, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, NULL);
                 kevent(kernel_queue, &events[i], 1, NULL, 0, NULL);
                 // close (client_socketfd);
             }
@@ -57,7 +57,7 @@ int Server::run(){
                 if (_Recv_request.size()){
                     std::cout << "---------------------Received request : ----------------\n";
                     std::cout << _Recv_request;
-                    std::cout << "---------------------end of request : ---------------------\n";
+                    std::cout << "\n---------------------end of request : ---------------------\n";
                 }
                 send(events[i].ident, resp ,strlen(resp),0);
                 _Recv_request.clear();
@@ -76,15 +76,19 @@ void Server::close_remove_event(int &socket_fd, int &kqueue){
 int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int client_soc){
     (void)events;
     (void)kernel_q;
-    std::vector < char > buffer(200);
-    int _bytesread=0, readsofar = 0;;
+    std::vector < char > buffer(200, 0);
+    char s[200];
 
-    while ((_bytesread = recv(client_soc, &buffer[0], 200, 0)) >  0){
-        _Recv_request.insert(_Recv_request.end(), buffer.begin(), buffer.begin()+ _bytesread);
+    int _bytesread = 0;
+
+    while ((_bytesread = recv(client_soc, s, 199, 0)) > 0){
+        for (size_t i = 0 ; i < strlen(s); i++)
+            _Recv_request.push_back(s[i]);
         buffer.clear();
     }
      if (_bytesread == 0){ // connection closed
         std::cout << "bytesread == 0 connection closed \n";
+        std::cout << "---------------------closing "<< client_soc<< " ---------------------\n";
         Server::close_remove_event(client_soc, kernel_q);
         return (0);
     }
