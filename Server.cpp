@@ -18,13 +18,13 @@ int Server::getsocketfd()const{
 // handle signal for interupting server 
 
 int Server::run(){
-    std::vector < char > buffer(BUFFER_SIZE);
+    // std::vector < char > buffer(BUFFER_SIZE);
 
     char resp[] = "HTTP/1.1 200 OK\r\n"
                     "Content-Type: text/html\r\n"
-                    "Content-Length: 70\r\n"
+                    "Content-Length: 60\r\n"
                     "Connection: keep-alive\r\n\r\n"
-                    "<html><body><h1 style=\"color: #567810;\"> wa ras asalah l9lwa</h1></body></html>";
+                    "<html><body><h1 style=\"color: #567810;\"> test</h1></body></html>";
 
     int kernel_queue = kqueue();
     if (kernel_queue < 0)
@@ -39,47 +39,59 @@ int Server::run(){
 
     while (1){
         struct kevent events[MAX_EVENTS];
-        int count = kevent(kernel_queue, NULL, 0, events, MAX_EVENTS, NULL);
+        int count;
+        if ((count = kevent(kernel_queue, NULL, 0, events, MAX_EVENTS, NULL)) == -1)
+            throw("kevent error");
         for (int i = 0 ; i < count; i++){
             if (std::find(_Socketsfd.begin(), _Socketsfd.end(), events[i].ident) != _Socketsfd.end()){
-                int sizeHost = sizeof(struct sockaddr_in);
-                int client_socketfd = accept(events[i].ident, (struct sockaddr*)&_Addresses[i], (socklen_t*)&sizeHost);
+                int client_socketfd = accept(events[i].ident, NULL,0);
                 if (client_socketfd < 0)
                     throw("Client fd accept error"); // accepting client connection
-                struct sockaddr_in clin;
-                int sizecli = sizeof(clin);
-                getsockname(client_socketfd, (struct sockaddr *)&clin, (socklen_t *)&sizecli);
-                std::cout << "Client address and port : " << inet_ntoa(clin.sin_addr) 
-                    << " " << ntohs(clin.sin_port) << std::endl;
+                std::cout << "---------------------Client socket fd: " << client_socketfd << "-------------------" <<'\n';
                 EV_SET(&events[i], client_socketfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
                 kevent(kernel_queue, &events[i], 1, NULL, 0, NULL);
                 // close (client_socketfd);
             }
             else{
                 getting_req(events, kernel_queue, events[i].ident); // parse request send to majid;
+                if (_Recv_request.size()){
+                    std::cout << "---------------------Received request : ----------------\n";
+                    std::cout << _Recv_request;
+                    std::cout << "---------------------end of request : ---------------------\n";
+                }
                 send(events[i].ident, resp ,strlen(resp),0);
-                // close(events[i].ident);
+                _Recv_request.clear();
             }
         }
     }
 }
 
+void Server::close_remove_event(int &socket_fd, int &kqueue){
+    struct kevent change;
+    EV_SET(&change, socket_fd, EVFILT_WRITE | EVFILT_READ, EV_DELETE,0, 0 , NULL);
+    kevent(kqueue, &change, 1, NULL, 0, NULL);
+    close(socket_fd);
+}
+
 int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int client_soc){
     (void)events;
     (void)kernel_q;
-    std::vector < char > buffer(BUFFER_SIZE);
-    ssize_t _bytesread = recv(client_soc, &buffer[0], BUFFER_SIZE, 0);
-    if (_bytesread < 0)
-        throw ("recv error");
-    if (_bytesread == 0){
-        close (client_soc);
+    std::vector < char > buffer(200);
+    int _bytesread=0, readsofar = 0;;
+
+    while ((_bytesread = recv(client_soc, &buffer[0], 200, 0)) >  0){
+        _Recv_request.insert(_Recv_request.end(), buffer.begin(), buffer.begin()+ _bytesread);
+        buffer.clear();
+    }
+     if (_bytesread == 0){ // connection closed
+        std::cout << "bytesread == 0 connection closed \n";
+        Server::close_remove_event(client_soc, kernel_q);
+        return (0);
+    }
+    if (_bytesread < 0){ // failed recv could mean no more data no read;
+        std::cout << "bytesread < 0 either no more data , or err in recv\n";
         return (1);
     }
-    for (size_t i = 0 ; i < buffer.size(); i++)
-        std::cout << buffer[i];
-    std::cout << std::endl;
-    std::string _Recv_request(buffer.begin(), buffer.end());
-    // call majid's request implementation 
     return (0);
 }
 
@@ -122,7 +134,7 @@ int Server::Filldata(){
             freeaddrinfo(res);
             throw("Bind failure");
         }
-        if (listen(_Tcpsocketfd, this->_backlog) <  0){
+        if (listen(_Tcpsocketfd, SOMAXCONN) <  0){
             freeaddrinfo(res);
             throw("listen failure");
         }
