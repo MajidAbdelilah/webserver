@@ -18,7 +18,7 @@
 
 #define PORT 8080
 #define BUFFER_SIZE 30000
-#define MAX_EVENTS 10000
+#define MAX_EVENTS 1000
 
 class Server {
     private:
@@ -35,7 +35,7 @@ class Server {
         std::string _Recv_request; // request send lmajid
         std::vector < int > _Socketsfd; // save the fd's
         std::vector < sockaddr_in > _Addresses;
-
+        std::vector < int > _Clien_sock;
     public:
         Server(int , int , int , int , u_int32_t , int, std::vector < std::pair < std::string , std::string  > > &);
         ~Server();
@@ -44,7 +44,7 @@ class Server {
         int run();
         int getting_req(struct kevent* , int kq, int cli_sock);
         std::string GetRequestToParse();
-        void close_remove_event(int &, int &);
+        void close_remove_event(int , int &);
 };
 
 #endif
