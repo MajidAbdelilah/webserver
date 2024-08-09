@@ -36,13 +36,15 @@ class Server {
         std::vector < int > _Socketsfd; // save the fd's
         std::vector < sockaddr_in > _Addresses;
         std::vector < int > _Clien_sock;
+        std::map < int , std::string > _Sockets_req;
+
     public:
         Server(int , int , int , int , u_int32_t , int, std::vector < std::pair < std::string , std::string  > > &);
         ~Server();
         int getsocketfd() const;
         int Filldata();
         int run();
-        int getting_req(struct kevent* , int kq, int cli_sock);
+        int getting_req( int kq, int cli_sock);
         std::string GetRequestToParse();
         void close_remove_event(int , int &);
 };
