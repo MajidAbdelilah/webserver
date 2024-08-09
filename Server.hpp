@@ -18,7 +18,7 @@
 
 #define PORT 8080
 #define BUFFER_SIZE 30000
-#define MAX_EVENTS 1000
+#define MAX_EVENTS 10000
 
 class Server {
     private:
