@@ -46,25 +46,31 @@ int Server::run(){
                 int client_socketfd = accept(events[i].ident, NULL,0);
                 if (client_socketfd < 0)
                     throw("Client fd accept error"); // accepting client connection
+                if(-1 == fcntl(client_socketfd, F_SETFL, O_NONBLOCK))
+                    throw("error fcntl client socket");
                 std::cout << "---------------------Client socket fd: " << client_socketfd << "-------------------" <<'\n';
                 _Clien_sock.push_back(client_socketfd);
-                EV_SET(&events[i], client_socketfd, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+                EV_SET(&events[i], client_socketfd, EVFILT_READ , EV_ADD, 0, 0, NULL);
                 kevent(kernel_queue, &events[i], 1, NULL, 0, NULL);
                 // close (client_socketfd);
             }
             else if (std::find(_Clien_sock.begin(), _Clien_sock.end(), events[i].ident) != _Clien_sock.end()){
                 int r = getting_req(events, kernel_queue, events[i].ident); // parse request send to majid;
-                if (_Recv_request.size()){
-                    std::cout << "---------------------Received request : ----------------\n";
-                    std::cout << _Recv_request;
-                    std::cout << "\n---------------------end of request : ---------------------\n";
-                }
-                //request parsing section
+                if (r < 0)
+                    continue;
+                else{ 
+                    if (_Recv_request.size()){
+                        std::cout << "---------------------Received request : ----------------\n";
+                        std::cout << _Recv_request;
+                        std::cout << "\n---------------------end of request : ---------------------\n";
+                    }
+                    //request parsing section
 
-                send(events[i].ident, resp ,strlen(resp),0);
-                _Recv_request.clear();
-                if (r <= 0)
-                    Server::close_remove_event((int)events[i].ident, kernel_queue);
+                    send(events[i].ident, resp ,strlen(resp),0);
+                        Server::close_remove_event((int)events[i].ident, kernel_queue);
+                    _Recv_request.clear();
+                }
+                // if (r <= 0)
             }
         }
     }
@@ -85,10 +91,12 @@ int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int clie
     int _bytesread = -1;
 
     while ((_bytesread = recv(client_soc, s, 599, 0)) > 0){
+        std::cout << "Testing\n";
         std::vector < char > l(600);
         memcpy(&l[0], s, 599);
         bzero(s, 600);
         _Recv_request.insert(_Recv_request.end(), l.begin(), l.end());
+        l.clear();
     }
     if (_bytesread == 0){ // connection closed
         std::cout << "bytesread == 0 connection closed \n";
