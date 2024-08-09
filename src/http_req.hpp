@@ -16,7 +16,7 @@ class Parsed_request_and_body
 		this->content_len = content_len;
 		this->type = type;
 	}
-	Parsed_request_and_body()
+	Parsed_request_and_body(): req_map(), body(), content_len(0), type()
 	{
 	}
 	~Parsed_request_and_body()
@@ -28,3 +28,6 @@ class Parsed_request_and_body
 
 // returns the exit status of the operation
 int GET(Parsed_request_and_body &result);
+int DELETE(Parsed_request_and_body &result);
+int handle_request(Parsed_request_and_body &result);
+

@@ -67,7 +67,7 @@ int Server::run(){
 				// call majid's request implementation 
 				
 				Parsed_request_and_body result;
-				int status = GET(result);
+				int status = handle_request(result);
 				std::string resp = "HTTP/1.1 "+std::to_string(status)+"\r\n"
 								"Content-Type: " + result.type + "\r\n"
 								"Content-Length: " + std::to_string(result.content_len) + "\r\n"
