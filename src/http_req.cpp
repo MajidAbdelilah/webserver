@@ -39,7 +39,7 @@ int parse_headers(std::string line, std::map<std::string, std::string> &req)
 	return 0;
 }
 
-int GET(std::string &file_content, size_t &content_len)
+int GET(Parsed_request_and_body &result)
 {
 	std::string req = Server::GetRequestToParse();
 	std::cout << "\n\n\nGET REQUEST START \n\n";
@@ -52,22 +52,22 @@ int GET(std::string &file_content, size_t &content_len)
 	if (parse_initial_line(line, req_map) == -1)
 	{
 		std::cout << ("Error parsing initial line\n");
-		return -1;
+		return 400;
 	}	
 	if(req_map["Method"] != "GET" || req_map.find("Method") == req_map.end())
 	{
 		std::cout << ("Method is not GET\n");
-		return -1;
+		return 400;
 	}	
 	if(req_map.find("URI") == req_map.end())
 	{
 		std::cout << ("URI not found\n");
-		return -1;
+		return 400;
 	}	
 	if(req_map["Version"] != "HTTP/1.1" || req_map.find("Version") == req_map.end())
 	{
 		std::cout << ("Version is not HTTP/1.1\n");
-		return -1;
+		return 400;
 	}	
 
 	while (line != "")
@@ -80,12 +80,12 @@ int GET(std::string &file_content, size_t &content_len)
 	if(req_map.find("Host") == req_map.end())
 	{
 		std::cout << ("Host header not found\n");
-		return -1;
+		return 400;
 	}	
 	if(req_map["Host"] != http_host_macro)
 	{
 		std::cout << ("Host header is not correct\n");
-		return -1;
+		return 400;
 	}	
 	
 	if(req_map["URI"] == "/")
@@ -98,13 +98,34 @@ int GET(std::string &file_content, size_t &content_len)
 	if (!file.is_open())
 	{
 		std::cout << ("File not found\n");
-		return -1;
+		return 404;
 	}
 
 	std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 	std::cout << content << std::endl;
-	file_content = content;
-	content_len = content.size();
+	result.body = content;
+	result.content_len = content.size();
 	std::cout << "content_len: " << content.size() << std::endl;
-	return 0;
+
+	if (uri.find(".html") == uri.size() - 5)
+		result.type = "text/html";
+	else if (uri.find(".css") == uri.size() - 4)
+		result.type = "text/css";
+	else if (uri.find(".js") == uri.size() - 3)
+		result.type = "text/javascript";
+	else if (uri.find(".jpg") == uri.size() - 4)
+		result.type = "image/jpeg";
+	else if (uri.find(".png") == uri.size() - 4)
+		result.type = "image/png";
+	else if (uri.find(".gif") == uri.size() - 4)
+		result.type = "image/gif";
+	else if (uri.find(".ico") == uri.size() - 4)
+		result.type = "image/x-icon";
+	else
+	{
+		result.type = "text/plain";
+		// call smoumni cgi here
+	}
+
+	return 200;
 }

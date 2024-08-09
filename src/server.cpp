@@ -1,5 +1,6 @@
 #include "server.hpp"
 #include "http_req.hpp"
+#include <iostream>
 
 std::string Server::_Recv_request = ""; // request send lmajid
 
@@ -23,11 +24,11 @@ int Server::getsocketfd()const{
 int Server::run(){
     // std::vector < char > buffer(BUFFER_SIZE);
 
-    char resp[] = "HTTP/1.1 200 OK\r\n"
-                    "Content-Type: text/html\r\n"
-                    "Content-Length: 60\r\n"
-                    "Connection: keep-alive\r\n\r\n"
-                    "<html><body><h1 style=\"color: #567810;\"> test</h1></body></html>";
+    // char resp[] = "HTTP/1.1 200 OK\r\n"
+    //                 "Content-Type: text/html\r\n"
+    //                 "Content-Length: 60\r\n"
+    //                 "Connection: keep-alive\r\n\r\n"
+    //                 "<html><body><h1 style=\"color: #567810;\"> test</h1></body></html>";
 
     int kernel_queue = kqueue();
     if (kernel_queue < 0)
@@ -51,19 +52,37 @@ int Server::run(){
                 if (client_socketfd < 0)
                     throw("Client fd accept error"); // accepting client connection
                 std::cout << "---------------------Client socket fd: " << client_socketfd << "-------------------" <<'\n';
-                EV_SET(&events[i], client_socketfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+                EV_SET(&events[i], client_socketfd, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, NULL);
                 kevent(kernel_queue, &events[i], 1, NULL, 0, NULL);
                 // close (client_socketfd);
             }
             else{
-                getting_req(events, kernel_queue, events[i].ident); // parse request send to majid;
+                int sock_status = getting_req(events, kernel_queue, events[i].ident); // parse request send to majid;
                 if (_Recv_request.size()){
                     std::cout << "---------------------Received request : ----------------\n";
                     std::cout << _Recv_request;
-                    std::cout << "---------------------end of request : ---------------------\n";
+                    std::cout << "\n---------------------end of request : ---------------------\n";
                 }
-                send(events[i].ident, resp ,strlen(resp),0);
+                //request parsing section
+				// call majid's request implementation 
+				
+				Parsed_request_and_body result;
+				int status = GET(result);
+				std::string resp = "HTTP/1.1 "+std::to_string(status)+"\r\n"
+								"Content-Type: " + result.type + "\r\n"
+								"Content-Length: " + std::to_string(result.content_len) + "\r\n"
+								"Connection: keep-alive\r\n\r\n";
+				std::cout << "type: " << result.type << std::endl;
+				send(events[i].ident, (resp+result.body).c_str() , (resp+result.body).size(),0);
+				std::cout << status << std::endl;
+                // send(events[i].ident, resp ,strlen(resp),0);
                 _Recv_request.clear();
+				if(sock_status == 1)
+				{
+					int client_socketfd = events[i].ident;
+					std::cout << "---------------------closing "<< client_socketfd << " ---------------------\n";
+					Server::close_remove_event(client_socketfd, kernel_queue);
+				}
             }
         }
     }
@@ -79,16 +98,20 @@ void Server::close_remove_event(int &socket_fd, int &kqueue){
 int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int client_soc){
     (void)events;
     (void)kernel_q;
-    std::vector < char > buffer(200);
-    int _bytesread=0, readsofar = 0;;
-	(void)readsofar;
+	std::vector<char> s;
+	s.resize(2000);
 
-    while ((_bytesread = recv(client_soc, &buffer[0], 200, 0)) >  0){
-        _Recv_request.insert(_Recv_request.end(), buffer.begin(), buffer.begin()+ _bytesread);
-        buffer.clear();
+    int _bytesread = 0;
+    while ((_bytesread = recv(client_soc, &s[0], 2000, 0)) > 0){
+        // std::vector < char > l(2000);
+        // memcpy(&l[0], s, _bytesread);
+        _Recv_request.insert(_Recv_request.end(), s.begin(), s.end());
+		std::cout << "bytes read(inside): " << _bytesread << std::endl;
     }
+	std::cout << "bytes read(outside): " << _bytesread << std::endl;
      if (_bytesread == 0){ // connection closed
         std::cout << "bytesread == 0 connection closed \n";
+        std::cout << "---------------------closing "<< client_soc<< " ---------------------\n";
         Server::close_remove_event(client_soc, kernel_q);
         return (0);
     }
@@ -96,19 +119,6 @@ int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int clie
         std::cout << "bytesread < 0 either no more data , or err in recv\n";
         return (1);
     }
-    for (size_t i = 0 ; i < buffer.size(); i++)
-        std::cout << buffer[i];
-    std::cout << std::endl;
-    Server::_Recv_request = std::string(buffer.begin(), buffer.end());
-    // call majid's request implementation 
-	std::string body;
-	size_t body_len;
-	GET(body, body_len);
-	std::string resp = "HTTP/1.1 200 OK\r\n"
-					"Content-Type: text/html\r\n"
-					"Content-Length: " + std::to_string(body_len) + "\r\n"
-					"Connection: keep-alive\r\n\r\n";
-    send(client_soc, (resp+body).c_str() , (resp+body).size(),0);
     return (0);
 }
 
