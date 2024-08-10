@@ -26,7 +26,7 @@ int Server::run(){
     for(size_t i = 0 ; i < _Socketsfd.size(); i++){
         EV_SET(&Server_k, _Socketsfd[i], EVFILT_READ, EV_ADD ,0 ,0 ,NULL);
         if(kevent(kernel_queue, &Server_k, 1, NULL, 0 , NULL) < 0)
-            throw("kevent error");
+            throw("kevent creation error");
     }
     struct timespec timeout;
     timeout.tv_nsec = 400000000;
@@ -45,7 +45,7 @@ int Server::run(){
                     throw("error fcntl client socket");
                 std::cout << "--------------------- Client socket fd: " << client_socketfd << " -------------------" <<'\n';
                 _Clien_sock.push_back(client_socketfd);
-                EV_SET(&events[i], client_socketfd, EVFILT_READ  | EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+                EV_SET(&events[i], client_socketfd, EVFILT_READ, EV_ADD, 0, 0, NULL); //need to set the read event
                 kevent(kernel_queue, &events[i], 1, NULL, 0, NULL);
             }
             else if (std::find(_Clien_sock.begin(), _Clien_sock.end(), events[i].ident) != _Clien_sock.end()){
@@ -63,6 +63,7 @@ int Server::run(){
         }
     }
 }
+
 
 void Server::close_remove_event(int socket_fd, int &kqueue){
     struct kevent change;
