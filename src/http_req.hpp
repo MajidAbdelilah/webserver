@@ -10,6 +10,8 @@ class Parsed_request_and_body
 	std::string body;
 	size_t content_len;
 	std::string type;
+	// 1 if keep alive, 0 if not, -1 if header doesnt exist
+	char keep_alive;
 	Parsed_request_and_body(std::map<std::string, std::string> req_map, std::string body, size_t content_len, std::string type)
 	{
 		this->req_map = req_map;
