@@ -24,7 +24,7 @@ int Server::run(){
 
     struct kevent Server_k;
     for(size_t i = 0 ; i < _Socketsfd.size(); i++){
-        EV_SET(&Server_k, _Socketsfd[i], EVFILT_READ | EVFILT_WRITE, EV_ADD ,0 ,0 ,NULL);
+        EV_SET(&Server_k, _Socketsfd[i], EVFILT_READ, EV_ADD ,0 ,0 ,NULL);
         if(kevent(kernel_queue, &Server_k, 1, NULL, 0 , NULL) < 0)
             throw("kevent error");
     }
@@ -74,11 +74,11 @@ void Server::close_remove_event(int socket_fd, int &kqueue){
 
 int Server::getting_req(int kernel_q, int client_soc){
 
-        char resp[] = "HTTP/1.1 200 OK\r\n"
-                    "Content-Type: text/html\r\n"
-                    "Content-Length: 60\r\n"
-                    "Connection: keep-alive\r\n\r\n"
-                    "<html><body><h1 style=\"color: #567810;\"> test</h1></body></html>";
+    char resp[] = "HTTP/1.1 200 OK\r\n"
+                "Content-Type: text/html\r\n"
+                "Content-Length: 60\r\n"
+                "Connection: keep-alive\r\n\r\n"
+                "<html><body><h1 style=\"color: #567810;\"> test</h1></body></html>";
     (void)kernel_q;
     char s[600]={0};
 
@@ -91,7 +91,14 @@ int Server::getting_req(int kernel_q, int client_soc){
         if(_Sockets_req[client_soc].rfind("\r\n\r\n") != std::string::npos){
             if(_Sockets_req[client_soc].find("GET") != std::string::npos){
                 send(client_soc, resp, sizeof(resp), 0);
-                // Server::close_remove_event(client_soc, kernel_q);
+                Server::close_remove_event(client_soc, kernel_q);
+                return (1);
+            }
+            else if (_Sockets_req[client_soc].find("POST") != std::string::npos){
+                std::cout << "--------------------------------REQUEST HEADER + BODY \n";
+                std::cout << _Sockets_req[client_soc] << '\n';
+                std::cout << "--------------------------------REQUEST TRAILER \n";
+                // send(client_soc, resp, sizeof(resp), 0);
                 return (1);
             }
             else{
