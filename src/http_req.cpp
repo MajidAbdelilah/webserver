@@ -82,7 +82,7 @@ int GET(Parsed_request_and_body &result)
 		std::cout << ("Host header not found\n");
 		return 400;
 	}	
-	if(req_map["Host"] != http_host_macro)
+	if(req_map["Host"] != http_hostname_macro && req_map["Host"] != http_localhost_macro)
 	{
 		std::cout << ("Host header is not correct\n");
 		return 400;
@@ -173,7 +173,7 @@ int DELETE(Parsed_request_and_body &result)
 		std::cout << ("Host header not found\n");
 		return 400;
 	}	
-	if(req_map["Host"] != http_host_macro)
+	if(req_map["Host"] != http_hostname_macro && req_map["Host"] != http_localhost_macro)
 	{
 		std::cout << ("Host header is not correct\n");
 		return 400;
@@ -250,7 +250,7 @@ int handle_request(Parsed_request_and_body &result)
 	else
 	{
 		std::cout << ("Method not supported\n");
-		return 400;
+		return 405;
 	}
 	return 500;
 }

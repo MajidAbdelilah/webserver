@@ -64,7 +64,7 @@ int Server::run(){
                     std::cout << "\n---------------------end of request : ---------------------\n";
                 }
                 //request parsing section
-				// call majid's request implementation 
+				// call majid's request implementation ////
 				
 				Parsed_request_and_body result;
 				int status = handle_request(result);
@@ -102,7 +102,7 @@ int Server::getting_req(struct kevent events[MAX_EVENTS], int kernel_q, int clie
 	s.resize(2000);
 
     int _bytesread = 0;
-    while ((_bytesread = recv(client_soc, &s[0], 2000, 0)) > 0){
+    if ((_bytesread = recv(client_soc, &s[0], 2000, 0)) > 0){
         // std::vector < char > l(2000);
         // memcpy(&l[0], s, _bytesread);
         _Recv_request.insert(_Recv_request.end(), s.begin(), s.end());
