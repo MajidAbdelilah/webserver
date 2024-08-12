@@ -41,7 +41,7 @@ int parse_headers(std::string line, std::map<std::string, std::string> &req)
 
 int GET(Parsed_request_and_body &result)
 {
-	std::string req = Server::GetRequestToParse();
+	std::string req ;//= Server::GetRequestToParse();
 	std::cout << "\n\n\nGET REQUEST START \n\n";
 	std::cout << req << std::endl;
 	std::cout << "\nGET REQUEST END\n";
@@ -132,7 +132,7 @@ int GET(Parsed_request_and_body &result)
 
 int DELETE(Parsed_request_and_body &result)
 {
-	std::string req = Server::GetRequestToParse();
+	std::string req ;//= Server::GetRequestToParse();
 	std::cout << "\n\n\nDELETE REQUEST START \n\n";
 	std::cout << req << std::endl;
 	std::cout << "\nDELETE REQUEST END\n";
@@ -212,9 +212,9 @@ int DELETE(Parsed_request_and_body &result)
 }
 
 
-int handle_request(Parsed_request_and_body &result)
+int handle_request(Parsed_request_and_body &result, std::map <int, std::string> &Sockets_req)
 {
-	std::string req = Server::GetRequestToParse();
+	std::string req ;//= Server::GetRequestToParse();
 	std::cout << "\n\n\nREQUEST START \n\n";
 	std::cout << req << std::endl;
 	std::cout << "\nREQUEST END\n";

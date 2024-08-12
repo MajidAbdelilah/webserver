@@ -32,9 +32,11 @@ class Server {
         std::vector < std::pair < std::string , std::string > > _interfaces;
         int _backlog;
         struct sockaddr_in hostaddr; //convert into an array of struct 
-        static std::string _Recv_request; // request send lmajid
+        std::string _Recv_request; // request send lmajid
         std::vector < int > _Socketsfd; // save the fd's
         std::vector < sockaddr_in > _Addresses;
+        std::vector < int > _Clien_sock;
+        std::map < int , std::string > _Sockets_req;
 
     public:
         Server(int , int , int , int , u_int32_t , int, std::vector < std::pair < std::string , std::string  > > &);
@@ -42,9 +44,9 @@ class Server {
         int getsocketfd() const;
         int Filldata();
         int run();
-        int getting_req(struct kevent* , int kq, int cli_sock);
-        static std::string GetRequestToParse();
-        void close_remove_event(int &, int &);
+        int getting_req( int kq, int cli_sock);
+        std::string GetRequestToParse();
+        void close_remove_event(int , int &);
 };
 
 #endif
