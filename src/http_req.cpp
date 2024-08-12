@@ -1,6 +1,7 @@
 #include "http_req.hpp"
 #include "server.hpp"
 #include <fstream>
+#include <string>
 
 
 std::map<int, request_queue_element> request_queue;
@@ -42,9 +43,8 @@ int parse_headers(std::string line, std::map<std::string, std::string> &req)
 	return 0;
 }
 
-int GET(Parsed_request_and_body &result)
+int GET(Parsed_request_and_body &result, std::string &req)
 {
-	std::string req ;//= Server::GetRequestToParse();
 	std::cout << "\n\n\nGET REQUEST START \n\n";
 	std::cout << req << std::endl;
 	std::cout << "\nGET REQUEST END\n";
@@ -95,9 +95,13 @@ int GET(Parsed_request_and_body &result)
 		req_map["URI"] = "/index.html";
 
 	std::string uri = req_map["URI"][0] == '/' ? req_map["URI"].substr(1) : req_map["URI"];
+	while(uri.find("%20") != std::string::npos)
+	{
+		uri.replace(uri.find("%20"), 3, " ");
+	}
 	std::cout << "URI: " << uri << std::endl;
 
-	std::ifstream file(uri);
+	std::ifstream file(uri, std::ios_base::binary);
 	if (!file.is_open())
 	{
 		std::cout << ("File not found\n");
@@ -105,7 +109,7 @@ int GET(Parsed_request_and_body &result)
 	}
 
 	std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-	std::cout << content << std::endl;
+	// std::cout << content << std::endl;
 	result.body = content;
 	result.content_len = content.size();
 	std::cout << "content_len: " << content.size() << std::endl;
@@ -124,6 +128,8 @@ int GET(Parsed_request_and_body &result)
 		result.type = "image/gif";
 	else if (uri.find(".ico") == uri.size() - 4)
 		result.type = "image/x-icon";
+	else if(uri.find(".mp4") == uri.size() - 4)
+		result.type = "video/mp4";
 	else
 	{
 		result.type = "text/plain";
@@ -133,9 +139,8 @@ int GET(Parsed_request_and_body &result)
 	return 200;
 }
 
-int DELETE(Parsed_request_and_body &result)
+int DELETE(Parsed_request_and_body &result, std::string &req)
 {
-	std::string req ;//= Server::GetRequestToParse();
 	std::cout << "\n\n\nDELETE REQUEST START \n\n";
 	std::cout << req << std::endl;
 	std::cout << "\nDELETE REQUEST END\n";
@@ -186,6 +191,10 @@ int DELETE(Parsed_request_and_body &result)
 		req_map["URI"] = "/index.html";
 
 	std::string uri = req_map["URI"][0] == '/' ? req_map["URI"].substr(1) : req_map["URI"];
+	while(uri.find("%20") != std::string::npos)
+	{
+		uri.replace(uri.find("%20"), 3, " ");
+	}
 	std::cout << "URI: " << uri << std::endl;
 
 
@@ -226,12 +235,22 @@ int handle_request(Parsed_request_and_body &result, std::map <int, std::string> 
 	{
 		if(request_queue.find(it->first) == request_queue.end())
 		{
+			std::cout << it->first << std::endl;
 			std::string req = Sockets_req[it->first];
 			std::cout << "\n\n\nREQUEST START \n\n";
 			std::cout << req << std::endl;
 			std::cout << "\nREQUEST END\n";
-
-			std::string line = get_line(req);
+			if(req.find("\r\n\r\n") == std::string::npos)
+			{
+				std::cout << ("Request not complete\n");
+				return 400;
+			}
+			std::string line;
+			size_t pos = req.find("\r\n");
+			if (pos != std::string::npos)
+			{
+				line = req.substr(0, pos);
+			}
 			std::cout << line << std::endl;
 			std::map<std::string, std::string> req_map;
 			if (parse_initial_line(line, req_map) == -1)
@@ -256,9 +275,12 @@ int handle_request(Parsed_request_and_body &result, std::map <int, std::string> 
 			}	
 
 			if(req_map["Method"] == "GET")
-				return GET(result);
+			{
+				std::cout << ("GET request found\n");
+				return GET(result, req);
+			}
 			else if(req_map["Method"] == "DELETE")
-				return DELETE(result);
+				return DELETE(result, req);
 			else
 			{
 				std::cout << ("Method not supported\n");

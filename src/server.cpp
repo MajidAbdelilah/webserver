@@ -1,4 +1,6 @@
 #include "server.hpp"
+#include "http_req.hpp"
+#include <string>
 
 Server::Server(int domain, int type, int protocol, int port, u_int32_t interface, int backlog, std::vector < std::pair < std::string , std::string > > &addresses){
     this->_domain = domain;
@@ -76,11 +78,6 @@ void Server::close_remove_event(int socket_fd, int &kqueue){
 
 int Server::getting_req(int kernel_q, int client_soc){
 
-    char resp[] = "HTTP/1.1 200 OK\r\n"
-                "Content-Type: text/html\r\n"
-                "Content-Length: 60\r\n"
-                "Connection: keep-alive\r\n\r\n"
-                "<html><body><h1 style=\"color: #567810;\"> test</h1></body></html>";
     (void)kernel_q;
     char s[600]={0};
 
@@ -91,24 +88,18 @@ int Server::getting_req(int kernel_q, int client_soc){
         // std::cout << _Sockets_req[client_soc] << '\n';
         // check if the map has the client socket fd with string
         if(_Sockets_req[client_soc].rfind("\r\n\r\n") != std::string::npos){
-            if(_Sockets_req[client_soc].find("GET") != std::string::npos){
-                send(client_soc, resp, sizeof(resp), 0);
-                Server::close_remove_event(client_soc, kernel_q);
-                return (1);
-            }
-            else if (_Sockets_req[client_soc].find("POST") != std::string::npos){
-                std::cout << "--------------------------------REQUEST HEADER + BODY \n";
-                std::cout << _Sockets_req[client_soc] << '\n';
-                std::cout << "--------------------------------REQUEST TRAILER \n";
-                // send(client_soc, resp, sizeof(resp), 0);
-                return (1);
-            }
-            else{
-                std::cout << _Sockets_req[client_soc] << '\n';
-                _Sockets_req[client_soc].clear();
-            }
-        }
-
+          Parsed_request_and_body result;
+		   int status  = handle_request(result, _Sockets_req);
+		   std::string resp = "HTTP/1.1 "+std::to_string(status)+"\r\n"
+                "Content-Type: "+result.type+"\r\n"
+                "Content-Length: "+std::to_string(result.content_len)+"\r\n"
+                "Connection: keep-alive\r\n\r\n"
+                +result.body;
+				std::cout << "status: " << status << std::endl;
+			send(client_soc, resp.c_str(), resp.size(), 0);
+ 	      	if(status != -100)
+		   		Server::close_remove_event(client_soc, kernel_q);
+		}
     }
     std::cout << "number of read bytes : " << _bytesread << '\n';
     if (_bytesread == 0){ // connection closed

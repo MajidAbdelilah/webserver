@@ -61,7 +61,7 @@ class request_queue_element
 
 
 // returns the exit status of the operation
-int GET(Parsed_request_and_body &result);
-int DELETE(Parsed_request_and_body &result);
-int handle_request(Parsed_request_and_body &result);
+int GET(Parsed_request_and_body &result, std::string &req);
+int DELETE(Parsed_request_and_body &result, std::string &req);
+int handle_request(Parsed_request_and_body &result, std::map <int, std::string> &Sockets_req);
 
