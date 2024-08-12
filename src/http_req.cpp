@@ -2,6 +2,9 @@
 #include "server.hpp"
 #include <fstream>
 
+
+std::map<int, request_queue_element> request_queue;
+
 std::string get_line(std::string &req)
 {
 	std::string line;
@@ -214,43 +217,57 @@ int DELETE(Parsed_request_and_body &result)
 
 int handle_request(Parsed_request_and_body &result, std::map <int, std::string> &Sockets_req)
 {
-	std::string req ;//= Server::GetRequestToParse();
-	std::cout << "\n\n\nREQUEST START \n\n";
-	std::cout << req << std::endl;
-	std::cout << "\nREQUEST END\n";
+	if(Sockets_req.size() == 0)
+	{
+		std::cout << ("No request to handle\n");
+		return 500;
+	}
+	for(std::map<int, std::string>::iterator it = Sockets_req.begin(); it != Sockets_req.end(); it++)
+	{
+		if(request_queue.find(it->first) == request_queue.end())
+		{
+			std::string req = Sockets_req[it->first];
+			std::cout << "\n\n\nREQUEST START \n\n";
+			std::cout << req << std::endl;
+			std::cout << "\nREQUEST END\n";
 
-	std::string line = get_line(req);
-	std::cout << line << std::endl;
-	std::map<std::string, std::string> req_map;
-	if (parse_initial_line(line, req_map) == -1)
-	{
-		std::cout << ("Error parsing initial line\n");
-		return 400;
-	}	
-	if(req_map.find("Method") == req_map.end())
-	{
-		std::cout << ("Method not found\n");
-		return 400;
-	}	
-	if(req_map.find("URI") == req_map.end())
-	{
-		std::cout << ("URI not found\n");
-		return 400;
-	}	
-	if(req_map.find("Version") == req_map.end())
-	{
-		std::cout << ("Version not found\n");
-		return 400;
-	}	
+			std::string line = get_line(req);
+			std::cout << line << std::endl;
+			std::map<std::string, std::string> req_map;
+			if (parse_initial_line(line, req_map) == -1)
+			{
+				std::cout << ("Error parsing initial line\n");
+				return 400;
+			}	
+			if(req_map.find("Method") == req_map.end())
+			{
+				std::cout << ("Method not found\n");
+				return 400;
+			}	
+			if(req_map.find("URI") == req_map.end())
+			{
+				std::cout << ("URI not found\n");
+				return 400;
+			}	
+			if(req_map.find("Version") == req_map.end())
+			{
+				std::cout << ("Version not found\n");
+				return 400;
+			}	
 
-	if(req_map["Method"] == "GET")
-		return GET(result);
-	else if(req_map["Method"] == "DELETE")
-		return DELETE(result);
-	else
-	{
-		std::cout << ("Method not supported\n");
-		return 405;
+			if(req_map["Method"] == "GET")
+				return GET(result);
+			else if(req_map["Method"] == "DELETE")
+				return DELETE(result);
+			else
+			{
+				std::cout << ("Method not supported\n");
+				return 405;
+			}
+			return 500;
+		}else {
+			std::cout << ("Request found in request queue\n");
+		}
 	}
 	return 500;
 }

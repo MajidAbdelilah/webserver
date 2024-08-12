@@ -1,3 +1,4 @@
+#include <fstream>
 #include <sys/_types/_size_t.h>
 #define http_hostname_macro "127.0.0.1:8080"
 #define http_localhost_macro "localhost:8080"
@@ -27,6 +28,36 @@ class Parsed_request_and_body
 	}	
 };
 
+class request_queue_element
+{
+	public:
+	std::string request;
+	long long written_len;
+	std::map<std::string, std::string> req_header_map;
+	std::ofstream file;
+
+	request_queue_element(std::string request, long long written_len)
+	{
+		this->request = request;
+		this->written_len = written_len;
+	}
+	
+	request_queue_element(): request(), written_len(0), req_header_map()
+	{
+	}
+	~request_queue_element()
+	{
+	}
+	void add_to_request(std::string to_add)
+	{
+		this->request += to_add;
+	}
+	void write_to_file(std::string to_write)
+	{
+		this->file << to_write;
+	}
+
+};
 
 
 // returns the exit status of the operation
