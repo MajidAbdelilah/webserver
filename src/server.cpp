@@ -56,9 +56,11 @@ int Server::run(){
 					(void)r;
                     // TODO ! method to check the request part in each socket fd 
                 }
-                else if (events[i].filter & EVFILT_WRITE)
+                if (events[i].filter & EVFILT_WRITE)
                 {
-                    std::cout << "Test\n";
+                    std::cout << "TEST" << '\n';
+                    std::cout << "IT ENTERS WRITE FILTEEEEER L3EEEEZZZ \n";
+                    Server::handle_write_request(events[i], kernel_queue);
                     // TODO ! the socket is ready to be written on
                 }
 
@@ -76,6 +78,26 @@ void Server::close_remove_event(int socket_fd, int &kqueue){
     close(socket_fd);
 }
 
+int Server::handle_write_request(struct kevent &events, int kq) {
+    long long length = socket_bytes[events.ident].second.content_len;
+    std::string resp = socket_header[events.ident];
+    resp.append(socket_bytes[events.ident].second.body);
+    int size = send(events.ident, resp.c_str(), length, 0);
+
+    if (size < 0)
+        return (1);
+    
+    if (size >= length){ //whole body has been sent
+        struct kevent change;
+        EV_SET(&change, events.ident, EVFILT_READ, EV_ADD, 0, 0, NULL);
+        kevent(kq, &change, 1, NULL, 0 , NULL);
+        return (0);
+    }
+    
+    socket_bytes[events.ident].second.body = resp.substr(0, size);
+    return (0);
+}
+
 int Server::getting_req(int kernel_q, int client_soc){
 
     (void)kernel_q;
@@ -85,7 +107,6 @@ int Server::getting_req(int kernel_q, int client_soc){
 
     if ((_bytesread = recv(client_soc, s, 599, 0)) > 0){
         _Sockets_req[client_soc].append(s, _bytesread);
-        // std::cout << _Sockets_req[client_soc] << '\n';
         // check if the map has the client socket fd with string
         if(_Sockets_req[client_soc].rfind("\r\n\r\n") != std::string::npos){
           Parsed_request_and_body result;
@@ -96,9 +117,23 @@ int Server::getting_req(int kernel_q, int client_soc){
                 "Connection: keep-alive\r\n\r\n"
                 +result.body;
 				std::cout << "status: " << status << std::endl;
-			send(client_soc, resp.c_str(), resp.size(), 0);
- 	      	if(status != -100)
+            socket_header[client_soc] = resp.substr(0, resp.find("\r\n\r\n"));
+            struct kevent change;
+            EV_SET(&change, client_soc, EVFILT_WRITE | EVFILT_READ , EV_ADD, 0, 0, NULL);
+            kevent(kernel_q, &change, 1, NULL, 0, NULL);
+            long long b = 0;
+			b = send(client_soc, resp.c_str(), resp.size(), 0);
+            if (b == 0 || status != -100){
 		   		Server::close_remove_event(client_soc, kernel_q);
+                return (1);
+            }
+            if ((size_t)b >= result.content_len){
+                EV_SET(&change, client_soc, EVFILT_READ , EV_ADD, 0, 0 , NULL);
+                kevent(kernel_q, &change, 1, NULL, 0, NULL);
+                return (0);
+            }
+            result.body.substr(0, b);
+            socket_bytes[client_soc] = std::make_pair(b, result);
 		}
     }
     std::cout << "number of read bytes : " << _bytesread << '\n';

@@ -20,6 +20,8 @@
 #define BUFFER_SIZE 30000
 #define MAX_EVENTS 10000
 
+class Parsed_request_and_body;
+
 class Server {
     private:
         Server();
@@ -37,6 +39,8 @@ class Server {
         std::vector < sockaddr_in > _Addresses;
         std::vector < int > _Clien_sock;
         std::map < int , std::string > _Sockets_req;
+        std::map < int , std::pair < int , Parsed_request_and_body > > socket_bytes;
+        std::map < int , std::string > socket_header;
 
     public:
         Server(int , int , int , int , u_int32_t , int, std::vector < std::pair < std::string , std::string  > > &);
@@ -47,6 +51,7 @@ class Server {
         int getting_req( int kq, int cli_sock);
         std::string GetRequestToParse();
         void close_remove_event(int , int &);
+        int handle_write_request(struct kevent&, int);
 };
 
 #endif
