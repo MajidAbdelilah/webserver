@@ -46,8 +46,8 @@ int parse_headers(std::string line, std::map<std::string, std::string> &req)
 int GET(Parsed_request_and_body &result, std::string &req)
 {
 	std::cout << "\n\n\nGET REQUEST START \n\n";
-	std::cout << req << std::endl;
-	std::cout << "\nGET REQUEST END\n";
+	// std::cout << req << std::endl;
+	// std::cout << "\nGET REQUEST END\n";
 
 	std::string line = get_line(req);
 	std::cout << line << std::endl;
@@ -112,7 +112,7 @@ int GET(Parsed_request_and_body &result, std::string &req)
 	// std::cout << content << std::endl;
 	result.body = content;
 	result.content_len = content.size();
-	std::cout << "content_len: " << content.size() << std::endl;
+	std::cout << "content_len  : " << content.size() << std::endl;
 
 	if (uri.find(".html") == uri.size() - 5)
 		result.type = "text/html";

@@ -1,6 +1,9 @@
 #include "server.hpp"
 #include "http_req.hpp"
+#include <iostream>
 #include <string>
+#include <utility>
+#include "client.hpp"
 
 Server::Server(int domain, int type, int protocol, int port, u_int32_t interface, int backlog, std::vector < std::pair < std::string , std::string > > &addresses){
     this->_domain = domain;
@@ -46,11 +49,11 @@ int Server::run(){
                 if(-1 == fcntl(client_socketfd, F_SETFL, O_NONBLOCK))
                     throw("error fcntl client socket");
                 std::cout << "--------------------- Client socket fd: " << client_socketfd << " -------------------" <<'\n';
-                _Clien_sock.push_back(client_socketfd);
                 EV_SET(&events[i], client_socketfd, EVFILT_READ, EV_ADD, 0, 0, NULL); //need to set the read event
                 kevent(kernel_queue, &events[i], 1, NULL, 0, NULL);
+                _Clients[client_socketfd] = client(client_socketfd);
             }
-            else if (std::find(_Clien_sock.begin(), _Clien_sock.end(), events[i].ident) != _Clien_sock.end()){
+            else if (std::find(_Clients.begin(), _Clients.end(), events[i].ident) != _Clients.end()){
                 if (events[i].filter & EVFILT_READ){
                     int r = getting_req(kernel_queue, events[i].ident); // parse request send to majid;
 					(void)r;
@@ -58,8 +61,7 @@ int Server::run(){
                 }
                 if (events[i].filter & EVFILT_WRITE)
                 {
-                    std::cout << "TEST" << '\n';
-                    std::cout << "IT ENTERS WRITE FILTEEEEER L3EEEEZZZ \n";
+                    std::cout << "IT ENTERS WRITE FILTEEEEER \n";
                     Server::handle_write_request(events[i], kernel_queue);
                     // TODO ! the socket is ready to be written on
                 }
@@ -69,88 +71,115 @@ int Server::run(){
     }
 }
 
-
 void Server::close_remove_event(int socket_fd, int &kqueue){
     struct kevent change;
     EV_SET(&change, socket_fd, EVFILT_WRITE | EVFILT_READ , EV_DELETE,0, 0 , NULL);
     kevent(kqueue, &change, 1, NULL, 0, NULL);
     _Sockets_req.erase(socket_fd); // removing the client socket
+    _Clients.erase(socket_fd);
     close(socket_fd);
 }
 
 int Server::handle_write_request(struct kevent &events, int kq) {
-    long long length = socket_bytes[events.ident].second.content_len;
-    std::string resp = socket_header[events.ident];
-    resp.append(socket_bytes[events.ident].second.body);
+    long long length = socket_response[events.ident].content_len;
+    std::string resp = socket_response[events.ident].body;
     int size = send(events.ident, resp.c_str(), length, 0);
 
     if (size < 0)
         return (1);
-    
+
+    struct kevent change;
     if (size >= length){ //whole body has been sent
-        struct kevent change;
+        EV_SET(&change, events.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+        kevent(kq, &change, 1, NULL, 0 , NULL);
         EV_SET(&change, events.ident, EVFILT_READ, EV_ADD, 0, 0, NULL);
         kevent(kq, &change, 1, NULL, 0 , NULL);
-        return (0);
+        socket_response.erase(events.ident);
     }
-    
-    socket_bytes[events.ident].second.body = resp.substr(0, size);
+    else{
+        socket_response[events.ident].body = resp.substr(size);
+    }
     return (0);
 }
 
 int Server::getting_req(int kernel_q, int client_soc){
 
     (void)kernel_q;
-    char s[600]={0};
+    char s[4096]={0};
 
-    int _bytesread = -1;
+    int _bytesread = recv(client_soc, s, 4095, 0);
 
-    if ((_bytesread = recv(client_soc, s, 599, 0)) > 0){
-        _Sockets_req[client_soc].append(s, _bytesread);
-        // check if the map has the client socket fd with string
-        if(_Sockets_req[client_soc].rfind("\r\n\r\n") != std::string::npos){
-          Parsed_request_and_body result;
-		   int status  = handle_request(result, _Sockets_req);
-		   std::string resp = "HTTP/1.1 "+std::to_string(status)+"\r\n"
-                "Content-Type: "+result.type+"\r\n"
-                "Content-Length: "+std::to_string(result.content_len)+"\r\n"
-                "Connection: keep-alive\r\n\r\n"
-                +result.body;
-				std::cout << "status: " << status << std::endl;
-            socket_header[client_soc] = resp.substr(0, resp.find("\r\n\r\n"));
-            struct kevent change;
-            EV_SET(&change, client_soc, EVFILT_WRITE | EVFILT_READ , EV_ADD, 0, 0, NULL);
-            kevent(kernel_q, &change, 1, NULL, 0, NULL);
-            long long b = 0;
-			b = send(client_soc, resp.c_str(), resp.size(), 0);
-            if (b == 0 || status != -100){
-		   		Server::close_remove_event(client_soc, kernel_q);
-                return (1);
-            }
-            if ((size_t)b >= result.content_len){
-                EV_SET(&change, client_soc, EVFILT_READ , EV_ADD, 0, 0 , NULL);
-                kevent(kernel_q, &change, 1, NULL, 0, NULL);
-                return (0);
-            }
-            result.body.substr(0, b);
-            socket_bytes[client_soc] = std::make_pair(b, result);
-		}
-    }
-    std::cout << "number of read bytes : " << _bytesread << '\n';
-    if (_bytesread == 0){ // connection closed
-        std::cout << "---------------------closing "<< client_soc<< " ---------------------\n";
-        Server::close_remove_event(client_soc, kernel_q);
-        return (0);
-    }
-
-    if (_bytesread < 0){ // failed recv could mean no more data no read;
+    if (_bytesread < 0){
         std::cout << "bytesread < 0 either no more data , or err in recv\n";
-        // Server::close_remove_event(client_soc, kernel_q);
-        return (_bytesread);
     }
+    else if (_bytesread == 0){
+        std::cout << "received 0 bytes, closing connection\n";
+        Server::close_remove_event(client_soc, kernel_q);
+    }
+    else{
+        _Clients[client_soc].set_request(s);
+        // _Client_header_body[client_soc].second.append(s, _bytesread);
+        check_header_body(client_soc);
+        if (request_done){
+            std::string request = _Client_header_body[client_soc].first + _Client_header_body[client_soc].second;
+            _Client_full_request[client_soc] = std::make_pair(request.size(), request);
+            struct kevent change;
+            EV_SET(&change, client_soc, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+            kevent(kernel_q, &change, 1, NULL, 0, NULL);
+            request_done = false;
+            header_done = false;
+            body_done = false;
+        }
 
+    }
     return (_bytesread);
 }
+
+void Server::check_header_body(int client_soc){
+    if (!_Clients[client_soc].is_header_done()){
+        std::string header = _Clients[client_soc].get_request();
+        std::string tmp = header;
+        int pos = tmp.find("\r\n\r\n");
+        if (pos != std::string::npos){
+            _Clients[client_soc].set_header_done(true);
+            std::string head = tmp.substr(0, pos + 4);
+            _Clients[client_soc].set_header(head);
+            _Clients[client_soc].set_body(tmp.substr(pos + 4));
+            _Clients[client_soc].clear_request();
+        }
+        else {
+            _Clients[client_soc].set_header_done(false);
+            _Clients[client_soc].set_body_done(false);
+            return ;
+        }
+    }
+    if (_Clients[client_soc].is_header_done())
+    {
+        std::string method = _Client_header_body[client_soc].first.substr(0, _Client_header_body[client_soc].first.find(" "));
+        if (method == "GET" || method == "DELETE"){
+            request_done = true;
+            return ;
+        }
+        if (method == "POST"){
+            std::string &body = _Client_header_body[client_soc].second;
+            std::string tmp = body;
+            int pos = tmp.find("\r\n\r\n");
+            if (pos != std::string::npos){
+                body_done = true;
+                std::string body = tmp.substr(0, pos + 4);
+                _Client_header_body[client_soc].second = body;
+                _Recv_request = _Client_header_body[client_soc].first + _Client_header_body[client_soc].second;
+            }
+            else{
+                body_done = false;
+            }
+        }
+        else{
+            request_done = true;
+        }
+    }
+}
+
 
 std::string Server::GetRequestToParse() {
     return (_Recv_request);
