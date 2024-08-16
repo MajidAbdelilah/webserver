@@ -14,9 +14,10 @@ class client {
         bool header_done;
         bool body_done;
         bool request_done;
-
+        bool connection_close; // 1 if close 0 if keep alive
 
     public:
+        client();
         client(int fd);
         ~client();
         std::string &get_request();

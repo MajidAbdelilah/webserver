@@ -5,6 +5,21 @@ client::client(int fd) : _socketfd(fd){
     this->body_done = false;
     this->request_done = false;
     this->status_code = 0;
+    this->body = "";
+    this->header = "";
+    this->_request = "";
+    this->_response = "";
+}
+
+client::client(){
+    this->header_done = false;
+    this->body_done = false;
+    this->request_done = false;
+    this->status_code = 0;
+    this->body = "";
+    this->header = "";
+    this->_request = "";
+    this->_response = "";
 }
 
 client::~client(){
@@ -24,7 +39,7 @@ int client::get_status_code(){
 }
 
 void client::set_request(std::string req){
-    this->_request.append(0, req.size());
+    this->_request.append(req);
 }
 
 void client::set_response(std::string &res){
@@ -95,11 +110,11 @@ void client::set_request_done(bool done){
 }
 
 void client::set_body(std::string body){
-    this->body.append(0, body.size());
+    this->body.append(body);
 }
 
 void client::set_header(std::string header){
-    this->header.append(0, header.size());
+    this->header.append(header);
 }
 
 std::string client::get_body(){
