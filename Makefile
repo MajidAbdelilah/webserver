@@ -1,4 +1,4 @@
-SRCS=  src/main.cpp src/server.cpp src/http_req.cpp
+SRCS=  src/main.cpp src/server.cpp src/http_req.cpp src/client.cpp
 OBJS= $(SRCS:.cpp=.o)
 CFLAGS= -Wall -Wextra -Werror -std=c++98 -fsanitize=address  -g -Ofast
 CPP= c++
@@ -8,7 +8,7 @@ NAME= webserv
 
 all: $(NAME)
 
-%.o: %.cpp  src/server.hpp
+%.o: %.cpp  src/server.hpp src/http_req.hpp src/client.hpp
 	$(CPP) $(CFLAGS) -c $< -o $@
 
 $(NAME): $(OBJS)
