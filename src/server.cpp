@@ -129,13 +129,14 @@ int Server::getting_req(int kernel_q, int client_soc){
         _Clients[client_soc].set_request(a);
         check_header_body(client_soc);
         // still needs to be fixed
-        if (_Clients[client_soc].is_request_done() && _Clients[client_soc].is_requestvalid()){
+        if (_Clients[client_soc].is_request_done()){
             struct kevent changes;
             EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             EV_SET(&changes, client_soc, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             // std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello World!";
+			handle_request(_Clients[client_soc]);
             _Clients[client_soc].build_response();
         }
     }
