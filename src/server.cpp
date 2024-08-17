@@ -83,21 +83,21 @@ int Server::getting_req(int kernel_q, int client_soc){
 
     int _bytesread = -1;
 
-    if ((_bytesread = recv(client_soc, s, 599, 0)) > 0){
+    if ((_bytesread = recv(client_soc, s, 10, 0)) > 0){
         _Sockets_req[client_soc].append(s, _bytesread);
         // std::cout << _Sockets_req[client_soc] << '\n';
         // check if the map has the client socket fd with string
         if(_Sockets_req[client_soc].rfind("\r\n\r\n") != std::string::npos){
           Parsed_request_and_body result;
 		   int status  = handle_request(result, _Sockets_req);
-		   std::string resp = "HTTP/1.1 "+std::to_string(status)+"\r\n"
+		   std::string resp = "HTTP/1.1 "+std::to_string(status == -100 ? 200 : status )+"\r\n"
                 "Content-Type: "+result.type+"\r\n"
                 "Content-Length: "+std::to_string(result.content_len)+"\r\n"
                 "Connection: keep-alive\r\n\r\n"
                 +result.body;
 				std::cout << "status: " << status << std::endl;
 			send(client_soc, resp.c_str(), resp.size(), 0);
- 	      	if(status != -100)
+ 	      	if(status != -100 || _bytesread == 0)
 		   		Server::close_remove_event(client_soc, kernel_q);
 		}
     }
