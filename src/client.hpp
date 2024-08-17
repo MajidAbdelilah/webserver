@@ -42,7 +42,7 @@ class client {
         std::string &get_response();
         int get_status_code();
         void set_request(std::string );
-        void set_response(std::string &);
+        void set_response(std::string );
         void set_status_code(int);
         void set_socketfd(int);
         int get_socketfd();
