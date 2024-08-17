@@ -3,6 +3,9 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
+#define CRLF "\r\n"
+
+
 class client {
     private:
         int _socketfd; // socket file descriptor
@@ -10,6 +13,7 @@ class client {
         std::string header; // header of the request
         std::string _request; // request to be parsed
         std::string _response; // response to be sent
+        std::string response_body; // body of the response
         int status_code; // 200, 404, 500 etc
         bool header_done; // 1 if header is done 0 if not
         bool body_done; // 1 if body is done 0 if not
@@ -28,6 +32,7 @@ class client {
         std::string content_type; // example Content-Type: text/html -> text/html
         bool chunked; // 1 if chunked 0 if not
         bool requestvalid; // 1 if request is valid 0 if not
+
 
     public:
         client();
@@ -79,6 +84,8 @@ class client {
         std::string get_content_type();
         void set_status_message(std::string);
         std::string get_status_message();
+        void build_response();
+        std::string tostring(long long);
         void clear_method();
         void clear_uri();
         void clear_version();
@@ -94,9 +101,6 @@ class client {
         void clear_status_code();
         void clear_socketfd();
         void clear_all();
-
-
-
 
 };
 

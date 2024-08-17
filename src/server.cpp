@@ -133,9 +133,11 @@ int Server::getting_req(int kernel_q, int client_soc){
             EV_SET(&changes, client_soc, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello World!";
+            if (_Clients[client_soc].is_requestvalid()){
+                _Clients[client_soc].build_response();
+            }
             _Clients[client_soc].set_response(res);
         }
-
     }
     return (_bytesread);
 }
@@ -166,8 +168,8 @@ void Server::check_header_body(int client_soc){
             _Clients[client_soc].set_request_done(true);
             _Clients[client_soc].set_request(_Clients[client_soc].get_header());
             if (_Clients[client_soc].get_body().size() > 0){
-                char trash[9999] = {0};
-                while (recv(client_soc, trash, 10000, 0) > 0);
+                char trash[10000] = {0};
+                while (recv(client_soc, trash, 9999, 0) > 0);
             }
             return ;
          // to do later, trash the body

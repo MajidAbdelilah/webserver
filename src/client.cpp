@@ -1,5 +1,6 @@
 #include "client.hpp"
 #include <string>
+#include <sstream>
 
 client::client(int fd) : _socketfd(fd){
     this->header_done = false;
@@ -194,6 +195,61 @@ std::string client::get_query(){
 
 std::string client::get_fragment(){
     return (this->fragment);
+}
+
+std::string client::get_status_message(){
+    return (this->status_message);
+}
+
+void client::set_status_message(std::string message){
+    this->status_message = message;
+}
+
+std::string client::get_content_type(){
+    return (this->content_type);
+}
+
+void client::set_content_type(std::string type){
+    this->content_type = type;
+}
+
+long long client::get_content_length(){
+    return (this->content_length);
+}
+
+void client::set_content_length(long long length){
+    this->content_length = length;
+}
+
+std::string client::tostring(long long num){
+    std::ostringstream convert ;
+    convert << num;
+    std::string result(convert.str());
+    return (result);
+}
+
+void client::build_response(){
+    std::string response = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
+        + "Content-Type: " + content_type + CRLF\
+        + "Content-Length: " + tostring(content_length)+ CRLF+CRLF\
+        + c;
+
+}
+
+bool client::is_chunked(){
+    return (this->chunked);
+}
+
+void client::set_chunked(bool is){
+    this->chunked = is;
+}
+
+void client::set_requestvalid(bool is){
+    this->requestvalid = is;
+}
+
+bool client::is_requestvalid(){
+    return (this->requestvalid);
 }
 
 void client::clear_method(){
