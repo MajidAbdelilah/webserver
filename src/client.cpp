@@ -229,11 +229,10 @@ std::string client::tostring(long long num){
 }
 
 void client::build_response(){
-    std::string response = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
+    _response = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
         + "Content-Type: " + content_type + CRLF\
         + "Content-Length: " + tostring(content_length)+ CRLF+CRLF\
-        + c;
-
+        + response_body;
 }
 
 bool client::is_chunked(){
