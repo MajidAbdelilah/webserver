@@ -269,17 +269,11 @@ std::string client::get_content_type(){
     return (this->content_type);
 }
 
-void client::set_content_type(std::string type){
-    this->content_type = type;
-}
 
 long long client::get_content_length(){
     return (this->content_length);
 }
 
-void client::set_content_length(long long length){
-    this->content_length = length;
-}
 
 std::string client::tostring(long long num){
     std::ostringstream convert ;
@@ -301,10 +295,6 @@ bool client::is_chunked(){
 
 void client::set_chunked(bool is){
     this->chunked = is;
-}
-
-void client::set_requestvalid(bool is){
-    this->requestvalid = is;
 }
 
 bool client::is_requestvalid(){
