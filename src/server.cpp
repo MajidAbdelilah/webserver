@@ -147,6 +147,7 @@ void Server::check_header_body(int client_soc){
         std::string header = _Clients[client_soc].get_request();
         std::string tmp = header;
         int pos = tmp.find("\r\n\r\n");
+
         if (pos != std::string::npos){
             _Clients[client_soc].set_header_done(true);
             std::string head = tmp.substr(0, pos + 4);
@@ -170,6 +171,7 @@ void Server::check_header_body(int client_soc){
             if (_Clients[client_soc].get_body().size() > 0){
                 char trash[10000] = {0};
                 while (recv(client_soc, trash, 9999, 0) > 0);
+
             }
             return ;
          // to do later, trash the body
@@ -177,7 +179,9 @@ void Server::check_header_body(int client_soc){
         if (method == "POST"){
             std::string &body = _Client_header_body[client_soc].second;
             std::string tmp = body;
+
             int pos = tmp.find("\r\n\r\n");
+
             if (pos != std::string::npos){
                 body_done = true;
                 std::string body = tmp.substr(0, pos + 4);

@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 
+
 client::client(int fd) : _socketfd(fd){
     this->header_done = false;
     this->body_done = false;
@@ -15,7 +16,7 @@ client::client(int fd) : _socketfd(fd){
     this->chunked = false;
     this->requestvalid = false;
     this->connection_close = false;
-    
+
 }
 
 client::client(){
@@ -31,10 +32,48 @@ client::client(){
     this->chunked = false;
     this->requestvalid = false;
     this->connection_close = false;
+
 }
 
 client::~client(){
     this->clear_all();
+}
+
+
+// IMPORTANT NOTE: this DOES NOT copy the ifstream file
+client &client::operator=(const client &rhs){
+	this->_socketfd = rhs._socketfd;
+	this->header_done = rhs.header_done;
+	this->body_done = rhs.body_done;
+	this->request_done = rhs.request_done;
+	this->status_code = rhs.status_code;
+	this->body = rhs.body;
+	this->header = rhs.header;
+	this->_request = rhs._request;
+	this->_response = rhs._response;
+	this->method = rhs.method;
+	this->uri = rhs.uri;
+	this->version = rhs.version;
+	this->host = rhs.host;
+	this->port = rhs.port;
+	this->path = rhs.path;
+	this->query = rhs.query;
+	this->fragment = rhs.fragment;
+	this->connection_close = rhs.connection_close;
+	this->content_length = rhs.content_length;
+	this->content_type = rhs.content_type;
+	this->status_message = rhs.status_message;
+	this->chunked = rhs.chunked;
+	return (*this);
+}
+
+void client::set_requestvalid(bool valid){
+	this->requestvalid = valid;
+}
+
+
+std::ifstream &client::get_file(){
+	return (this->file);
 }
 
 std::string &client::get_request(){
@@ -53,7 +92,9 @@ void client::set_request(std::string req){
     this->_request.append(req);
 }
 
+
 void client::set_response(std::string res){
+
     this->_response = res;
 }
 
@@ -63,6 +104,15 @@ void client::set_status_code(int code){
 
 void client::set_socketfd(int fd){
     this->_socketfd = fd;
+}
+
+
+void client::set_content_length(long long len){
+	this->content_length = len;
+}
+
+void client::set_content_type(std::string type){
+	this->content_type = type;
 }
 
 int client::get_socketfd(){
@@ -206,6 +256,7 @@ std::string client::get_fragment(){
     return (this->fragment);
 }
 
+
 std::string client::get_status_message(){
     return (this->status_message);
 }
@@ -259,6 +310,7 @@ void client::set_requestvalid(bool is){
 bool client::is_requestvalid(){
     return (this->requestvalid);
 }
+
 
 void client::clear_method(){
     this->method.clear();

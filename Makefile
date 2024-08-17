@@ -8,7 +8,7 @@ NAME= webserv
 
 all: $(NAME)
 
-%.o: %.cpp  src/server.hpp
+%.o: %.cpp  src/server.hpp src/http_req.hpp src/client.hpp
 	$(CPP) $(CFLAGS) -c $< -o $@
 
 $(NAME): $(OBJS)
