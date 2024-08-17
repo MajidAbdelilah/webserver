@@ -11,6 +11,11 @@ client::client(int fd) : _socketfd(fd){
     this->header = "";
     this->_request = "";
     this->_response = "";
+    this->content_length = 0;
+    this->chunked = false;
+    this->requestvalid = false;
+    this->connection_close = false;
+    
 }
 
 client::client(){
@@ -22,6 +27,10 @@ client::client(){
     this->header = "";
     this->_request = "";
     this->_response = "";
+    this->content_length = 0;
+    this->chunked = false;
+    this->requestvalid = false;
+    this->connection_close = false;
 }
 
 client::~client(){

@@ -82,14 +82,10 @@ void Server::close_remove_event(int socket_fd, int &kqueue){
 
 int Server::handle_write_request(struct kevent &events, int kq) {
     int fd = events.ident;
-    int length = _Clients[events.ident].get_response().size();
-    std::cout << "this is the response  :" << _Clients[events.ident].get_response() << std::endl;
+    int length = _Clients[fd].get_response().size();
+    std::cout << "this is the response  :" << _Clients[fd].get_response() << std::endl;
     std::cout << "--------------\n";
-    int size = send(events.ident, _Clients[events.ident].get_response().c_str(), length, 0);
-    int length = _Clients[events.ident].get_response().size();
-    std::cout << "this is the response  :" << _Clients[events.ident].get_response() << std::endl;
-    std::cout << "--------------\n";
-    int size = send(events.ident, _Clients[events.ident].get_response().c_str(), length, 0);
+    int size = send(fd, _Clients[fd].get_response().c_str(), length, 0);
 
     if (size < 0)
         return (1);
