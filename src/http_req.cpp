@@ -45,6 +45,7 @@ int parse_headers(std::string line, std::map<std::string, std::string> &req)
 
 int DELETE(Parsed_request_and_body &result, std::string &req)
 {
+
 	std::cout << "\n\n\nDELETE REQUEST START \n\n";
 	std::cout << req << std::endl;
 	std::cout << "\nDELETE REQUEST END\n";
@@ -102,8 +103,10 @@ int DELETE(Parsed_request_and_body &result, std::string &req)
 	std::cout << "URI: " << uri << std::endl;
 
 
+
     
 	int status = std::remove(uri.c_str());
+
 
     // Check if the file has been successfully removed
     if (status != 0) {

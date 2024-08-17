@@ -1,17 +1,27 @@
 #include "server.hpp"
+
 #include <fstream>
+
 
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
+
+#define CRLF "\r\n"
+
+
+
 class client {
     private:
-		std::ifstream file;
+		    std::ifstream file;
         int _socketfd; // socket file descriptor
         std::string body; // body of the request
         std::string header; // header of the request
         std::string _request; // request to be parsed
         std::string _response; // response to be sent
+
+        std::string response_body; // body of the response
+
         int status_code; // 200, 404, 500 etc
         bool header_done; // 1 if header is done 0 if not
         bool body_done; // 1 if body is done 0 if not
@@ -37,12 +47,12 @@ class client {
         ~client();
         std::string &get_request();
         std::string &get_response();
-        std::ifstream &get_file();
-		client &operator=(const client &);
-		void set_file(std::ifstream &);
-		int get_status_code();
+        int get_status_code();
         void set_request(std::string );
-        void set_response(std::string &);
+        void set_response(std::string );
+        std::ifstream &get_file();
+		    client &operator=(const client &);
+    		void set_file(std::ifstream &);
         void set_status_code(int);
         void set_socketfd(int);
         int get_socketfd();
@@ -84,6 +94,8 @@ class client {
         std::string get_content_type();
         void set_status_message(std::string);
         std::string get_status_message();
+        void build_response();
+        std::string tostring(long long);
         void clear_method();
         void clear_uri();
         void clear_version();
@@ -99,9 +111,6 @@ class client {
         void clear_status_code();
         void clear_socketfd();
         void clear_all();
-
-
-
 
 };
 

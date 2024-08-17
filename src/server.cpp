@@ -81,25 +81,28 @@ void Server::close_remove_event(int socket_fd, int &kqueue){
 }
 
 int Server::handle_write_request(struct kevent &events, int kq) {
-    // int fd = events.ident;
-    std::string resp = _Clients[events.ident].get_response();
-    int length = resp.size();
-
-    int size = send(events.ident, resp.c_str(), length, 0);
+    int fd = events.ident;
+    int length = _Clients[fd].get_response().size();
+    std::cout << "this is the response  :" << _Clients[fd].get_response() << std::endl;
+    std::cout << "--------------\n";
+    int size = send(fd, _Clients[fd].get_response().c_str(), length, 0);
 
     if (size < 0)
         return (1);
-
-    struct kevent change;
-    if (size >= length){ //whole body has been sent
-        EV_SET(&change, events.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-        kevent(kq, &change, 1, NULL, 0 , NULL);
-        EV_SET(&change, events.ident, EVFILT_READ, EV_ADD, 0, 0, NULL);
-        kevent(kq, &change, 1, NULL, 0 , NULL);
-        socket_response.erase(events.ident);
-    }
-    else{
-        socket_response[events.ident].body = resp.substr(size);
+    if (size >= 0) {
+        if (size == _Clients[events.ident].get_response().size()){
+            _Clients[events.ident].set_response("");
+            struct kevent change;
+            EV_SET(&change, events.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+            kevent(kq, &change, 1, NULL, 0 , NULL);
+            EV_SET(&change, events.ident, EVFILT_READ, EV_ADD, 0, 0, NULL);
+            kevent(kq, &change, 1, NULL, 0 , NULL);
+            // if (_Clients[fd].get_connection_close())
+            //     close(fd);
+        }
+        else{
+            _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
+        }
     }
     return (0);
 }
@@ -125,18 +128,16 @@ int Server::getting_req(int kernel_q, int client_soc){
 
         _Clients[client_soc].set_request(a);
         check_header_body(client_soc);
-       // still needs to be fixed
-        if (_Clients[client_soc].is_request_done()){
-            struct kevent changes; 
+        // still needs to be fixed
+        if (_Clients[client_soc].is_request_done() && _Clients[client_soc].is_requestvalid()){
+            struct kevent changes;
             EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             EV_SET(&changes, client_soc, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
-            std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello World!";
-			handle_request(_Clients[client_soc]);
-            _Clients[client_soc].set_response(res);
+            // std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello World!";
+            _Clients[client_soc].build_response();
         }
-
     }
     return (_bytesread);
 }
@@ -145,7 +146,8 @@ void Server::check_header_body(int client_soc){
     if (!_Clients[client_soc].is_header_done()){
         std::string header = _Clients[client_soc].get_request();
         std::string tmp = header;
-        unsigned long pos = tmp.find("\r\n\r\n");
+        int pos = tmp.find("\r\n\r\n");
+
         if (pos != std::string::npos){
             _Clients[client_soc].set_header_done(true);
             std::string head = tmp.substr(0, pos + 4);
@@ -167,8 +169,9 @@ void Server::check_header_body(int client_soc){
             _Clients[client_soc].set_request_done(true);
             _Clients[client_soc].set_request(_Clients[client_soc].get_header());
             if (_Clients[client_soc].get_body().size() > 0){
-                char trash[9999] = {0};
-                while (recv(client_soc, trash, 10000, 0) > 0);
+                char trash[10000] = {0};
+                while (recv(client_soc, trash, 9999, 0) > 0);
+
             }
             return ;
          // to do later, trash the body
@@ -176,7 +179,9 @@ void Server::check_header_body(int client_soc){
         if (method == "POST"){
             std::string &body = _Client_header_body[client_soc].second;
             std::string tmp = body;
-            unsigned long pos = tmp.find("\r\n\r\n");
+
+            int pos = tmp.find("\r\n\r\n");
+
             if (pos != std::string::npos){
                 body_done = true;
                 std::string body = tmp.substr(0, pos + 4);
