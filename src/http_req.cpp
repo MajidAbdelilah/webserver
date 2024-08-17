@@ -43,15 +43,15 @@ int parse_headers(std::string line, std::map<std::string, std::string> &req)
 	return 0;
 }
 
-int DELETE(Parsed_request_and_body &result, std::string &req)
+int DELETE(client &client_class, std::map<std::string, std::string> &req_map)
 {
+	std::string req = client_class.get_request();
 	std::cout << "\n\n\nDELETE REQUEST START \n\n";
 	std::cout << req << std::endl;
 	std::cout << "\nDELETE REQUEST END\n";
 
 	std::string line = get_line(req);
 	std::cout << line << std::endl;
-	std::map<std::string, std::string> req_map;
 	if (parse_initial_line(line, req_map) == -1)
 	{
 		std::cout << ("Error parsing initial line\n");
@@ -114,15 +114,14 @@ int DELETE(Parsed_request_and_body &result, std::string &req)
         std::cout << "File successfully deleted\n";
     }
 
-	result.body = "<html>"
+	client_class.set_body("<html>"
 					"<body>"
 						"<h1>File deleted.</h1>"
 					"</body>"
-				  "</html>";
-	result.content_len = result.body.size();
-	std::cout << "content_len: " << result.body.size() << std::endl;
-	result.type = "text/html";
-	result.req_map = req_map;
+				  "</html>");
+	client_class.set_content_length(client_class.get_body().size());
+	std::cout << "content_len: " << client_class.get_body().size() << std::endl;
+	client_class.set_content_type("text/html");
 
 	return 200;
 }
@@ -303,7 +302,20 @@ int handle_request(client &client_class)
 		}
 		else if(req_map["Method"] == "DELETE")
 		{
-			// return DELETE(result, req);
+			int status = DELETE(client_class, req_map);
+			if(status == 200)
+			{
+				client_class.set_status_code(int(status));
+				client_class.set_connection_close(req_map["Connection"] == "keep-alive" ? 0 : 1);
+				client_class.set_method(req_map["Method"]);
+				client_class.set_uri(req_map["URI"]);
+				client_class.set_version(req_map["Version"]);
+				client_class.set_host(req_map["Host"].substr(0, req_map["Host"].find(":")));
+				client_class.set_port(req_map["Host"].substr(req_map["Host"].find(":") + 1));
+				client_class.set_path(req_map["URI"].substr(0, req_map["URI"].find("?")));
+			}
+			client_class.set_requestvalid(bool(status == 200 || status == 404));
+			return status;
 		}
 		else if (req_map["Method"] == "POST")
 		{
