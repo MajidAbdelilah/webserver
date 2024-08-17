@@ -1,4 +1,5 @@
 #include "client.hpp"
+#include <string>
 
 client::client(int fd) : _socketfd(fd){
     this->header_done = false;
@@ -58,10 +59,6 @@ int client::get_socketfd(){
     return (this->_socketfd);
 }
 
-void client::clear(){
-    this->clear_all();
-}
-
 void client::clear_request(){
     this->_request.clear();
 }
@@ -78,12 +75,6 @@ void client::clear_socketfd(){
     this->_socketfd = 0;
 }
 
-void client::clear_all(){
-    this->clear_request();
-    this->clear_response();
-    this->clear_status_code();
-    this->clear_socketfd();
-}
 
 bool client::is_header_done(){
     return (this->header_done);
@@ -133,3 +124,121 @@ void client::clear_header(){
     this->header.clear();
 }
 
+void client::set_connection_close(bool close){
+    this->connection_close = close;
+}
+
+bool client::get_connection_close(){
+    return (this->connection_close);
+}
+
+void client::set_method(std::string method){
+    this->method = method;
+}
+
+void client::set_uri(std::string uri){
+    this->uri = uri;
+}
+
+void client::set_version(std::string version){
+    this->version = version;
+}
+
+void client::set_host(std::string host){
+    this->host = host;
+}
+
+void client::set_port(std::string port){
+    this->port = port;
+}
+
+void client::set_path(std::string path){
+    this->path = path;
+}
+
+void client::set_query(std::string query){
+    this->query = query;
+}
+
+void client::set_fragment(std::string fragment){
+    this->fragment = fragment;
+}
+
+std::string client::get_method(){
+    return (this->method);
+}
+
+std::string client::get_uri(){
+    return (this->uri);
+}
+
+std::string client::get_version(){
+    return (this->version);
+}
+
+std::string client::get_host(){
+    return (this->host);
+}
+
+std::string client::get_port(){
+    return (this->port);
+}
+
+std::string client::get_path(){
+    return (this->path);
+}
+
+std::string client::get_query(){
+    return (this->query);
+}
+
+std::string client::get_fragment(){
+    return (this->fragment);
+}
+
+void client::clear_method(){
+    this->method.clear();
+}
+
+void client::clear_uri(){
+    this->uri.clear();
+}
+
+void client::clear_version(){
+    this->version.clear();
+}
+
+void client::clear_host(){
+    this->host.clear();
+}
+
+void client::clear_port(){
+    this->port.clear();
+}
+
+void client::clear_path(){
+    this->path.clear();
+}
+
+void client::clear_query(){
+    this->query.clear();
+}
+
+void client::clear_fragment(){
+    this->fragment.clear();
+}
+
+void client::clear_all(){
+    this->clear_request();
+    this->clear_response();
+    this->clear_status_code();
+    this->clear_socketfd();
+    this->clear_method();
+    this->clear_uri();
+    this->clear_version();
+    this->clear_host();
+    this->clear_port();
+    this->clear_path();
+    this->clear_query();
+    this->clear_fragment();
+}
