@@ -82,24 +82,27 @@ void Server::close_remove_event(int socket_fd, int &kqueue){
 
 int Server::handle_write_request(struct kevent &events, int kq) {
     int fd = events.ident;
-    std::string resp = _Clients[events.ident].get_response();
-    int length = resp.size();
-
-    int size = send(events.ident, resp.c_str(), length, 0);
+    int length = _Clients[events.ident].get_response().size();
+    std::cout << "this is the response  :" << _Clients[events.ident].get_response() << std::endl;
+    std::cout << "--------------\n";
+    int size = send(events.ident, _Clients[events.ident].get_response().c_str(), length, 0);
 
     if (size < 0)
         return (1);
-
-    struct kevent change;
-    if (size >= length){ //whole body has been sent
-        EV_SET(&change, events.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-        kevent(kq, &change, 1, NULL, 0 , NULL);
-        EV_SET(&change, events.ident, EVFILT_READ, EV_ADD, 0, 0, NULL);
-        kevent(kq, &change, 1, NULL, 0 , NULL);
-        socket_response.erase(events.ident);
-    }
-    else{
-        socket_response[events.ident].body = resp.substr(size);
+    if (size >= 0) {
+        if (size == _Clients[events.ident].get_response().size()){
+            _Clients[events.ident].set_response("");
+            struct kevent change;
+            EV_SET(&change, events.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+            kevent(kq, &change, 1, NULL, 0 , NULL);
+            EV_SET(&change, events.ident, EVFILT_READ, EV_ADD, 0, 0, NULL);
+            kevent(kq, &change, 1, NULL, 0 , NULL);
+            // if (_Clients[fd].get_connection_close())
+            //     close(fd);
+        }
+        else{
+            _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
+        }
     }
     return (0);
 }

@@ -44,7 +44,7 @@ void client::set_request(std::string req){
     this->_request.append(req);
 }
 
-void client::set_response(std::string &res){
+void client::set_response(std::string res){
     this->_response = res;
 }
 
