@@ -86,6 +86,10 @@ int Server::handle_write_request(struct kevent &events, int kq) {
     std::cout << "this is the response  :" << _Clients[events.ident].get_response() << std::endl;
     std::cout << "--------------\n";
     int size = send(events.ident, _Clients[events.ident].get_response().c_str(), length, 0);
+    int length = _Clients[events.ident].get_response().size();
+    std::cout << "this is the response  :" << _Clients[events.ident].get_response() << std::endl;
+    std::cout << "--------------\n";
+    int size = send(events.ident, _Clients[events.ident].get_response().c_str(), length, 0);
 
     if (size < 0)
         return (1);
@@ -129,17 +133,14 @@ int Server::getting_req(int kernel_q, int client_soc){
         _Clients[client_soc].set_request(a);
         check_header_body(client_soc);
         // still needs to be fixed
-        if (_Clients[client_soc].is_request_done()){
+        if (_Clients[client_soc].is_request_done() && _Clients[client_soc].is_requestvalid()){
             struct kevent changes;
             EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             EV_SET(&changes, client_soc, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
-            std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello World!";
-            if (_Clients[client_soc].is_requestvalid()){
-                _Clients[client_soc].build_response();
-            }
-            _Clients[client_soc].set_response(res);
+            // std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello World!";
+            _Clients[client_soc].build_response();
         }
     }
     return (_bytesread);
