@@ -1,9 +1,12 @@
+#include "server.hpp"
 #include <fstream>
 #include <sys/_types/_size_t.h>
 #define http_hostname_macro "127.0.0.1:8080"
 #define http_localhost_macro "localhost:8080"
 #include <string>
 #include <map>
+#include "client.hpp"
+
 class Parsed_request_and_body
 {
 	public:
@@ -61,7 +64,5 @@ class request_queue_element
 
 
 // returns the exit status of the operation
-int GET(Parsed_request_and_body &result, std::string &req);
-int DELETE(Parsed_request_and_body &result, std::string &req);
-int handle_request(Parsed_request_and_body &result, std::map <int, std::string> &Sockets_req);
+int handle_request(client &client);
 
