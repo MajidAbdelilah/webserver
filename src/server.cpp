@@ -94,7 +94,6 @@ int Server::handle_write_request(struct kevent &events, int kq) {
     std::cout << "-----------------END-------------------\n";
 
     int size = send(fd, _Clients[fd].get_response().c_str(), length, 0);
-
     if (size < 0)
         return (1);
     if (size >= 0) {
@@ -103,8 +102,14 @@ int Server::handle_write_request(struct kevent &events, int kq) {
                 _Clients[fd].set_response_header("");
             }
             else {
-                _Clients[fd].set_response_header(_Clients[fd].get_response_header().substr(size));
-                return 0;
+                if (_Clients[fd].get_response_header().size() < size){
+                    _Clients[fd].set_response_header("");
+                    return 0;
+                }
+                else{
+                    _Clients[fd].set_response_header(_Clients[fd].get_response_header().substr(size));
+                    return 0;
+                }
             }
         }
         else if (_Clients[fd].get_response_header() == "" && _Clients[fd].is_ifstream_empty()){
@@ -130,7 +135,6 @@ int Server::getting_req(int kernel_q, int client_soc){
     (void)kernel_q;
     char s[4096]={0};
     if (_Clients[client_soc].get_request().size() > 0){
-
         std::string tmp = _Clients[client_soc].get_request();
         std::string tmp2 = s;
         tmp2.append(tmp);
@@ -141,6 +145,10 @@ int Server::getting_req(int kernel_q, int client_soc){
 
     if (_bytesread < 0){
         std::cout << "bytesread < 0 either no more data , or err in recv\n";
+        std::cout << _Clients[client_soc].get_socketfd() << std::endl;
+        std::cout << "RESPONSE HEADER IN READ ZONE\n";
+        std::cout << _Clients[client_soc].get_request() << std::endl;
+        return -1;
     }
     else if (_bytesread == 0){
         std::cout << "received 0 bytes, closing connection\n";
@@ -156,8 +164,8 @@ int Server::getting_req(int kernel_q, int client_soc){
         // still needs to be fixed
         if (_Clients[client_soc].is_request_done()){
             struct kevent changes;
-            EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-            kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
+            // EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+            // kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             EV_SET(&changes, client_soc, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             // std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello World!";
