@@ -378,15 +378,11 @@ void client::build_response(){
         + "Content-Length: " + tostring(content_length)+ CRLF + CRLF;
     // setting the header
     _response = response_header;
-    int i = 0;
-    while (!is_ifstream_empty()){
+    if (!is_ifstream_empty()){
         std::string toappend;
         std::getline(file, toappend); // get one line to append to the header
-        std::cout << "getline result : " << toappend << '\n';
+        // std::cout << "getline result : " << toappend << '\n';
         _response.append(toappend, 0, toappend.size());
-        i++;
-        if (i == 100)
-            break;
     }
     clear_request();
     request_done = false;

@@ -55,12 +55,12 @@ int Server::run(){
                 _Clients[client_socketfd] = client(client_socketfd);
             }
             else if (_Clients.find(events[i].ident) != _Clients.end()){
-                if (events[i].filter & EVFILT_READ){
+                if (events[i].filter == EVFILT_READ){
                     int r = getting_req(kernel_queue, events[i].ident); // parse request send to majid;
 					(void)r;
                     // TODO ! method to check the request part in each socket fd 
                 }
-                if (events[i].filter & EVFILT_WRITE)
+                if (events[i].filter == EVFILT_WRITE)
                 {
                     std::cout << "IT ENTERS WRITE FILTEEEEER \n";
                     Server::handle_write_request(events[i], kernel_queue);
@@ -89,7 +89,9 @@ int Server::handle_write_request(struct kevent &events, int kq) {
         _Clients[fd].set_response(res);
     }
     int length = _Clients[fd].get_response().size();
-    std::cout << "-----------------RESPONSE-------------------\n";
+    std::cout << "-----------------RESPONSE TYPE-------------------\n";
+    std::cout << _Clients[fd].get_content_type() << std::endl;
+    std::cout << _Clients[fd].get_content_length() << std::endl;
     std::cout << _Clients[fd].get_response() << std::endl;
     std::cout << "-----------------END-------------------\n";
 
@@ -104,10 +106,13 @@ int Server::handle_write_request(struct kevent &events, int kq) {
             else {
                 if (_Clients[fd].get_response_header().size() < size){
                     _Clients[fd].set_response_header("");
+                    size -= _Clients[fd].get_response_header().size();
+                    _Clients[fd].set_content_length(_Clients[fd].get_content_length() - size);
                     return 0;
                 }
                 else{
                     _Clients[fd].set_response_header(_Clients[fd].get_response_header().substr(size));
+                    _Clients[fd].set_response(_Clients[fd].get_response_header());
                     return 0;
                 }
             }
@@ -120,8 +125,8 @@ int Server::handle_write_request(struct kevent &events, int kq) {
             kevent(kq, &change, 1, NULL, 0 , NULL);
             EV_SET(&change, events.ident, EVFILT_READ, EV_ADD, 0, 0, NULL);
             kevent(kq, &change, 1, NULL, 0 , NULL);
-            // if (_Clients[fd].get_connection_close())
-            //     close(fd);
+            if (_Clients[fd].get_connection_close())
+                close(fd);
         }
         else{
             _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
