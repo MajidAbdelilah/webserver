@@ -127,12 +127,81 @@ int DELETE(client &client_class, std::map<std::string, std::string> &req_map)
 }
 
 
-int POST(Parsed_request_and_body &result, std::string &req)
+int POST(client &client_class, std::map<std::string, std::string> &req_map)
 {
-	(void)result;
+	std::string req = client_class.get_request();
 	std::cout << "\n\n\nPOST REQUEST START \n\n";
 	std::cout << req << std::endl;
 	std::cout << "\nPOST REQUEST END\n";
+
+	std::string line = get_line(req);
+	std::cout << line << std::endl;
+	if (parse_initial_line(line, req_map) == -1)
+	{
+		std::cout << ("Error parsing initial line\n");
+		return 400;
+	}
+	if(req_map["Method"] != "POST" || req_map.find("Method") == req_map.end())
+	{
+		std::cout << ("Method is not POST\n");
+		return 400;
+	}
+	if(req_map.find("URI") == req_map.end())
+	{
+		std::cout << ("URI not found\n");
+		return 400;
+	}
+	if(req_map["Version"] != "HTTP/1.1" || req_map.find("Version") == req_map.end())
+	{
+		std::cout << ("Version is not HTTP/1.1\n");
+		return 400;
+	}
+
+	while (line != "")
+	{
+		line = get_line(req);
+		std::cout << line << std::endl;
+		parse_headers(line, req_map);
+	}
+
+	if(req_map.find("Host") == req_map.end())
+	{
+		std::cout << ("Host header not found\n");
+		return 400;
+	}
+
+	if(req_map["Host"] != http_hostname_macro && req_map["Host"] != http_localhost_macro)
+	{
+		std::cout << ("Host header is not correct\n");
+		return 400;
+	}
+
+	if(req_map["URI"] == "/")
+		req_map["URI"] = "/index.html";
+
+	std::string uri = req_map["URI"][0] == '/' ? req_map["URI"].substr(1) : req_map["URI"];
+	while(uri.find("%20") != std::string::npos)
+	{
+		uri.replace(uri.find("%20"), 3, " ");
+	}
+
+	std::cout << "URI: " << uri << std::endl;
+
+	std::string content = req.substr(req.find("\r\n\r\n") + 4);
+	std::cout << content << std::endl;
+
+	std::ofstream file;
+	file.open(uri, std::ios_base::binary);
+	if (!file.is_open())
+	{
+		std::cout << ("Error opening file\n");
+		return 500;
+	}
+
+	file << content;
+	file.close();
+
+
 	return -100;
 }
 
@@ -302,6 +371,7 @@ int handle_request(client &client_class)
 		}
 		else if(req_map["Method"] == "DELETE")
 		{
+			std::cout << ("DELETE request found\n");
 			int status = DELETE(client_class, req_map);
 			if(status == 200)
 			{
@@ -320,7 +390,8 @@ int handle_request(client &client_class)
 		else if (req_map["Method"] == "POST")
 		{
 			std::cout << ("POST request found\n");
-			// return POST(result, req);
+			int status = POST(client_class, req_map);
+			return status;
 		}
 		else
 		{
