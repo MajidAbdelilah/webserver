@@ -2,6 +2,7 @@
 #include "http_req.hpp"
 #include <iostream>
 #include <string>
+#include <sys/socket.h>
 #include <utility>
 #include "client.hpp"
 
@@ -82,16 +83,33 @@ void Server::close_remove_event(int socket_fd, int &kqueue){
 
 int Server::handle_write_request(struct kevent &events, int kq) {
     int fd = events.ident;
+    if (_Clients[fd].get_response_header() == ""){
+        std::string res;
+        std::getline(_Clients[fd].get_file(), res);
+        _Clients[fd].set_response(res);
+    }
     int length = _Clients[fd].get_response().size();
-    std::cout << "this is the response  :" << _Clients[fd].get_response() << std::endl;
-    std::cout << "--------------\n";
+    std::cout << "-----------------RESPONSE-------------------\n";
+    std::cout << _Clients[fd].get_response() << std::endl;
+    std::cout << "-----------------END-------------------\n";
+
     int size = send(fd, _Clients[fd].get_response().c_str(), length, 0);
 
     if (size < 0)
         return (1);
     if (size >= 0) {
-        if (size == _Clients[events.ident].get_response().size()){
-            _Clients[events.ident].set_response("");
+        if (_Clients[fd].get_response_header() != ""){
+            if (_Clients[fd].get_response_header().size() == size){
+                _Clients[fd].set_response_header("");
+            }
+            else {
+                _Clients[fd].set_response_header(_Clients[fd].get_response_header().substr(size));
+                return 0;
+            }
+        }
+        else if (_Clients[fd].get_response_header() == "" && _Clients[fd].is_ifstream_empty()){
+            std::cout << "checking if the file is empty && kevent is registred\n";
+            _Clients[fd].set_response("");
             struct kevent change;
             EV_SET(&change, events.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
             kevent(kq, &change, 1, NULL, 0 , NULL);
@@ -111,6 +129,13 @@ int Server::getting_req(int kernel_q, int client_soc){
 
     (void)kernel_q;
     char s[4096]={0};
+    if (_Clients[client_soc].get_request().size() > 0){
+
+        std::string tmp = _Clients[client_soc].get_request();
+        std::string tmp2 = s;
+        tmp2.append(tmp);
+        _Clients[client_soc].set_request(tmp2);
+    }
 
     int _bytesread = recv(client_soc, s, 4095, 0);
 

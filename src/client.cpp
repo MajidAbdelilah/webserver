@@ -71,6 +71,9 @@ void client::set_requestvalid(bool valid){
 	this->requestvalid = valid;
 }
 
+void client::set_response_header(std::string header){
+    this->response_header = header;
+}
 
 std::ifstream &client::get_file(){
 	return (this->file);
@@ -86,6 +89,12 @@ std::string &client::get_response(){
 
 int client::get_status_code(){
     return (this->status_code);
+}
+
+std::streampos client::get_ifstream_size() {
+    std::streampos size = file.seekg(0, std::ios::end).tellg();  // Seek to end and get position
+    file.seekg(0, std::ios::beg);  // Return to the beginning of the file
+    return size;
 }
 
 void client::set_request(std::string req){
@@ -261,8 +270,87 @@ std::string client::get_status_message(){
     return (this->status_message);
 }
 
-void client::set_status_message(std::string message){
-    this->status_message = message;
+void client::set_status_message(int status_code){
+    switch (status_code) {
+        case 200:
+            this->status_message = "OK";
+            break;
+        case 201:
+            this->status_message = "Created";
+            break;
+        case 202:
+            this->status_message = "Accepted";
+            break;
+        case 204:
+            this->status_message = "No Content";
+            break;
+        case 301:
+            this->status_message = "Moved Permanently";
+            break;
+        case 302:
+            this->status_message = "Found";
+            break;
+        case 303:
+            this->status_message = "See Other";
+            break;
+        case 304:
+            this->status_message = "Not Modified";
+            break;
+        case 400:
+            this->status_message = "Bad Request";
+            break;
+        case 401:
+            this->status_message = "Unauthorized";
+            break;
+        case 403:
+            this->status_message = "Forbidden";
+            break;
+        case 404:
+            this->status_message = "Not Found";
+            break;
+        case 405:
+            this->status_message = "Method Not Allowed";
+            break;
+        case 406:
+            this->status_message = "Not Acceptable";
+            break;
+        case 408:
+            this->status_message = "Request Timeout";
+            break;
+        case 409:
+            this->status_message = "Conflict";
+            break;
+        case 411:
+            this->status_message = "Length Required";
+            break;
+        case 413:
+            this->status_message = "Payload Too Large";
+            break;
+        case 414:
+            this->status_message = "URI Too Long";
+            break;
+        case 415:
+            this->status_message = "Unsupported Media Type";
+            break;
+        case 500:
+            this->status_message = "Internal Server Error";
+            break;
+        case 501:
+            this->status_message = "Not Implemented";
+            break;
+        case 502:
+            this->status_message = "Bad Gateway";
+            break;
+        case 503:
+            this->status_message = "Service Unavailable";
+            break;
+        case 505:
+            this->status_message = "HTTP Version Not Supported";
+            break;
+        default:
+            this->status_message = "Internal Server Error";
+            break;
+    }
 }
 
 std::string client::get_content_type(){
@@ -283,10 +371,21 @@ std::string client::tostring(long long num){
 }
 
 void client::build_response(){
-    _response = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
+    set_status_message(status_code); // setting the message
+    set_content_length(get_ifstream_size());
+    response_header = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
         + "Content-Type: " + content_type + CRLF\
-        + "Content-Length: " + tostring(content_length)+ CRLF+CRLF\
-        + response_body;
+        + "Content-Length: " + tostring(content_length)+ CRLF + CRLF;
+    // setting the header
+    _response = response_header;
+}
+
+bool client::is_ifstream_empty(){
+        return (file.peek() == std::ifstream::traits_type::eof()); // check if the file is empty
+}
+
+std::string client::get_response_header(){
+    return (response_header);
 }
 
 bool client::is_chunked(){

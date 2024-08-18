@@ -236,7 +236,6 @@ int GET(client &client_class, std::map<std::string, std::string> &req_map)
 
 int handle_request(client &client_class)
 {
-	std::cout << "T-----------------EST\n";;
 	if(client_class.get_request().size() == 0)
 	{
 		std::cout << ("No request to handle\n");

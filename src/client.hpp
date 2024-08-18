@@ -13,13 +13,15 @@
 
 class client {
     private:
-		    std::ifstream file;
+        std::ifstream file;
         int _socketfd; // socket file descriptor
         std::string body; // body of the request
         std::string header; // header of the request
         std::string _request; // request to be parsed
         std::string _response; // response to be sent
 
+
+        std::string response_header; // header of the response
         std::string response_body; // body of the response
 
         int status_code; // 200, 404, 500 etc
@@ -51,8 +53,8 @@ class client {
         void set_request(std::string );
         void set_response(std::string );
         std::ifstream &get_file();
-		    client &operator=(const client &);
-    		void set_file(std::ifstream &);
+        client &operator=(const client &);
+        void set_file(std::ifstream &);
         void set_status_code(int);
         void set_socketfd(int);
         int get_socketfd();
@@ -84,6 +86,8 @@ class client {
         std::string get_path();
         std::string get_query();
         std::string get_fragment();
+        std::string get_response_header();
+        std::streampos get_ifstream_size();
         bool is_chunked();
         void set_chunked(bool);
         void set_requestvalid(bool);
@@ -92,10 +96,12 @@ class client {
         long long get_content_length();
         void set_content_type(std::string);
         std::string get_content_type();
-        void set_status_message(std::string);
+        void set_status_message(int);
         std::string get_status_message();
         void build_response();
         std::string tostring(long long);
+        bool is_ifstream_empty();
+        void set_response_header(std::string);
         void clear_method();
         void clear_uri();
         void clear_version();
