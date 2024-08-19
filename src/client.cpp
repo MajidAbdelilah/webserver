@@ -4,6 +4,7 @@
 
 
 client::client(int fd) : _socketfd(fd){
+	_filename = "";
     this->header_done = false;
     this->body_done = false;
     this->request_done = false;
@@ -75,9 +76,6 @@ void client::set_response_header(std::string header){
     this->response_header = header;
 }
 
-std::ifstream &client::get_file(){
-	return (this->file);
-}
 
 std::string &client::get_request(){
     return (this->_request);
@@ -90,7 +88,9 @@ std::string &client::get_response(){
 int client::get_status_code(){
     return (this->status_code);
 }
-
+void client::set_filename(std::string filename){
+	_filename = filename;
+}
 std::streampos client::get_ifstream_size() {
     std::streampos size = file.seekg(0, std::ios::end).tellg();  // Seek to end and get position
     file.seekg(0, std::ios::beg);  // Return to the beginning of the file

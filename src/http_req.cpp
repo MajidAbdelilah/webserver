@@ -199,12 +199,12 @@ int GET(client &client_class, std::map<std::string, std::string> &req_map)
 	}
 	std::cout << "URI: " << uri << std::endl;
 
-	client_class.get_file().open(uri, std::ios_base::binary);
-	if (!client_class.get_file().is_open())
-	{
-		std::cout << ("File not found\n");
-		return 404;
-	}
+	client_class.set_filename(uri);
+	// if (!client_class.get_file().is_open())
+	// {
+	// 	std::cout << ("File not found\n");
+	// 	return 404;
+	// }
 
 	// std::cout << content << std::endl;
 

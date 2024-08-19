@@ -1,6 +1,7 @@
 #include "server.hpp"
 
 #include <fstream>
+#include <string>
 
 
 #ifndef CLIENT_HPP
@@ -13,7 +14,8 @@
 
 class client {
     private:
-        std::ifstream file;
+        // std::ifstream file;
+		std::string _filename;
         int _socketfd; // socket file descriptor
         std::string body; // body of the request
         std::string header; // header of the request
@@ -52,9 +54,9 @@ class client {
         int get_status_code();
         void set_request(std::string );
         void set_response(std::string );
-        std::ifstream &get_file();
         client &operator=(const client &);
         void set_file(std::ifstream &);
+		void set_filename(std::string);
         void set_status_code(int);
         void set_socketfd(int);
         int get_socketfd();
