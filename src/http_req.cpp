@@ -144,9 +144,9 @@ int POST(Parsed_request_and_body &result, std::string &req)
 int GET(client &client_class, std::map<std::string, std::string> &req_map)
 {
 	std::string req = client_class.get_request();
-	std::cout << "\n\n\nGET REQUEST START \n\n";
-	std::cout << req << std::endl;
-	std::cout << "\nGET REQUEST END\n";
+	// std::cout << "\n\n\nGET REQUEST START \n\n";
+	// std::cout << req << std::endl;
+	// std::cout << "\nGET REQUEST END\n";
 
 	std::string line = get_line(req);
 	std::cout << line << std::endl;
@@ -244,9 +244,9 @@ int handle_request(client &client_class)
 	if(request_queue.find(client_class.get_socketfd()) == request_queue.end())
 	{
 		std::string req = client_class.get_request();
-		std::cout << "\n\n\nREQUEST START \n\n";
-		std::cout << req << std::endl;
-		std::cout << "\nREQUEST END\n";
+		// std::cout << "\n\n\nREQUEST START \n\n";
+		// std::cout << req << std::endl;
+		// std::cout << "\nREQUEST END\n";
 		if(req.find("\r\n\r\n") == std::string::npos)
 		{
 			std::cout << ("Request not complete\n");

@@ -17,6 +17,8 @@ client::client(int fd) : _socketfd(fd){
     this->chunked = false;
     this->requestvalid = false;
     this->connection_close = false;
+    this->filefd = 0;
+    this->ifstream_empty = false;
 
 }
 
@@ -33,7 +35,9 @@ client::client(){
     this->chunked = false;
     this->requestvalid = false;
     this->connection_close = false;
-
+    this->filefd = 0;
+    this->ifstream_empty = false;
+    
 }
 
 client::~client(){
@@ -91,11 +95,6 @@ int client::get_status_code(){
 void client::set_filename(std::string filename){
 	_filename = filename;
 }
-std::streampos client::get_ifstream_size() {
-    std::streampos size = file.seekg(0, std::ios::end).tellg();  // Seek to end and get position
-    file.seekg(0, std::ios::beg);  // Return to the beginning of the file
-    return size;
-}
 
 void client::set_request(std::string req){
     this->_request.append(req);
@@ -103,7 +102,6 @@ void client::set_request(std::string req){
 
 
 void client::set_response(std::string res){
-
     this->_response = res;
 }
 
@@ -370,30 +368,48 @@ std::string client::tostring(long long num){
     return (result);
 }
 
+
+
 void client::build_response(){
     set_status_message(status_code); // setting the message
-    set_content_length(get_ifstream_size());
+    if (_filename != ""){
+        filefd = open(_filename.c_str(), O_RDONLY);
+        if (filefd < 0)
+            perror("open");
+    }
+    if (-1 ==fstat(filefd, &filestat)){
+        perror("fstat");
+        return ;
+    }
+    set_content_length(filestat.st_size);
+    long long length = get_content_length();
     response_header = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
         + "Content-Type: " + content_type + CRLF\
-        + "Content-Length: " + tostring(content_length)+ CRLF + CRLF;
+        + "Content-Length: " + tostring(length)+ CRLF \
+        + (!connection_close ? "Connection: keep-alive" : "Connection: close" ) + CRLF + CRLF;
     // setting the header
     _response = response_header;
-    if (!is_ifstream_empty()){
-        std::string toappend;
-        std::getline(file, toappend); // get one line to append to the header
-        // std::cout << "getline result : " << toappend << '\n';
-        _response.append(toappend, 0, toappend.size());
+    if (_filename != ""){
+        char buffer[1024];
+        int bytes_read = read(filefd, buffer, 1024);
+        if (bytes_read < 0){
+            perror("read");
+        }
+        _response.append(buffer, bytes_read);
     }
+    ifstream_empty = false;
     clear_request();
+    clear_header();
+    clear_body();
     request_done = false;
     header_done = false;
     body_done = false;
     requestvalid = false;
 }
 
-bool client::is_ifstream_empty(){
-        return (file.peek() == std::ifstream::traits_type::eof()); // check if the file is empty
-}
+// bool client::is_ifstream_empty(){
+//         return (file.peek() == std::ifstream::traits_type::eof()); // check if the file is empty
+// }
 
 std::string client::get_response_header(){
     return (response_header);
@@ -457,4 +473,40 @@ void client::clear_all(){
     this->clear_path();
     this->clear_query();
     this->clear_fragment();
+    this->clear_body();
+    this->clear_header();
+    this->set_requestvalid(false);
+    this->set_content_length(0);
+    this->set_content_type("");
+    this->set_status_message(0);
+    this->set_chunked(false);
+    this->set_connection_close(false);
+    this->set_response_header("");
+    this->set_ifstreamempty(false);
+    if (filefd > 0){
+        close(filefd);
+    }
+    filefd = 0;
+}
+
+
+void client::set_filefd(int fd){
+    this->filefd = fd;
+}
+
+int client::get_filefd(){
+    return (this->filefd);
+}
+
+
+std::string client::get_filename(){
+    return (_filename);
+}
+
+bool client::get_ifstreamempty(){
+    return (ifstream_empty);
+}
+
+void client::set_ifstreamempty(bool empty){
+    ifstream_empty = empty;
 }

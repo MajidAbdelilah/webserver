@@ -24,6 +24,7 @@ int Server::getsocketfd()const{
 // handle signal for interupting server 
 
 int Server::run(){
+    signal(SIGPIPE, SIG_IGN);
     int kernel_queue = kqueue();
     if (kernel_queue < 0)
         throw("Kq failure");
@@ -55,15 +56,20 @@ int Server::run(){
                 _Clients[client_socketfd] = client(client_socketfd);
             }
             else if (_Clients.find(events[i].ident) != _Clients.end()){
+                if (events[i].flags & EV_EOF){
+                    std::cout << "Client disconnected\n";
+                    close_remove_event(events[i].ident, kernel_queue);
+                }
+                else
                 if (events[i].filter == EVFILT_READ){
                     int r = getting_req(kernel_queue, events[i].ident); // parse request send to majid;
 					(void)r;
-                    // TODO ! method to check the request part in each socket fd 
                 }
-                if (events[i].filter == EVFILT_WRITE)
+                else if (events[i].filter == EVFILT_WRITE)
                 {
                     std::cout << "IT ENTERS WRITE FILTEEEEER \n";
                     Server::handle_write_request(events[i], kernel_queue);
+                    std::cout << "JUST SEND THE RESPONSE\n";
                     // TODO ! the socket is ready to be written on
                 }
 
@@ -74,9 +80,8 @@ int Server::run(){
 
 void Server::close_remove_event(int socket_fd, int &kqueue){
     struct kevent change;
-    EV_SET(&change, socket_fd, EVFILT_WRITE | EVFILT_READ , EV_DELETE,0, 0 , NULL);
+    EV_SET(&change, socket_fd, EVFILT_READ , EV_DELETE,0, 0 , NULL);
     kevent(kqueue, &change, 1, NULL, 0, NULL);
-    _Sockets_req.erase(socket_fd); // removing the client socket
     _Clients.erase(socket_fd);
     close(socket_fd);
 }
@@ -84,49 +89,65 @@ void Server::close_remove_event(int socket_fd, int &kqueue){
 int Server::handle_write_request(struct kevent &events, int kq) {
     int fd = events.ident;
     if (_Clients[fd].get_response_header() == ""){
-        std::string res;
-        std::getline(_Clients[fd].get_file(), res);
-        _Clients[fd].set_response(res);
+        int buffer = 5000;
+        char res[buffer + 1];
+        int byes = read(_Clients[fd].get_filefd(), res, buffer);
+        std::cout << "bytes read : " << byes << std::endl;
+        if (byes < 0){
+            perror("read");
+        }
+        if (byes == 0 || byes < buffer){
+            _Clients[fd].set_ifstreamempty(1);
+        }
+        _Clients[fd].set_response(_Clients[fd].get_response() + std::string(res, byes));
     }
+    
     int length = _Clients[fd].get_response().size();
     std::cout << "-----------------RESPONSE TYPE-------------------\n";
-    std::cout << _Clients[fd].get_content_type() << std::endl;
-    std::cout << _Clients[fd].get_content_length() << std::endl;
-    std::cout << _Clients[fd].get_response() << std::endl;
+    // std::cout << _Clients[fd].get_content_type() << std::endl;
+    // std::cout << _Clients[fd].get_content_length() << std::endl;
+    // std::cout << _Clients[fd].get_response() << std::endl;
     std::cout << "-----------------END-------------------\n";
 
     int size = send(fd, _Clients[fd].get_response().c_str(), length, 0);
-    if (size < 0)
+    std::cout << "data sent : " << size << std::endl;
+    if (size < 0){
+        perror("send");
         return (1);
+    }
     if (size >= 0) {
         if (_Clients[fd].get_response_header() != ""){
             if (_Clients[fd].get_response_header().size() == size){
                 _Clients[fd].set_response_header("");
+                _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
             }
             else {
                 if (_Clients[fd].get_response_header().size() < size){
                     _Clients[fd].set_response_header("");
-                    size -= _Clients[fd].get_response_header().size();
-                    _Clients[fd].set_content_length(_Clients[fd].get_content_length() - size);
+                    size = size - _Clients[fd].get_response_header().size();
+                    if (size >= _Clients[fd].get_response().size())
+                        _Clients[fd].set_response("");
+                    else
+                        _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
                     return 0;
                 }
-                else{
+                else if(_Clients[fd].get_response_header().size() > size){
+                    _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
                     _Clients[fd].set_response_header(_Clients[fd].get_response_header().substr(size));
-                    _Clients[fd].set_response(_Clients[fd].get_response_header());
                     return 0;
                 }
             }
         }
-        else if (_Clients[fd].get_response_header() == "" && _Clients[fd].is_ifstream_empty()){
+        else if (_Clients[fd].get_response_header() == "" && _Clients[fd].get_ifstreamempty()){
             std::cout << "checking if the file is empty && kevent is registred\n";
-            _Clients[fd].set_response("");
+            _Clients[fd].clear_all();
             struct kevent change;
-            EV_SET(&change, events.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+            EV_SET(&change, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
             kevent(kq, &change, 1, NULL, 0 , NULL);
-            EV_SET(&change, events.ident, EVFILT_READ, EV_ADD, 0, 0, NULL);
+            EV_SET(&change, fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
             kevent(kq, &change, 1, NULL, 0 , NULL);
             if (_Clients[fd].get_connection_close())
-                close(fd);
+                close_remove_event(fd, kq);
         }
         else{
             _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
@@ -169,11 +190,10 @@ int Server::getting_req(int kernel_q, int client_soc){
         // still needs to be fixed
         if (_Clients[client_soc].is_request_done()){
             struct kevent changes;
-            // EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-            // kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
+            EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+            kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             EV_SET(&changes, client_soc, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
-            // std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello World!";
 			handle_request(_Clients[client_soc]);
             _Clients[client_soc].build_response();
         }
@@ -213,7 +233,6 @@ void Server::check_header_body(int client_soc){
 
             }
             return ;
-         // to do later, trash the body
         }
         if (method == "POST"){
             std::string &body = _Client_header_body[client_soc].second;
