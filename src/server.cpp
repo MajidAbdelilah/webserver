@@ -103,11 +103,11 @@ int Server::handle_write_request(struct kevent &events, int kq) {
     }
     
     int length = _Clients[fd].get_response().size();
-    std::cout << "-----------------RESPONSE TYPE LENGTH-------------------\n";
+    // std::cout << "-----------------RESPONSE TYPE LENGTH-------------------\n";
     // std::cout << _Clients[fd].get_content_type() << std::endl;
     // std::cout << _Clients[fd].get_content_length() << std::endl;
     // std::cout << _Clients[fd].get_response() << std::endl;
-    std::cout << "-----------------END-------------------\n";
+    // std::cout << "-----------------END-------------------\n";
 
     int size = send(fd, _Clients[fd].get_response().c_str(), length, 0);
     std::cout << "data sent : " << size << std::endl;
@@ -140,6 +140,7 @@ int Server::handle_write_request(struct kevent &events, int kq) {
         }
         else if (_Clients[fd].get_response_header() == "" && _Clients[fd].get_ifstreamempty()){
             std::cout << "checking if the file is empty && kevent is registred\n";
+            std::cout << "Send the response\n";
             _Clients[fd].clear_all();
             struct kevent change;
             EV_SET(&change, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
@@ -234,23 +235,18 @@ void Server::check_header_body(int client_soc){
             return ;
         }
         if (method == "POST"){
-            std::string &body = _Client_header_body[client_soc].second;
-            std::string tmp = body;
-
-            int pos = tmp.find("\r\n\r\n");
-
-            if (pos != std::string::npos){
-                body_done = true;
-                std::string body = tmp.substr(0, pos + 4);
-                _Client_header_body[client_soc].second = body;
-                _Recv_request = _Client_header_body[client_soc].first + _Client_header_body[client_soc].second;
-            }
-            else{
-                body_done = false;
+            _Clients[client_soc].set_method("POST");
+            if (_Clients[client_soc].get_header().find("boundary=") != std::string::npos){
+                _Clients[client_soc].set_post_boundary(_Clients[client_soc].get_header().substr(_Clients[client_soc].get_header().find("boundary="),\
+                     _Clients[client_soc].get_header().find("\r\n") - _Clients[client_soc].get_header().find("boundary=")));
+                std::cout << "boundary found\n";
+                std::cout << _Clients[client_soc].get_post_boundary() << '\n';
+                return ;
             }
         }
-        else { 
-            request_done = true;
+        else {
+            // std::cout << "Method not allowed\n";
+            exit(0);
         }
     }
 }

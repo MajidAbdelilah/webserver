@@ -46,6 +46,7 @@ class client {
         bool chunked; // 1 if chunked 0 if not
         bool requestvalid; // 1 if request is valid 0 if not
         bool ifstream_empty; // 1 if ifstream is empty 0 if not
+        std::string post_boundary;
 
     public:
         client();
@@ -58,6 +59,8 @@ class client {
         void set_response(std::string );
         client &operator=(const client &);
 		void set_filename(std::string);
+        std::string get_post_boundary();
+        void set_post_boundary(std::string);
         std::string get_filename();
         void set_filefd(int);
         int get_filefd();

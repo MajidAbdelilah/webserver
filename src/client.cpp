@@ -243,6 +243,14 @@ std::string client::get_version(){
     return (this->version);
 }
 
+std::string client::get_post_boundary(){
+    return (this->post_boundary);
+}
+
+void client::set_post_boundary(std::string boundary){
+    this->post_boundary = boundary;
+}
+
 std::string client::get_host(){
     return (this->host);
 }
@@ -408,9 +416,6 @@ void client::build_response(){
     requestvalid = false;
 }
 
-// bool client::is_ifstream_empty(){
-//         return (file.peek() == std::ifstream::traits_type::eof()); // check if the file is empty
-// }
 
 std::string client::get_response_header(){
     return (response_header);
@@ -487,7 +492,7 @@ void client::clear_all(){
     if (filefd > 0){
         close(filefd);
     }
-    filefd = 0;
+    filefd = -2;
 }
 
 
