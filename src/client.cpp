@@ -371,17 +371,18 @@ std::string client::tostring(long long num){
 
 
 void client::build_response(){
-    set_status_message(status_code); // setting the message
     if (_filename != ""){
         filefd = open(_filename.c_str(), O_RDONLY);
-        if (filefd < 0)
-            perror("open");
+        if (filefd < 0){
+            filefd = -2;
+            set_status_code(404);
+        }
     }
-    if (-1 ==fstat(filefd, &filestat)){
+    if (filefd != -2 && -1 ==fstat(filefd, &filestat)){
         perror("fstat");
-        return ;
     }
     set_content_length(filestat.st_size);
+    set_status_message(status_code); // setting the message
     long long length = get_content_length();
     response_header = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
         + "Content-Type: " + content_type + CRLF\
@@ -389,7 +390,7 @@ void client::build_response(){
         + (!connection_close ? "Connection: keep-alive" : "Connection: close" ) + CRLF + CRLF;
     // setting the header
     _response = response_header;
-    if (_filename != ""){
+    if (_filename != "" && filefd > 0){
         char buffer[1024];
         int bytes_read = read(filefd, buffer, 1024);
         if (bytes_read < 0){

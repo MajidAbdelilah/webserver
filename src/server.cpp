@@ -70,7 +70,6 @@ int Server::run(){
                     std::cout << "IT ENTERS WRITE FILTEEEEER \n";
                     Server::handle_write_request(events[i], kernel_queue);
                     std::cout << "JUST SEND THE RESPONSE\n";
-                    // TODO ! the socket is ready to be written on
                 }
 
             }
@@ -95,6 +94,7 @@ int Server::handle_write_request(struct kevent &events, int kq) {
         std::cout << "bytes read : " << byes << std::endl;
         if (byes < 0){
             perror("read");
+            return (0);
         }
         if (byes == 0 || byes < buffer){
             _Clients[fd].set_ifstreamempty(1);
@@ -103,7 +103,7 @@ int Server::handle_write_request(struct kevent &events, int kq) {
     }
     
     int length = _Clients[fd].get_response().size();
-    std::cout << "-----------------RESPONSE TYPE-------------------\n";
+    std::cout << "-----------------RESPONSE TYPE LENGTH-------------------\n";
     // std::cout << _Clients[fd].get_content_type() << std::endl;
     // std::cout << _Clients[fd].get_content_length() << std::endl;
     // std::cout << _Clients[fd].get_response() << std::endl;
@@ -187,7 +187,6 @@ int Server::getting_req(int kernel_q, int client_soc){
 
         _Clients[client_soc].set_request(a);
         check_header_body(client_soc);
-        // still needs to be fixed
         if (_Clients[client_soc].is_request_done()){
             struct kevent changes;
             EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
