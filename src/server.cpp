@@ -114,7 +114,8 @@ int Server::handle_write_request(struct kevent &events, int kq) {
     int size = send(fd, _Clients[fd].get_response().c_str(), length, 0);
     std::cout << "data sent : " << size << std::endl;
     if (size < 0){
-        perror("send");
+        Server::register_read(fd, kq);
+        Server::close_remove_event(fd, kq);
         return (1);
     }
     if (size >= 0) {
@@ -180,11 +181,9 @@ int Server::getting_req(int kernel_q, int client_soc){
     int _bytesread = recv(client_soc, s, 4095, 0);
 
     if (_bytesread < 0){
-        std::cout << "bytesread < 0 either no more data , or err in recv\n";
-        std::cout << _Clients[client_soc].get_socketfd() << std::endl;
-        std::cout << "RESPONSE HEADER IN READ ZONE\n";
-        std::cout << _Clients[client_soc].get_request() << std::endl;
-        return -1;
+        std::cout << "Recv returned -1 removing client fd number : " <<_Clients[client_soc].get_socketfd() << '\n';
+        Server::close_remove_event(client_soc, kernel_q);
+        return (-1);
     }
     else if (_bytesread == 0){
         std::cout << "received 0 bytes, closing connection\n";

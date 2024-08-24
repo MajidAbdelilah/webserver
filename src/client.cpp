@@ -416,7 +416,7 @@ void client::build_response(){
     response_header = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
         + "Content-Type: " + content_type + CRLF\
         + "Content-Length: " + tostring(length)+ CRLF \
-        + (!connection_close ? "Connection: keep-alive" : "Connection: close" ) + CRLF + CRLF;
+        + (!connection_close ? "Connection: keep-alive\r\nKeep-Alive: timeout=10, max=20" : "Connection: close" ) + CRLF + CRLF;
     // setting the header
     _response = response_header;
     if (_filename != "" && filefd > 0){
