@@ -231,6 +231,7 @@ void Server::check_header_body(int client_soc){
     }
     if (_Clients[client_soc].is_header_done())
     {
+		std::cout << "here\n";
         if (_Clients[client_soc].get_method() != ""){
             std::cout << "test\n";
             // reading body part of post request // majid post request/ body parsing and opening file and putting data in it 

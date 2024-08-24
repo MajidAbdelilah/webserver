@@ -58,6 +58,7 @@ client::client(){
     this->postfileboundary = "";
     this->postfileboundaryend = "";
     this->post_boundary = "";
+	this->post_body_header_parsed = false;
     
 }
 

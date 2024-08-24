@@ -4,7 +4,6 @@
 #include <string>
 
 
-std::map<int, request_queue_element> request_queue;
 
 std::string get_line(std::string &req)
 {
@@ -127,10 +126,12 @@ int DELETE(client &client_class, std::map<std::string, std::string> &req_map)
 }
 
 
-int POST(client &client_class, std::map<std::string, std::string> &req_map)
+int POST_body();
+
+int POST_header(client &client_class, std::map<std::string, std::string> &req_map)
 {
 	std::string req = client_class.get_request();
-	std::cout << "\n\n\nPOST REQUEST START \n\n";
+	std::cout << "\nPOST REQUEST START \n";
 	std::cout << req << std::endl;
 	std::cout << "\nPOST REQUEST END\n";
 
@@ -176,6 +177,10 @@ int POST(client &client_class, std::map<std::string, std::string> &req_map)
 		return 400;
 	}
 
+	req_map["Content-Type"].find("multipart/form-data") != std::string::npos ? 
+																client_class.set_post_boundary(req_map["Content-Type"].substr(req_map["Content-Type"].find("boundary=") + 9)) : 
+																client_class.set_post_boundary("");
+	std::cout << client_class.get_post_boundary() << std::endl;
 	if(req_map["URI"] == "/")
 		req_map["URI"] = "/index.html";
 
@@ -186,20 +191,21 @@ int POST(client &client_class, std::map<std::string, std::string> &req_map)
 	}
 
 	std::cout << "URI: " << uri << std::endl;
+	// std::cout << req << std::endl; 
 
-	std::string content = req.substr(req.find("\r\n\r\n") + 4);
-	std::cout << content << std::endl;
+	// std::string content = req.substr(req.find("\r\n\r\n") + 4);
+	// std::cout << content << std::endl;
 
-	std::ofstream file;
-	file.open(uri, std::ios_base::binary);
-	if (!file.is_open())
-	{
-		std::cout << ("Error opening file\n");
-		return 500;
-	}
+	// std::ofstream file;
+	// file.open(uri, std::ios_base::binary);
+	// if (!file.is_open())
+	// {
+	// 	std::cout << ("Error opening file\n");
+	// 	return 500;
+	// }
 
-	file << content;
-	file.close();
+	// file << content;
+	// file.close();
 
 
 	return -100;
@@ -301,101 +307,96 @@ int handle_request(client &client_class)
 		std::cout << ("No request to handle\n");
 		return 500;
 	}
-	if(request_queue.find(client_class.get_socketfd()) == request_queue.end())
-	{
-		std::string req = client_class.get_request();
-		std::cout << "\n\n\nREQUEST START \n\n";
-		std::cout << req << std::endl;
-		std::cout << "\nREQUEST END\n";
-		if(req.find("\r\n\r\n") == std::string::npos)
-		{
-			std::cout << ("Request not complete\n");
-			return 400;
-		}
-		std::string line;
-		size_t pos = req.find("\r\n");
-		if (pos != std::string::npos)
-		{
-			line = req.substr(0, pos);
-		}
-		std::cout << line << std::endl;
-		std::map<std::string, std::string> req_map;
-		if (parse_initial_line(line, req_map) == -1)
-		{
-			std::cout << ("Error parsing initial line\n");
-			return 400;
-		}	
-		if(req_map.find("Method") == req_map.end())
-		{
-			std::cout << ("Method not found\n");
-			return 400;
-		}	
-		if(req_map.find("URI") == req_map.end())
-		{
-			std::cout << ("URI not found\n");
-			return 400;
-		}	
-		if(req_map.find("Version") == req_map.end())
-		{
-			std::cout << ("Version not found\n");
-			return 400;
-		}	
-		if(req_map["Version"] != "HTTP/1.1")
-		{
-			std::cout << ("Version not supported\n");
-			return 505;
-		}
-		if(req_map["Method"] == "GET")
-		{
-			std::cout << ("GET request found\n");
-			int status =  GET(client_class, req_map);
-			if(status == 200)
-			{
-				client_class.set_status_code(int(status));
-				client_class.set_connection_close(req_map["Connection"] == "keep-alive" ? 0 : 1);
-				client_class.set_method(req_map["Method"]);
-				client_class.set_uri(req_map["URI"]);
-				client_class.set_version(req_map["Version"]);
-				client_class.set_host(req_map["Host"].substr(0, req_map["Host"].find(":")));
-				client_class.set_port(req_map["Host"].substr(req_map["Host"].find(":") + 1));
-				client_class.set_path(req_map["URI"].substr(0, req_map["URI"].find("?")));
-			}
-			client_class.set_requestvalid(bool(status == 200 || status == 404));
-			return status;
 
-		}
-		else if(req_map["Method"] == "DELETE")
+	std::string req = client_class.get_request();
+	std::cout << "\n\n\nREQUEST START \n\n";
+	std::cout << req << std::endl;
+	std::cout << "\nREQUEST END\n";
+	if(req.find("\r\n\r\n") == std::string::npos)
+	{
+		std::cout << ("Request not complete\n");
+		return 400;
+	}
+	std::string line;
+	size_t pos = req.find("\r\n");
+	if (pos != std::string::npos)
+	{
+		line = req.substr(0, pos);
+	}
+	std::cout << line << std::endl;
+	std::map<std::string, std::string> req_map;
+	if (parse_initial_line(line, req_map) == -1)
+	{
+		std::cout << ("Error parsing initial line\n");
+		return 400;
+	}	
+	if(req_map.find("Method") == req_map.end())
+	{
+		std::cout << ("Method not found\n");
+		return 400;
+	}	
+	if(req_map.find("URI") == req_map.end())
+	{
+		std::cout << ("URI not found\n");
+		return 400;
+	}	
+	if(req_map.find("Version") == req_map.end())
+	{
+		std::cout << ("Version not found\n");
+		return 400;
+	}	
+	if(req_map["Version"] != "HTTP/1.1")
+	{
+		std::cout << ("Version not supported\n");
+		return 505;
+	}
+	if(req_map["Method"] == "GET")
+	{
+		std::cout << ("GET request found\n");
+		int status =  GET(client_class, req_map);
+		if(status == 200)
 		{
-			std::cout << ("DELETE request found\n");
-			int status = DELETE(client_class, req_map);
-			if(status == 200)
-			{
-				client_class.set_status_code(int(status));
-				client_class.set_connection_close(req_map["Connection"] == "keep-alive" ? 0 : 1);
-				client_class.set_method(req_map["Method"]);
-				client_class.set_uri(req_map["URI"]);
-				client_class.set_version(req_map["Version"]);
-				client_class.set_host(req_map["Host"].substr(0, req_map["Host"].find(":")));
-				client_class.set_port(req_map["Host"].substr(req_map["Host"].find(":") + 1));
-				client_class.set_path(req_map["URI"].substr(0, req_map["URI"].find("?")));
-			}
-			client_class.set_requestvalid(bool(status == 200 || status == 404));
-			return status;
+			client_class.set_status_code(int(status));
+			client_class.set_connection_close(req_map["Connection"] == "keep-alive" ? 0 : 1);
+			client_class.set_method(req_map["Method"]);
+			client_class.set_uri(req_map["URI"]);
+			client_class.set_version(req_map["Version"]);
+			client_class.set_host(req_map["Host"].substr(0, req_map["Host"].find(":")));
+			client_class.set_port(req_map["Host"].substr(req_map["Host"].find(":") + 1));
+			client_class.set_path(req_map["URI"].substr(0, req_map["URI"].find("?")));
 		}
-		else if (req_map["Method"] == "POST")
+		client_class.set_requestvalid(bool(status == 200 || status == 404));
+		return status;
+
+	}
+	else if(req_map["Method"] == "DELETE")
+	{
+		std::cout << ("DELETE request found\n");
+		int status = DELETE(client_class, req_map);
+		if(status == 200)
 		{
-			std::cout << ("POST request found\n");
-			// int status = POST(client_class, req_map);
-			return 200;
+			client_class.set_status_code(int(status));
+			client_class.set_connection_close(req_map["Connection"] == "keep-alive" ? 0 : 1);
+			client_class.set_method(req_map["Method"]);
+			client_class.set_uri(req_map["URI"]);
+			client_class.set_version(req_map["Version"]);
+			client_class.set_host(req_map["Host"].substr(0, req_map["Host"].find(":")));
+			client_class.set_port(req_map["Host"].substr(req_map["Host"].find(":") + 1));
+			client_class.set_path(req_map["URI"].substr(0, req_map["URI"].find("?")));
 		}
-		else
-		{
-			std::cout << ("Method not supported\n");
-			return 405;
-		}
-		return 500;
-	}else {
-		std::cout << ("Request found in request queue\n");
+		client_class.set_requestvalid(bool(status == 200 || status == 404));
+		return status;
+	}
+	else if (req_map["Method"] == "POST")
+	{
+		std::cout << ("POST request found\n");
+		int status = POST_header(client_class, req_map);
+		return status;
+	}
+	else
+	{
+		std::cout << ("Method not supported\n");
+		return 405;
 	}
 	return 500;
 }

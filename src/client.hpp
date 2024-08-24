@@ -59,6 +59,7 @@ class client {
         bool encoding_length_conflict;
         long long postfilelength;
         bool post_request_parsed;
+		bool post_body_header_parsed;
     public:
         client();
         client(int fd);
