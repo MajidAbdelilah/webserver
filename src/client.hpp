@@ -48,7 +48,7 @@ class client {
         bool requestvalid; // 1 if request is valid 0 if not
         bool ifstream_empty; // 1 if ifstream is empty 0 if not
         std::string post_boundary;
-
+        bool whole_response_sent; // 1 if whole response is sent 0 if not
         int postfd;
         std::string postfilename;
         std::string postfiletype;

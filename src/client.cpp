@@ -400,7 +400,7 @@ std::string client::tostring(long long num){
 
 
 void client::build_response(){
-    if (_filename != "" && !status_code){
+    if (_filename != ""){
         filefd = open(_filename.c_str(), O_RDONLY);
         if (filefd < 0){
             filefd = -2;
@@ -595,6 +595,18 @@ void client::clear_all(){
         close(filefd);
     }
     filefd = -2;
+    if (postfd > 0){
+        close(postfd);
+    }
+    postfd = -2;
+    postfilelength = 0;
+    postfilename.clear();
+    postfiletype.clear();
+    postfiledata.clear();
+    postfileboundary.clear();
+    postfileboundaryend.clear();
+    post_boundary.clear();
+    content_length_valid = 0;
 }
 
 
