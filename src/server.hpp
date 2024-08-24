@@ -16,6 +16,15 @@
 #include <netdb.h>
 #include <fcntl.h>
 
+#define BLK "\e[0;30m"
+#define RED "\e[0;31m"
+#define GRN "\e[0;32m"
+#define YEL "\e[0;33m"
+#define BLU "\e[0;34m"
+#define MAG "\e[0;35m"
+#define CYN "\e[0;36m"
+#define WHT "\e[0;37m"
+
 #define PORT 8080
 #define BUFFER_SIZE 30000
 #define MAX_EVENTS 1000
@@ -36,19 +45,9 @@ class Server {
         std::string _Recv_request; // request send lmajid
         std::vector < int > _Socketsfd; // save the fd's
         std::vector < sockaddr_in > _Addresses;
-        std::vector < int > _Clien_sock;
-        std::map < int , std::string > _Sockets_req;
-        std::map < int , Parsed_request_and_body > socket_response;
-        std::map < int , std::string > socket_header;
         //redone the request part
-        bool header_done;
-        bool body_done;
-        bool request_done;
-        int status_code;
-        std::map < int , std::pair < std::string , std::string > > _Client_header_body; //first is header, second is body
-        std::map < int , std::pair<int , std::string > > _Client_full_request;
         // will create a class for each client to handle the request and response
-        std::map < int , client > _Clients;
+        std::map < int , client > _Clients; // major client classes
 
     public:
         Server(int , int , int , int , u_int32_t , int, std::vector < std::pair < std::string , std::string  > > &);
@@ -61,6 +60,7 @@ class Server {
         void close_remove_event(int , int &);
         int handle_write_request(struct kevent&, int);
         void check_header_body(int);
+        void register_read(int fd, int kq);
 };
 
 #endif
