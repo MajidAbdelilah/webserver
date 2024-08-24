@@ -14,7 +14,7 @@ Server::Server(int domain, int type, int protocol, int port, u_int32_t interface
     this->_port = port; 
     this->_interface = interface;
     this->_backlog = backlog;
-    std::cout << "Server constructor called " << std::endl;
+    std::cout << GRN "SERVER CREATED" WHT<< std::endl;
 }
 
 int Server::getsocketfd()const{
@@ -49,13 +49,15 @@ int Server::run(){
                     throw("Client fd accept error"); // accepting client connection
                 if(-1 == fcntl(client_socketfd, F_SETFL, O_NONBLOCK))
                     throw("error fcntl client socket");
-                std::cout << "--------------------- Client socket fd: " << client_socketfd << " -------------------" <<'\n';
+                std::cout << GRN "Client connected fd number : " WHT << client_socketfd << '\n'; 
+                // std::cout << "--------------------- Client socket fd: " << client_socketfd << " -------------------" <<'\n';
                 EV_SET(&events[i], client_socketfd, EVFILT_READ, EV_ADD, 0, 0, NULL); //need to set the read event
                 kevent(kernel_queue, &events[i], 1, NULL, 0, NULL);
                 _Clients[client_socketfd] = client(client_socketfd);
             }
             else if (_Clients.find(events[i].ident) != _Clients.end()){
                  if (events[i].filter == EVFILT_READ){
+                    std::cout << GRN "Reading request from client fd number : " << events[i].ident << WHT << '\n';
                     int r = getting_req(kernel_queue, events[i].ident); // parse request send to majid;
 					(void)r;
                 }
@@ -63,10 +65,9 @@ int Server::run(){
                 {
                     std::cout << "IT ENTERS WRITE FILTEEEEER \n";
                     Server::handle_write_request(events[i], kernel_queue);
-                    std::cout << "JUST SEND THE RESPONSE\n";
                 }
                 if (events[i].flags & EV_EOF){
-                    std::cout << "Client disconnected\n";
+                    std::cout << RED "Client disconnected\n" WHT;
                     close_remove_event(events[i].ident, kernel_queue);
                 }
             }
@@ -143,12 +144,11 @@ int Server::handle_write_request(struct kevent &events, int kq) {
         }
         else if (_Clients[fd].get_response_header() == "" && _Clients[fd].get_ifstreamempty()){
             std::cout << "checking if the file is empty && kevent is registred\n";
-            std::cout << "Send the response\n";
             int s = _Clients[fd].get_connection_close();
             _Clients[fd].clear_all();
             Server::register_read(fd, kq);
             if (s){
-                std::cout << "CLosed  fd number : " << fd << std::endl;
+                std::cout << RED "Closed fd number : " << fd <<  WHT << '\n';
                 close_remove_event(fd, kq);
             }
         }
