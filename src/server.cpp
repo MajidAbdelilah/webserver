@@ -39,7 +39,7 @@ int Server::run(){
     int count =0;
     while (1){
         struct kevent events[MAX_EVENTS];
-        count = kevent(kernel_queue, NULL, 0, events, MAX_EVENTS, &timeout);
+        count = kevent(kernel_queue, NULL, 0, events, MAX_EVENTS, NULL);
         if (count == -1)
             throw("kevent error");
         for (int i = 0 ; i < count; i++){
@@ -247,7 +247,7 @@ void Server::check_header_body(int client_soc){
         }
         _Clients[client_soc].set_request(_Clients[client_soc].get_header());
         _Clients[client_soc].set_method(method);
-        if (method != "POST" || method != "GET" || method != "GET"){
+        if (method != "POST" || method != "GET" || method != "DELETE"){
             _Clients[client_soc].set_status_code(405);
             _Clients[client_soc].set_request_done(true);
         }
