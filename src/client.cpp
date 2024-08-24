@@ -1,7 +1,10 @@
 #include "client.hpp"
 #include <string>
+#include <sstream>
+
 
 client::client(int fd) : _socketfd(fd){
+	_filename = "";
     this->header_done = false;
     this->body_done = false;
     this->request_done = false;
@@ -10,6 +13,13 @@ client::client(int fd) : _socketfd(fd){
     this->header = "";
     this->_request = "";
     this->_response = "";
+    this->content_length = 0;
+    this->chunked = false;
+    this->requestvalid = false;
+    this->connection_close = false;
+    this->filefd = 0;
+    this->ifstream_empty = false;
+
 }
 
 client::client(){
@@ -21,11 +31,19 @@ client::client(){
     this->header = "";
     this->_request = "";
     this->_response = "";
+    this->content_length = 0;
+    this->chunked = false;
+    this->requestvalid = false;
+    this->connection_close = false;
+    this->filefd = 0;
+    this->ifstream_empty = false;
+    
 }
 
 client::~client(){
     this->clear_all();
 }
+
 
 // IMPORTANT NOTE: this DOES NOT copy the ifstream file
 client &client::operator=(const client &rhs){
@@ -58,10 +76,11 @@ void client::set_requestvalid(bool valid){
 	this->requestvalid = valid;
 }
 
-
-std::ifstream &client::get_file(){
-	return (this->file);
+void client::set_response_header(std::string header){
+    this->response_header = header;
 }
+
+
 std::string &client::get_request(){
     return (this->_request);
 }
@@ -73,12 +92,16 @@ std::string &client::get_response(){
 int client::get_status_code(){
     return (this->status_code);
 }
+void client::set_filename(std::string filename){
+	_filename = filename;
+}
 
 void client::set_request(std::string req){
     this->_request.append(req);
 }
 
-void client::set_response(std::string &res){
+
+void client::set_response(std::string res){
     this->_response = res;
 }
 
@@ -89,6 +112,7 @@ void client::set_status_code(int code){
 void client::set_socketfd(int fd){
     this->_socketfd = fd;
 }
+
 
 void client::set_content_length(long long len){
 	this->content_length = len;
@@ -239,6 +263,171 @@ std::string client::get_fragment(){
     return (this->fragment);
 }
 
+
+std::string client::get_status_message(){
+    return (this->status_message);
+}
+
+void client::set_status_message(int status_code){
+    switch (status_code) {
+        case 200:
+            this->status_message = "OK";
+            break;
+        case 201:
+            this->status_message = "Created";
+            break;
+        case 202:
+            this->status_message = "Accepted";
+            break;
+        case 204:
+            this->status_message = "No Content";
+            break;
+        case 301:
+            this->status_message = "Moved Permanently";
+            break;
+        case 302:
+            this->status_message = "Found";
+            break;
+        case 303:
+            this->status_message = "See Other";
+            break;
+        case 304:
+            this->status_message = "Not Modified";
+            break;
+        case 400:
+            this->status_message = "Bad Request";
+            break;
+        case 401:
+            this->status_message = "Unauthorized";
+            break;
+        case 403:
+            this->status_message = "Forbidden";
+            break;
+        case 404:
+            this->status_message = "Not Found";
+            break;
+        case 405:
+            this->status_message = "Method Not Allowed";
+            break;
+        case 406:
+            this->status_message = "Not Acceptable";
+            break;
+        case 408:
+            this->status_message = "Request Timeout";
+            break;
+        case 409:
+            this->status_message = "Conflict";
+            break;
+        case 411:
+            this->status_message = "Length Required";
+            break;
+        case 413:
+            this->status_message = "Payload Too Large";
+            break;
+        case 414:
+            this->status_message = "URI Too Long";
+            break;
+        case 415:
+            this->status_message = "Unsupported Media Type";
+            break;
+        case 500:
+            this->status_message = "Internal Server Error";
+            break;
+        case 501:
+            this->status_message = "Not Implemented";
+            break;
+        case 502:
+            this->status_message = "Bad Gateway";
+            break;
+        case 503:
+            this->status_message = "Service Unavailable";
+            break;
+        case 505:
+            this->status_message = "HTTP Version Not Supported";
+            break;
+        default:
+            this->status_message = "Internal Server Error";
+            break;
+    }
+}
+
+std::string client::get_content_type(){
+    return (this->content_type);
+}
+
+
+long long client::get_content_length(){
+    return (this->content_length);
+}
+
+
+std::string client::tostring(long long num){
+    std::ostringstream convert ;
+    convert << num;
+    std::string result(convert.str());
+    return (result);
+}
+
+
+
+void client::build_response(){
+    set_status_message(status_code); // setting the message
+    if (_filename != ""){
+        filefd = open(_filename.c_str(), O_RDONLY);
+        if (filefd < 0)
+            perror("open");
+    }
+    if (-1 ==fstat(filefd, &filestat)){
+        perror("fstat");
+        return ;
+    }
+    set_content_length(filestat.st_size);
+    long long length = get_content_length();
+    response_header = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
+        + "Content-Type: " + content_type + CRLF\
+        + "Content-Length: " + tostring(length)+ CRLF \
+        + (!connection_close ? "Connection: keep-alive" : "Connection: close" ) + CRLF + CRLF;
+    // setting the header
+    _response = response_header;
+    if (_filename != ""){
+        char buffer[1024];
+        int bytes_read = read(filefd, buffer, 1024);
+        if (bytes_read < 0){
+            perror("read");
+        }
+        _response.append(buffer, bytes_read);
+    }
+    ifstream_empty = false;
+    clear_request();
+    clear_header();
+    clear_body();
+    request_done = false;
+    header_done = false;
+    body_done = false;
+    requestvalid = false;
+}
+
+// bool client::is_ifstream_empty(){
+//         return (file.peek() == std::ifstream::traits_type::eof()); // check if the file is empty
+// }
+
+std::string client::get_response_header(){
+    return (response_header);
+}
+
+bool client::is_chunked(){
+    return (this->chunked);
+}
+
+void client::set_chunked(bool is){
+    this->chunked = is;
+}
+
+bool client::is_requestvalid(){
+    return (this->requestvalid);
+}
+
+
 void client::clear_method(){
     this->method.clear();
 }
@@ -284,4 +473,40 @@ void client::clear_all(){
     this->clear_path();
     this->clear_query();
     this->clear_fragment();
+    this->clear_body();
+    this->clear_header();
+    this->set_requestvalid(false);
+    this->set_content_length(0);
+    this->set_content_type("");
+    this->set_status_message(0);
+    this->set_chunked(false);
+    this->set_connection_close(false);
+    this->set_response_header("");
+    this->set_ifstreamempty(false);
+    if (filefd > 0){
+        close(filefd);
+    }
+    filefd = 0;
+}
+
+
+void client::set_filefd(int fd){
+    this->filefd = fd;
+}
+
+int client::get_filefd(){
+    return (this->filefd);
+}
+
+
+std::string client::get_filename(){
+    return (_filename);
+}
+
+bool client::get_ifstreamempty(){
+    return (ifstream_empty);
+}
+
+void client::set_ifstreamempty(bool empty){
+    ifstream_empty = empty;
 }

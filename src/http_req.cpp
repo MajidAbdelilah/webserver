@@ -263,13 +263,8 @@ int GET(client &client_class, std::map<std::string, std::string> &req_map)
 		uri.replace(uri.find("%20"), 3, " ");
 	}
 	std::cout << "URI: " << uri << std::endl;
-
-	client_class.get_file().open(uri, std::ios_base::binary);
-	if (!client_class.get_file().is_open())
-	{
-		std::cout << ("File not found\n");
-		return 404;
-	}
+	uri = uri.substr(0, uri.find("?"));
+	client_class.set_filename(uri);
 
 	// std::cout << content << std::endl;
 
