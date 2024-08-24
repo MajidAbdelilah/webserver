@@ -385,8 +385,8 @@ int handle_request(client &client_class)
 		else if (req_map["Method"] == "POST")
 		{
 			std::cout << ("POST request found\n");
-			int status = POST(client_class, req_map);
-			return status;
+			// int status = POST(client_class, req_map);
+			return 200;
 		}
 		else
 		{

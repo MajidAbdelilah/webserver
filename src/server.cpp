@@ -14,17 +14,16 @@ Server::Server(int domain, int type, int protocol, int port, u_int32_t interface
     this->_port = port; 
     this->_interface = interface;
     this->_backlog = backlog;
-    std::cout << "Server constructor called " << std::endl;
+    std::cout << GRN "SERVER CREATED" WHT<< std::endl;
 }
 
 int Server::getsocketfd()const{
     return (1);
 }
 
-// handle signal for interupting server 
-
 int Server::run(){
     signal(SIGPIPE, SIG_IGN);
+    signal(SIGINT, SIG_IGN);
     int kernel_queue = kqueue();
     if (kernel_queue < 0)
         throw("Kq failure");
@@ -50,18 +49,15 @@ int Server::run(){
                     throw("Client fd accept error"); // accepting client connection
                 if(-1 == fcntl(client_socketfd, F_SETFL, O_NONBLOCK))
                     throw("error fcntl client socket");
-                std::cout << "--------------------- Client socket fd: " << client_socketfd << " -------------------" <<'\n';
+                std::cout << GRN "Client connected fd number : " WHT << client_socketfd << '\n'; 
+                // std::cout << "--------------------- Client socket fd: " << client_socketfd << " -------------------" <<'\n';
                 EV_SET(&events[i], client_socketfd, EVFILT_READ, EV_ADD, 0, 0, NULL); //need to set the read event
                 kevent(kernel_queue, &events[i], 1, NULL, 0, NULL);
                 _Clients[client_socketfd] = client(client_socketfd);
             }
             else if (_Clients.find(events[i].ident) != _Clients.end()){
-                if (events[i].flags & EV_EOF){
-                    std::cout << "Client disconnected\n";
-                    close_remove_event(events[i].ident, kernel_queue);
-                }
-                else
-                if (events[i].filter == EVFILT_READ){
+                 if (events[i].filter == EVFILT_READ){
+                    std::cout << GRN "Reading request from client fd number : " << events[i].ident << WHT << '\n';
                     int r = getting_req(kernel_queue, events[i].ident); // parse request send to majid;
 					(void)r;
                 }
@@ -69,10 +65,11 @@ int Server::run(){
                 {
                     std::cout << "IT ENTERS WRITE FILTEEEEER \n";
                     Server::handle_write_request(events[i], kernel_queue);
-                    std::cout << "JUST SEND THE RESPONSE\n";
-                    // TODO ! the socket is ready to be written on
                 }
-
+                if (events[i].flags & EV_EOF){
+                    std::cout << RED "Client disconnected\n" WHT;
+                    close_remove_event(events[i].ident, kernel_queue);
+                }
             }
         }
     }
@@ -84,35 +81,42 @@ void Server::close_remove_event(int socket_fd, int &kqueue){
     kevent(kqueue, &change, 1, NULL, 0, NULL);
     _Clients.erase(socket_fd);
     close(socket_fd);
+
 }
 
 int Server::handle_write_request(struct kevent &events, int kq) {
     int fd = events.ident;
     if (_Clients[fd].get_response_header() == ""){
+        if ((_Clients[fd].get_filefd()) < 0){
+            Server::register_read(fd, kq);
+            return 0;
+        }
         int buffer = 5000;
         char res[buffer + 1];
         int byes = read(_Clients[fd].get_filefd(), res, buffer);
         std::cout << "bytes read : " << byes << std::endl;
         if (byes < 0){
             perror("read");
+            return (0);
         }
-        if (byes == 0 || byes < buffer){
+        if (byes == 0){
             _Clients[fd].set_ifstreamempty(1);
         }
         _Clients[fd].set_response(_Clients[fd].get_response() + std::string(res, byes));
     }
     
     int length = _Clients[fd].get_response().size();
-    std::cout << "-----------------RESPONSE TYPE-------------------\n";
+    // std::cout << "-----------------RESPONSE TYPE LENGTH-------------------\n";
     // std::cout << _Clients[fd].get_content_type() << std::endl;
     // std::cout << _Clients[fd].get_content_length() << std::endl;
     // std::cout << _Clients[fd].get_response() << std::endl;
-    std::cout << "-----------------END-------------------\n";
+    // std::cout << "-----------------END-------------------\n";
 
     int size = send(fd, _Clients[fd].get_response().c_str(), length, 0);
     std::cout << "data sent : " << size << std::endl;
     if (size < 0){
-        perror("send");
+        Server::register_read(fd, kq);
+        Server::close_remove_event(fd, kq);
         return (1);
     }
     if (size >= 0) {
@@ -140,20 +144,27 @@ int Server::handle_write_request(struct kevent &events, int kq) {
         }
         else if (_Clients[fd].get_response_header() == "" && _Clients[fd].get_ifstreamempty()){
             std::cout << "checking if the file is empty && kevent is registred\n";
+            int s = _Clients[fd].get_connection_close();
             _Clients[fd].clear_all();
-            struct kevent change;
-            EV_SET(&change, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-            kevent(kq, &change, 1, NULL, 0 , NULL);
-            EV_SET(&change, fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-            kevent(kq, &change, 1, NULL, 0 , NULL);
-            if (_Clients[fd].get_connection_close())
+            Server::register_read(fd, kq);
+            if (s){
+                std::cout << RED "Closed fd number : " << fd <<  WHT << '\n';
                 close_remove_event(fd, kq);
+            }
         }
         else{
             _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
         }
     }
     return (0);
+}
+
+void Server::register_read(int fd, int kq){
+    struct kevent change;
+    EV_SET(&change, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+    kevent(kq, &change, 1, NULL, 0 , NULL);
+    EV_SET(&change, fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+    kevent(kq, &change, 1, NULL, 0 , NULL);
 }
 
 int Server::getting_req(int kernel_q, int client_soc){
@@ -170,11 +181,9 @@ int Server::getting_req(int kernel_q, int client_soc){
     int _bytesread = recv(client_soc, s, 4095, 0);
 
     if (_bytesread < 0){
-        std::cout << "bytesread < 0 either no more data , or err in recv\n";
-        std::cout << _Clients[client_soc].get_socketfd() << std::endl;
-        std::cout << "RESPONSE HEADER IN READ ZONE\n";
-        std::cout << _Clients[client_soc].get_request() << std::endl;
-        return -1;
+        std::cout << "Recv returned -1 removing client fd number : " <<_Clients[client_soc].get_socketfd() << '\n';
+        Server::close_remove_event(client_soc, kernel_q);
+        return (-1);
     }
     else if (_bytesread == 0){
         std::cout << "received 0 bytes, closing connection\n";
@@ -187,7 +196,6 @@ int Server::getting_req(int kernel_q, int client_soc){
 
         _Clients[client_soc].set_request(a);
         check_header_body(client_soc);
-        // still needs to be fixed
         if (_Clients[client_soc].is_request_done()){
             struct kevent changes;
             EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
@@ -217,42 +225,34 @@ void Server::check_header_body(int client_soc){
         else {
             _Clients[client_soc].set_header_done(false);
             _Clients[client_soc].set_body_done(false);
+            _Clients[client_soc].set_request_done(false);
             return ;
         }
     }
     if (_Clients[client_soc].is_header_done())
     {
+        if (_Clients[client_soc].get_method() != ""){
+            std::cout << "test\n";
+            // reading body part of post request // majid post request/ body parsing and opening file and putting data in it 
+        }
         std::string first_line = _Clients[client_soc].get_header();
         std::string method = first_line.substr(0, first_line.find(" "));
         if (method == "GET" || method == "DELETE"){
             _Clients[client_soc].set_request_done(true);
-            _Clients[client_soc].set_request(_Clients[client_soc].get_header());
             if (_Clients[client_soc].get_body().size() > 0){
                 char trash[10000] = {0};
                 while (recv(client_soc, trash, 9999, 0) > 0);
-
-            }
-            return ;
-        }
-        if (method == "POST"){
-            std::string &body = _Client_header_body[client_soc].second;
-            std::string tmp = body;
-
-            unsigned long pos = tmp.find("\r\n\r\n");
-
-            if (pos != std::string::npos){
-                body_done = true;
-                std::string body = tmp.substr(0, pos + 4);
-                _Client_header_body[client_soc].second = body;
-                _Recv_request = _Client_header_body[client_soc].first + _Client_header_body[client_soc].second;
-            }
-            else{
-                body_done = false;
             }
         }
-        else { 
-            request_done = true;
+        std::cout << "method is : " << method << std::endl;
+        
+        _Clients[client_soc].set_request(_Clients[client_soc].get_header());
+        _Clients[client_soc].set_method(method);
+        if (method != "POST" || method != "GET" || method != "DELETE"){
+            _Clients[client_soc].set_status_code(405);
+            _Clients[client_soc].set_request_done(true);
         }
+        return ;
     }
 }
 
