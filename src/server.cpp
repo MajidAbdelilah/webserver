@@ -14,7 +14,7 @@ Server::Server(int domain, int type, int protocol, int port, u_int32_t interface
     this->_port = port; 
     this->_interface = interface;
     this->_backlog = backlog;
-    std::cout << GRN "SERVER CREATED" WHT<< std::endl;
+    std::cout << GRN "SERVER CREATED" WHT<< '\n';
 }
 
 int Server::getsocketfd()const{
@@ -23,7 +23,6 @@ int Server::getsocketfd()const{
 
 int Server::run(){
     signal(SIGPIPE, SIG_IGN);
-    signal(SIGINT, SIG_IGN);
     int kernel_queue = kqueue();
     if (kernel_queue < 0)
         throw("Kq failure");
@@ -94,7 +93,7 @@ int Server::handle_write_request(struct kevent &events, int kq) {
         int buffer = 5000;
         char res[buffer + 1];
         int byes = read(_Clients[fd].get_filefd(), res, buffer);
-        std::cout << "bytes read : " << byes << std::endl;
+        std::cout << "bytes read : " << byes << '\n';
         if (byes < 0){
             perror("read");
             return (0);
@@ -107,13 +106,13 @@ int Server::handle_write_request(struct kevent &events, int kq) {
     
     int length = _Clients[fd].get_response().size();
     // std::cout << "-----------------RESPONSE TYPE LENGTH-------------------\n";
-    // std::cout << _Clients[fd].get_content_type() << std::endl;
-    // std::cout << _Clients[fd].get_content_length() << std::endl;
-    // std::cout << _Clients[fd].get_response() << std::endl;
+    // std::cout << _Clients[fd].get_content_type() << '\n';
+    // std::cout << _Clients[fd].get_content_length() << '\n';
+    // std::cout << _Clients[fd].get_response() << '\n';
     // std::cout << "-----------------END-------------------\n";
 
     int size = send(fd, _Clients[fd].get_response().c_str(), length, 0);
-    std::cout << "data sent : " << size << std::endl;
+    std::cout << "data sent : " << size << '\n';
     if (size < 0){
         Server::register_read(fd, kq);
         Server::close_remove_event(fd, kq);
@@ -191,12 +190,13 @@ int Server::getting_req(int kernel_q, int client_soc){
     }
     else {
         std::string a(s);
-        std::cout << "Request received: " << a << std::endl;
-        std::cout << _Clients[client_soc].get_socketfd() << std::endl;
+        std::cout << "Request received: " << a << '\n';
+        std::cout << _Clients[client_soc].get_socketfd() << '\n';
 
         _Clients[client_soc].set_request(a);
         check_header_body(client_soc);
         if (_Clients[client_soc].is_request_done()){
+            std::cout << "------------------------- had l9lawi imta kidkhl lhna ---------------------\n";
             struct kevent changes;
             EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
@@ -231,6 +231,7 @@ void Server::check_header_body(int client_soc){
     }
     if (_Clients[client_soc].is_header_done())
     {
+        std::cout << _Clients[client_soc].get_method() << '\n';
 		std::cout << "here\n";
         if (_Clients[client_soc].get_method() != ""){
             std::cout << "test\n";
@@ -245,11 +246,10 @@ void Server::check_header_body(int client_soc){
                 while (recv(client_soc, trash, 9999, 0) > 0);
             }
         }
-        std::cout << "method is : " << method << std::endl;
         
         _Clients[client_soc].set_request(_Clients[client_soc].get_header());
         _Clients[client_soc].set_method(method);
-        if (method != "POST" || method != "GET" || method != "DELETE"){
+        if (method != "POST" && method != "GET" && method != "DELETE"){
             _Clients[client_soc].set_status_code(405);
             _Clients[client_soc].set_request_done(true);
         }
@@ -309,5 +309,5 @@ int Server::Filldata(){
 }
 
 Server::~Server(){
-    std::cout << "Destructor called " << std::endl;
+    std::cout << "Destructor called " << '\n';
 }
