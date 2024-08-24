@@ -217,37 +217,31 @@ void Server::check_header_body(int client_soc){
         else {
             _Clients[client_soc].set_header_done(false);
             _Clients[client_soc].set_body_done(false);
+            _Clients[client_soc].set_request_done(false);
             return ;
         }
     }
     if (_Clients[client_soc].is_header_done())
     {
+        if (_Clients[client_soc].get_method() != ""){
+            // reading body part of post request // majid post request/ body parsing and opening file and putting data in it 
+        }
         std::string first_line = _Clients[client_soc].get_header();
         std::string method = first_line.substr(0, first_line.find(" "));
         if (method == "GET" || method == "DELETE"){
             _Clients[client_soc].set_request_done(true);
-            _Clients[client_soc].set_request(_Clients[client_soc].get_header());
             if (_Clients[client_soc].get_body().size() > 0){
                 char trash[10000] = {0};
                 while (recv(client_soc, trash, 9999, 0) > 0);
-
-            }
-            return ;
-        }
-        if (method == "POST"){
-            _Clients[client_soc].set_method("POST");
-            if (_Clients[client_soc].get_header().find("boundary=") != std::string::npos){
-                _Clients[client_soc].set_post_boundary(_Clients[client_soc].get_header().substr(_Clients[client_soc].get_header().find("boundary="),\
-                     _Clients[client_soc].get_header().find("\r\n") - _Clients[client_soc].get_header().find("boundary=")));
-                std::cout << "boundary found\n";
-                std::cout << _Clients[client_soc].get_post_boundary() << '\n';
-                return ;
             }
         }
-        else {
-            // std::cout << "Method not allowed\n";
-            exit(0);
+        _Clients[client_soc].set_request(_Clients[client_soc].get_header());
+        _Clients[client_soc].set_method(method);
+        if (method != "POST" || method != "GET" || method != "GET"){
+            _Clients[client_soc].set_status_code(405);
+            _Clients[client_soc].set_request_done(true);
         }
+        return ;
     }
 }
 

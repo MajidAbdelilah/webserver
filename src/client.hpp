@@ -23,6 +23,7 @@ class client {
         std::string _request; // request to be parsed
         std::string _response; // response to be sent
         struct stat filestat; // file status
+        
 
         std::string response_header; // header of the response
         std::string response_body; // body of the response
@@ -48,6 +49,16 @@ class client {
         bool ifstream_empty; // 1 if ifstream is empty 0 if not
         std::string post_boundary;
 
+        int postfd;
+        std::string postfilename;
+        std::string postfiletype;
+        std::string postfiledata;
+        std::string postfileboundary;
+        std::string postfileboundaryend;
+        bool content_length_valid;
+        bool encoding_length_conflict;
+        long long postfilelength;
+        bool post_request_parsed;
     public:
         client();
         client(int fd);
@@ -55,6 +66,28 @@ class client {
         std::string &get_request();
         std::string &get_response();
         int get_status_code();
+        int get_post_fd();
+        std::string get_post_filename();
+        std::string get_post_filetype();
+        std::string get_post_filedata();
+        std::string get_post_fileboundary();
+        std::string get_post_fileboundaryend();
+
+
+        long long get_post_filelength();
+        bool get_content_length_valid();
+        bool get_encoding_length_conflict();
+        void set_post_filelength(long long);
+        void set_post_fd(int);
+        void set_post_filename(std::string);
+        void set_post_filetype(std::string);
+        void set_post_filedata(std::string);
+        void set_post_fileboundary(std::string);
+        void set_post_fileboundaryend(std::string);
+        void set_content_length_valid(bool);
+        void set_encoding_length_conflict(bool);
+        void set_post_request_parsed(bool);
+        bool get_post_request_parsed();
         void set_request(std::string );
         void set_response(std::string );
         client &operator=(const client &);
@@ -108,7 +141,6 @@ class client {
         std::string get_status_message();
         void build_response();
         std::string tostring(long long);
-        bool is_ifstream_empty();
         void set_response_header(std::string);
         bool get_ifstreamempty();
         void set_ifstreamempty(bool);
@@ -126,6 +158,7 @@ class client {
         void clear_response();
         void clear_status_code();
         void clear_socketfd();
+        void clear_post_elements();
         void clear_all();
 
 };

@@ -19,6 +19,17 @@ client::client(int fd) : _socketfd(fd){
     this->connection_close = false;
     this->filefd = 0;
     this->ifstream_empty = false;
+    this->postfd = 0;
+    this->postfilelength = 0;
+    this->content_length_valid = false;
+    this->encoding_length_conflict = false;
+    this->postfilename = "";
+    this->postfiletype = "";
+    this->postfiledata = "";
+    this->postfileboundary = "";
+    this->postfileboundaryend = "";
+    this->post_boundary = "";
+    
 
 }
 
@@ -37,6 +48,16 @@ client::client(){
     this->connection_close = false;
     this->filefd = 0;
     this->ifstream_empty = false;
+    this->postfd = 0;
+    this->postfilelength = 0;
+    this->content_length_valid = false;
+    this->encoding_length_conflict = false;
+    this->postfilename = "";
+    this->postfiletype = "";
+    this->postfiledata = "";
+    this->postfileboundary = "";
+    this->postfileboundaryend = "";
+    this->post_boundary = "";
     
 }
 
@@ -379,17 +400,17 @@ std::string client::tostring(long long num){
 
 
 void client::build_response(){
-    if (_filename != ""){
+    if (_filename != "" && !status_code){
         filefd = open(_filename.c_str(), O_RDONLY);
         if (filefd < 0){
             filefd = -2;
             set_status_code(404);
         }
+        if (filefd != -2 && -1 ==fstat(filefd, &filestat)){
+            perror("fstat");
+        }
+        set_content_length(filestat.st_size);
     }
-    if (filefd != -2 && -1 ==fstat(filefd, &filestat)){
-        perror("fstat");
-    }
-    set_content_length(filestat.st_size);
     set_status_message(status_code); // setting the message
     long long length = get_content_length();
     response_header = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
@@ -415,6 +436,87 @@ void client::build_response(){
     body_done = false;
     requestvalid = false;
 }
+
+long long client::get_post_filelength(){
+    return (postfilelength);
+}
+
+void client::set_post_filelength(long long length){
+    postfilelength = length;
+}
+
+std::string client::get_post_filename(){
+    return (postfilename);
+}
+
+void client::set_post_filename(std::string filename){
+    postfilename = filename;
+}
+
+std::string client::get_post_filetype(){
+    return (postfiletype);
+}
+
+void client::set_post_filetype(std::string filetype){
+    postfiletype = filetype;
+}
+
+std::string client::get_post_filedata(){
+    return (postfiledata);
+}
+
+void client::set_post_filedata(std::string data){
+    postfiledata = data;
+}
+
+std::string client::get_post_fileboundary(){
+    return (postfileboundary);
+}
+
+void client::set_post_fileboundary(std::string boundary){
+    postfileboundary = boundary;
+}
+
+std::string client::get_post_fileboundaryend(){
+    return (postfileboundaryend);
+}
+
+void client::set_post_fileboundaryend(std::string boundaryend){
+    postfileboundaryend = boundaryend;
+}
+
+int client::get_post_fd(){
+    return (postfd);
+}
+
+void client::set_post_fd(int fd){
+    postfd = fd;
+}
+
+bool client::get_content_length_valid(){
+    return (content_length_valid);
+}
+
+void client::set_content_length_valid(bool valid){
+    content_length_valid = valid;
+}
+
+bool client::get_encoding_length_conflict(){
+    return (encoding_length_conflict);
+}
+
+void client::set_encoding_length_conflict(bool conflict){
+    encoding_length_conflict = conflict;
+}
+
+bool client::get_post_request_parsed(){
+    return (post_request_parsed);
+}
+
+void client::set_post_request_parsed(bool parsed){
+    post_request_parsed = parsed;
+}
+
 
 
 std::string client::get_response_header(){
@@ -515,4 +617,16 @@ bool client::get_ifstreamempty(){
 
 void client::set_ifstreamempty(bool empty){
     ifstream_empty = empty;
+}
+
+void client::clear_post_elements(){
+    postfilelength = 0;
+    postfilename.clear();
+    postfiletype.clear();
+    postfiledata.clear();
+    postfileboundary.clear();
+    postfileboundaryend.clear();
+    postfd = 0;
+    content_length_valid = false;
+    encoding_length_conflict = false;
 }
