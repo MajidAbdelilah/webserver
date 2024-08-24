@@ -244,6 +244,8 @@ void Server::check_header_body(int client_soc){
                 while (recv(client_soc, trash, 9999, 0) > 0);
             }
         }
+        std::cout << "method is : " << method << std::endl;
+        
         _Clients[client_soc].set_request(_Clients[client_soc].get_header());
         _Clients[client_soc].set_method(method);
         if (method != "POST" || method != "GET" || method != "DELETE"){
