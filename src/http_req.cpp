@@ -131,7 +131,7 @@ int POST_body();
 int POST_header(client &client_class, std::map<std::string, std::string> &req_map)
 {
 	std::string req = client_class.get_request();
-	std::cout << "\nPOST REQUEST START \n";
+	std::cout << "\n\n\nPOST REQUEST START \n\n";
 	std::cout << req << std::endl;
 	std::cout << "\nPOST REQUEST END\n";
 
@@ -158,60 +158,47 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		return 400;
 	}
 
-	while (line != "")
+	while(line != "")
 	{
 		line = get_line(req);
 		std::cout << line << std::endl;
 		parse_headers(line, req_map);
 	}
 
-	if(req_map.find("Host") == req_map.end())
+	if(req_map["Content-Type"].find("boundary=") == std::string::npos)
 	{
-		std::cout << ("Host header not found\n");
+		std::cout << "Boundary not found\n";
 		return 400;
 	}
-
-	if(req_map["Host"] != http_hostname_macro && req_map["Host"] != http_localhost_macro)
+	if(req_map["Content-Type"].find("multipart/form-data") == std::string::npos)
 	{
-		std::cout << ("Host header is not correct\n");
+		std::cout << "Content-Type is not multipart/form-data\n";
 		return 400;
 	}
-
-	req_map["Content-Type"].find("multipart/form-data") != std::string::npos ? 
-																client_class.set_post_boundary(req_map["Content-Type"].substr(req_map["Content-Type"].find("boundary=") + 9)) : 
-																client_class.set_post_boundary("");
-	std::cout << client_class.get_post_boundary() << std::endl;
-	if(req_map["URI"] == "/")
-		req_map["URI"] = "/index.html";
-
+	if(req_map.find("Content-Length") == req_map.end())
+	{
+		std::cout << "Content-Length not found\n";
+		return 400;
+	}
+	client_class.set_post_boundary(req_map["Content-Type"].substr(req_map["Content-Type"].find("boundary=") + 9));
+	std::cout << "Boundary: " << client_class.get_post_boundary() << std::endl;
 	std::string uri = req_map["URI"][0] == '/' ? req_map["URI"].substr(1) : req_map["URI"];
-	while(uri.find("%20") != std::string::npos)
-	{
-		uri.replace(uri.find("%20"), 3, " ");
-	}
-
+	if(uri == "")
+		uri = "index.html";
+	uri = uri.substr(0, uri.find("?"));
 	std::cout << "URI: " << uri << std::endl;
-	// std::cout << req << std::endl; 
-
-	// std::string content = req.substr(req.find("\r\n\r\n") + 4);
-	// std::cout << content << std::endl;
-
-	// std::ofstream file;
-	// file.open(uri, std::ios_base::binary);
-	// if (!file.is_open())
-	// {
-	// 	std::cout << ("Error opening file\n");
-	// 	return 500;
-	// }
-
-	// file << content;
-	// file.close();
-
-
-	return -100;
+	client_class.set_post_filename(req_map[""]);
+	client_class.set_post_filelength(std::stoll(req_map["Content-Length"]));
+	std::cout << "Content-Length: " << client_class.get_post_filelength() << std::endl;
+	client_class.set_post_fd(open(uri.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666));
+	client_class.set_post_request_parsed(true);
+	if(req.find("\r\n\r\n") == std::string::npos)
+	{
+		std::cout << "request doesnt have a body\n";
+		return 400;
+	}
+	return 200;
 }
-
-
 int GET(client &client_class, std::map<std::string, std::string> &req_map)
 {
 	std::string req = client_class.get_request();
