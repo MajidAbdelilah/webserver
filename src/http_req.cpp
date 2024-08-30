@@ -2,6 +2,7 @@
 #include "server.hpp"
 #include <fstream>
 #include <string>
+#include <sys/fcntl.h>
 
 
 
@@ -126,11 +127,22 @@ int DELETE(client &client_class, std::map<std::string, std::string> &req_map)
 }
 
 
-int POST_body();
+int POST_body(client &client_class)
+{
+	std::cout << "POST_BODY---------------------------------\n";
+	std::string &req = client_class.get_request();
+	std::cout << "fd: " << client_class.get_post_fd() << std::endl;
+	std::cout << req << "\n";
+	std::string boundary = client_class.get_post_boundary();
+	write(client_class.get_post_fd(), req.c_str(), req.size());
+	req = "";
+	return -100;
+}
 
 int POST_header(client &client_class, std::map<std::string, std::string> &req_map)
 {
-	std::string req = client_class.get_request();
+	std::string &req = client_class.get_request();
+	std::cout << "req.size() = " << req.size() << "\n";
 	std::cout << "\n\n\nPOST REQUEST START \n\n";
 	std::cout << req << std::endl;
 	std::cout << "\nPOST REQUEST END\n";
@@ -157,14 +169,17 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		std::cout << ("Version is not HTTP/1.1\n");
 		return 400;
 	}
-
+	std::cout << "get_line loop start\n";
 	while(line != "")
 	{
 		line = get_line(req);
 		std::cout << line << std::endl;
 		parse_headers(line, req_map);
 	}
+	std::cout << "get_line loop end\n";
 
+	std::cout << "req.size() = " << req.size() << "\n";
+	
 	if(req_map["Content-Type"].find("boundary=") == std::string::npos)
 	{
 		std::cout << "Boundary not found\n";
@@ -187,16 +202,32 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		uri = "index.html";
 	uri = uri.substr(0, uri.find("?"));
 	std::cout << "URI: " << uri << std::endl;
-	client_class.set_post_filename(req_map[""]);
+	client_class.set_post_filename(uri);
 	client_class.set_post_filelength(std::stoll(req_map["Content-Length"]));
 	std::cout << "Content-Length: " << client_class.get_post_filelength() << std::endl;
-	client_class.set_post_fd(open(uri.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666));
+	client_class.set_post_fd(open(uri.c_str(), O_WRONLY | O_APPEND));
 	client_class.set_post_request_parsed(true);
 	if(req.find("\r\n\r\n") == std::string::npos)
 	{
 		std::cout << "request doesnt have a body\n";
 		return 400;
+	}else {
+	std::cout << "request has a body\n";
+	std::cout << req << "\n";
 	}
+	line = get_line(req);
+	std::cout << "get_line loop start\n";
+	while(line != "")
+	{
+		line = get_line(req);
+		std::cout << line << std::endl;
+		parse_headers(line, req_map);
+	}
+	std::cout << "get_line loop end\n";
+	std::cout << "POST HEADER PARSED, req = \n";
+	std::cout << req;
+	std::cout << "req.size() = " << req.size() << "\n";
+	// client_class.set_request("");
 	return 200;
 }
 int GET(client &client_class, std::map<std::string, std::string> &req_map)
@@ -295,10 +326,17 @@ int handle_request(client &client_class)
 		return 500;
 	}
 
+	if(client_class.get_post_request_parsed())
+		{
+			std::cout << ("POST body request found\n");
+			int status = POST_body(client_class);
+			return status;
+		}
+
 	std::string req = client_class.get_request();
-	std::cout << "\n\n\nREQUEST START \n\n";
-	std::cout << req << std::endl;
-	std::cout << "\nREQUEST END\n";
+	// std::cout << "\n\n\nREQUEST START \n\n";
+	// std::cout << req << std::endl;
+	// std::cout << "\nREQUEST END\n";
 	if(req.find("\r\n\r\n") == std::string::npos)
 	{
 		std::cout << ("Request not complete\n");
@@ -382,6 +420,7 @@ int handle_request(client &client_class)
 	}
 	else
 	{
+		
 		std::cout << ("Method not supported\n");
 		return 405;
 	}

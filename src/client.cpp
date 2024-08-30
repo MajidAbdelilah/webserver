@@ -29,7 +29,7 @@ client::client(int fd) : _socketfd(fd){
     this->postfileboundary = "";
     this->postfileboundaryend = "";
     this->post_boundary = "";
-    
+    this->post_request_parsed = false;
 
 }
 
@@ -59,7 +59,8 @@ client::client(){
     this->postfileboundaryend = "";
     this->post_boundary = "";
 	this->post_body_header_parsed = false;
-    
+    this->post_request_parsed = false;
+
 }
 
 client::~client(){

@@ -236,7 +236,9 @@ void Server::check_header_body(int client_soc){
         if (_Clients[client_soc].get_method() != ""){
             std::cout << "test\n";
             // reading body part of post request // majid post request/ body parsing and opening file and putting data in it 
-        }
+			handle_request(_Clients[client_soc]);
+			return ;
+		}
         std::string first_line = _Clients[client_soc].get_header();
         std::string method = first_line.substr(0, first_line.find(" "));
         if (method == "GET" || method == "DELETE"){
@@ -253,6 +255,10 @@ void Server::check_header_body(int client_soc){
             _Clients[client_soc].set_status_code(405);
             _Clients[client_soc].set_request_done(true);
         }
+		if(method == "POST"){
+			std::cout << "test2\n";
+			handle_request(_Clients[client_soc]);
+		}
         return ;
     }
 }
