@@ -50,7 +50,7 @@ int DELETE(client &client_class, std::map<std::string, std::string> &req_map)
 {
 	std::string req = client_class.get_request();
 	std::cout << "\n\n\nDELETE REQUEST START \n\n";
-	std::cout << req << std::endl;
+	// std::cout << req << std::endl;
 	std::cout << "\nDELETE REQUEST END\n";
 
 	std::string line = get_line(req);
@@ -172,13 +172,13 @@ int POST_body(client &client_class)
 			std::cout << "kdgfiehqfiouhweifuhewf--------------------\n";
 	}
 	std::cout << "fd: " << client_class.get_post_fd() << std::endl;
-	std::cout << req << "\n";
+	// std::cout << req << "\n";
 	std::cout << "efwefewfewf------\n";
 	std::string boundary = client_class.get_post_boundary();
 	long long write_size = 0;
-	if((req.size() + client_class.get_post_written_len()) >= (client_class.get_post_filelength() - (client_class.get_post_boundary().size() + 4)))
+	if((req.size() + client_class.get_post_written_len()) >= (client_class.get_post_filelength() - (client_class.get_post_boundary().size() + 6)))
 	{
-		write_size = (client_class.get_post_filelength() - client_class.get_post_written_len()) - (client_class.get_post_boundary().size() + 4);
+		write_size = (client_class.get_post_filelength() - client_class.get_post_written_len()) - (client_class.get_post_boundary().size() + 6);
 	}else {
 		write_size = req.size();
 	}
@@ -261,7 +261,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		return 400;
 	}else {
 		std::cout << "request has a body\n";
-		std::cout << req << "\n";
+		// std::cout << req << "\n";
 	}
 	line = get_line(req);
 	client_class.add_post_written_len(line.size());
@@ -294,7 +294,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	}
 	std::cout << "get_line loop end\n";
 	std::cout << "POST HEADER PARSED, req = \n";
-	std::cout << req;
+	// std::cout << req;
 	std::cout << "req.size() = " << req.size() << "\n";
 	if(req.size() > 0)
 	{
@@ -307,7 +307,7 @@ int GET(client &client_class, std::map<std::string, std::string> &req_map)
 {
 	std::string req = client_class.get_request();
 	std::cout << "\n\n\nGET REQUEST START \n\n";
-	std::cout << req << std::endl;
+	// std::cout << req << std::endl;
 	std::cout << "\nGET REQUEST END\n";
 
 	std::string line = get_line(req);
