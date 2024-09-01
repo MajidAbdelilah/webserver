@@ -22,7 +22,3 @@ int main (void)
         a++;
     }
 }
-----------------------------865435103944387598423208
-Content-Disposition: form-data; name=""; filename="openmp_test.c"
-Content-Type: text/x-c
-

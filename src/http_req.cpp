@@ -134,13 +134,26 @@ int POST_body(client &client_class)
 {
 	std::cout << "POST_BODY---------------------------------\n";
 	std::string &req = client_class.get_request();
-	if(req.compare((client_class.get_post_boundary())))
-		{
+	std::string bound = ("\r\n--"+client_class.get_post_boundary());
+	std::cout << bound << '\n';
+	unsigned long index = req.find(bound);
+	if(index != std::string::npos)
+	{
+	long long size = write(client_class.get_post_fd(), req.c_str(), index);
+	req.erase(0, size);
+	client_class.add_post_written_len(size);
+	std::cout << "cline_written_len = " << client_class.get_post_written_len() << "\n";
+
+			std::cout << "im here here\n";
+			std::string line  = get_line(req);
+			client_class.add_post_written_len(line.size());
+			std::cout << line;
+			line  = get_line(req);
+			std::cout << line;
+			client_class.add_post_written_len(line.size());
 			while(line != "\r\n")
 			{
-				parse_headers(line, req_map);
-				line = get_line(req);
-				client_class.add_post_written_len(line.size());
+				// parse_headers(line, req_map);
 				if(line.find("Content-Disposition:") != std::string::npos)
 				{
 					long long i = line.find("filename=\"") + 10;
@@ -148,19 +161,24 @@ int POST_body(client &client_class)
 					while(line[i] != '\"')
 						filename += line[i++];
 					std::cout << "filename = = " << filename << "\n";
+					close(client_class.get_post_fd());
 					client_class.set_post_filename(filename);
 					client_class.set_post_fd(open(filename.c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
 				}
+				line = get_line(req);
+				client_class.add_post_written_len(line.size());
+				std::cout << line;
 			}
-
-		}
+			std::cout << "kdgfiehqfiouhweifuhewf--------------------\n";
+	}
 	std::cout << "fd: " << client_class.get_post_fd() << std::endl;
-	// std::cout << req << "\n";
+	std::cout << req << "\n";
+	std::cout << "efwefewfewf------\n";
 	std::string boundary = client_class.get_post_boundary();
 	long long write_size = 0;
-	if((req.size() + client_class.get_post_written_len()) >= (client_class.get_post_filelength() - (client_class.get_post_boundary().size() + 6)))
+	if((req.size() + client_class.get_post_written_len()) >= (client_class.get_post_filelength() - (client_class.get_post_boundary().size() + 4)))
 	{
-		write_size = (client_class.get_post_filelength() - client_class.get_post_written_len()) - (client_class.get_post_boundary().size() + 6);
+		write_size = (client_class.get_post_filelength() - client_class.get_post_written_len()) - (client_class.get_post_boundary().size() + 4);
 	}else {
 		write_size = req.size();
 	}
@@ -250,7 +268,6 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	std::cout << "get_line loop start\n";
 	while(line != "\r\n")
 	{
-		client_class.add_post_written_len(line.size());
 		std::cout << line << std::endl;
 		if(line.find(client_class.get_post_boundary()) != std::string::npos)
 		{
