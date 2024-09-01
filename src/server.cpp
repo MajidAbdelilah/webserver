@@ -241,20 +241,22 @@ void Server::check_header_body(int client_soc){
 		}
         std::string first_line = _Clients[client_soc].get_header();
         std::string method = first_line.substr(0, first_line.find(" "));
+        if (method != "POST" && method != "GET" && method != "DELETE"){
+            _Clients[client_soc].set_status_code(405);
+            _Clients[client_soc].set_request_done(true);
+            return ;
+        }
         if (method == "GET" || method == "DELETE"){
             _Clients[client_soc].set_request_done(true);
             if (_Clients[client_soc].get_body().size() > 0){
                 char trash[10000] = {0};
                 while (recv(client_soc, trash, 9999, 0) > 0);
             }
+            _Clients[client_soc].set_body("");
         }
         
-        _Clients[client_soc].set_request(_Clients[client_soc].get_header());
+        _Clients[client_soc].set_request(_Clients[client_soc].get_header() + _Clients[client_soc].get_body() );
         _Clients[client_soc].set_method(method);
-        if (method != "POST" && method != "GET" && method != "DELETE"){
-            _Clients[client_soc].set_status_code(405);
-            _Clients[client_soc].set_request_done(true);
-        }
 		if(method == "POST"){
 			std::cout << "test2\n";
 			handle_request(_Clients[client_soc]);

@@ -30,7 +30,7 @@ client::client(int fd) : _socketfd(fd){
     this->postfileboundaryend = "";
     this->post_boundary = "";
     this->post_request_parsed = false;
-
+    post_written_len = 0;
 }
 
 client::client(){
@@ -60,6 +60,7 @@ client::client(){
     this->post_boundary = "";
 	this->post_body_header_parsed = false;
     this->post_request_parsed = false;
+    post_written_len = 0;
 
 }
 

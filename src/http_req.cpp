@@ -1,5 +1,6 @@
 #include "http_req.hpp"
 #include "server.hpp"
+#include <cctype>
 #include <fstream>
 #include <string>
 #include <sys/fcntl.h>
@@ -12,7 +13,7 @@ std::string get_line(std::string &req)
 	size_t pos = req.find("\r\n");
 	if (pos != std::string::npos)
 	{
-		line = req.substr(0, pos);
+		line = req.substr(0, pos + 2);
 		req.erase(0, pos + 2);
 	}
 	return line;
@@ -39,7 +40,9 @@ int parse_headers(std::string line, std::map<std::string, std::string> &req)
 	size_t pos = line.find(":");
 	if (pos == std::string::npos)
 		return -1;
-	req[line.substr(0, pos)] = line.substr(pos + 2);
+	int i = 1;
+	while(std::isspace(line[pos+i]))i++;
+	req[line.substr(0, pos)] = line.substr(pos + i);
 	return 0;
 }
 
@@ -73,7 +76,7 @@ int DELETE(client &client_class, std::map<std::string, std::string> &req_map)
 		return 400;
 	}	
 
-	while (line != "")
+	while (line != "\r\n")
 	{
 		line = get_line(req);
 		std::cout << line << std::endl;
@@ -131,11 +134,40 @@ int POST_body(client &client_class)
 {
 	std::cout << "POST_BODY---------------------------------\n";
 	std::string &req = client_class.get_request();
+	if(req.compare((client_class.get_post_boundary())))
+		{
+			while(line != "\r\n")
+			{
+				parse_headers(line, req_map);
+				line = get_line(req);
+				client_class.add_post_written_len(line.size());
+				if(line.find("Content-Disposition:") != std::string::npos)
+				{
+					long long i = line.find("filename=\"") + 10;
+					std::string filename = "";
+					while(line[i] != '\"')
+						filename += line[i++];
+					std::cout << "filename = = " << filename << "\n";
+					client_class.set_post_filename(filename);
+					client_class.set_post_fd(open(filename.c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
+				}
+			}
+
+		}
 	std::cout << "fd: " << client_class.get_post_fd() << std::endl;
-	std::cout << req << "\n";
+	// std::cout << req << "\n";
 	std::string boundary = client_class.get_post_boundary();
-	write(client_class.get_post_fd(), req.c_str(), req.size());
-	req = "";
+	long long write_size = 0;
+	if((req.size() + client_class.get_post_written_len()) >= (client_class.get_post_filelength() - (client_class.get_post_boundary().size() + 6)))
+	{
+		write_size = (client_class.get_post_filelength() - client_class.get_post_written_len()) - (client_class.get_post_boundary().size() + 6);
+	}else {
+		write_size = req.size();
+	}
+	long long size = write(client_class.get_post_fd(), req.c_str(), write_size);
+	req.erase(0, size);
+	client_class.add_post_written_len(size);
+	std::cout << "cline_written_len = " << client_class.get_post_written_len() << "\n";
 	return -100;
 }
 
@@ -144,7 +176,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	std::string &req = client_class.get_request();
 	std::cout << "req.size() = " << req.size() << "\n";
 	std::cout << "\n\n\nPOST REQUEST START \n\n";
-	std::cout << req << std::endl;
+	// std::cout << req << std::endl;
 	std::cout << "\nPOST REQUEST END\n";
 
 	std::string line = get_line(req);
@@ -164,13 +196,13 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		std::cout << ("URI not found\n");
 		return 400;
 	}
-	if(req_map["Version"] != "HTTP/1.1" || req_map.find("Version") == req_map.end())
+	if(req_map["Version"] != "HTTP/1.1\r\n" || req_map.find("Version") == req_map.end())
 	{
 		std::cout << ("Version is not HTTP/1.1\n");
 		return 400;
 	}
 	std::cout << "get_line loop start\n";
-	while(line != "")
+	while(line != "\r\n")
 	{
 		line = get_line(req);
 		std::cout << line << std::endl;
@@ -202,31 +234,55 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		uri = "index.html";
 	uri = uri.substr(0, uri.find("?"));
 	std::cout << "URI: " << uri << std::endl;
-	client_class.set_post_filename(uri);
 	client_class.set_post_filelength(std::stoll(req_map["Content-Length"]));
 	std::cout << "Content-Length: " << client_class.get_post_filelength() << std::endl;
-	client_class.set_post_fd(open(uri.c_str(), O_WRONLY | O_APPEND));
 	client_class.set_post_request_parsed(true);
 	if(req.find("\r\n\r\n") == std::string::npos)
 	{
 		std::cout << "request doesnt have a body\n";
 		return 400;
 	}else {
-	std::cout << "request has a body\n";
-	std::cout << req << "\n";
+		std::cout << "request has a body\n";
+		std::cout << req << "\n";
 	}
 	line = get_line(req);
+	client_class.add_post_written_len(line.size());
 	std::cout << "get_line loop start\n";
-	while(line != "")
+	while(line != "\r\n")
 	{
-		line = get_line(req);
+		client_class.add_post_written_len(line.size());
 		std::cout << line << std::endl;
-		parse_headers(line, req_map);
+		if(line.find(client_class.get_post_boundary()) != std::string::npos)
+		{
+			while(line != "\r\n")
+			{
+				parse_headers(line, req_map);
+				line = get_line(req);
+				client_class.add_post_written_len(line.size());
+				if(line.find("Content-Disposition:") != std::string::npos)
+				{
+					long long i = line.find("filename=\"") + 10;
+					std::string filename = "";
+					while(line[i] != '\"')
+						filename += line[i++];
+					std::cout << "filename = = " << filename << "\n";
+					client_class.set_post_filename(filename);
+					client_class.set_post_fd(open(filename.c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
+				}
+			}
+
+		}else {
+			return 400;
+		}
 	}
 	std::cout << "get_line loop end\n";
 	std::cout << "POST HEADER PARSED, req = \n";
 	std::cout << req;
 	std::cout << "req.size() = " << req.size() << "\n";
+	if(req.size() > 0)
+	{
+		return POST_body(client_class);
+	}
 	// client_class.set_request("");
 	return 200;
 }
@@ -260,7 +316,7 @@ int GET(client &client_class, std::map<std::string, std::string> &req_map)
 		return 400;
 	}	
 
-	while (line != "")
+	while (line != "\r\n")
 	{
 		line = get_line(req);
 		std::cout << line << std::endl;

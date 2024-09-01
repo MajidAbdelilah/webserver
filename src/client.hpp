@@ -60,6 +60,7 @@ class client {
         long long postfilelength;
         bool post_request_parsed;
 		bool post_body_header_parsed;
+        unsigned long post_written_len;
     public:
         client();
         client(int fd);
@@ -73,7 +74,17 @@ class client {
         std::string get_post_filedata();
         std::string get_post_fileboundary();
         std::string get_post_fileboundaryend();
+        
+        void add_post_written_len(unsigned long size)
+        {
+            post_written_len += size;
+        }
 
+        unsigned long get_post_written_len() const
+        {
+            return post_written_len;
+        }
+        
 
         long long get_post_filelength();
         bool get_content_length_valid();
