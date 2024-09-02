@@ -124,8 +124,13 @@ void client::set_append_with_bytes(char *req, int bytes_read){
     this->_request.append(req,  bytes_read);
 }
 
+
 void client::set_request(std::string req){
     this->_request.append(req);
+}
+
+void extern_set_append_with_bytes(std::string &a, const char *req, int bytes_read){
+    a.append(req, bytes_read);
 }
 
 

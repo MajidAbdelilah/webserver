@@ -176,5 +176,7 @@ class client {
 
 };
 
+void extern_set_append_with_bytes(std::string &, const char *, int );
+
 
 #endif

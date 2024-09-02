@@ -70,7 +70,7 @@ int DELETE(client &client_class, std::map<std::string, std::string> &req_map)
 		std::cout << ("URI not found\n");
 		return 400;
 	}	
-	if(req_map["Version"] != "HTTP/1.1" || req_map.find("Version") == req_map.end())
+	if(req_map.find("Version") == req_map.end() || req_map["Version"] != "HTTP/1.1\r\n")
 	{
 		std::cout << ("Version is not HTTP/1.1\n");
 		return 400;
@@ -192,6 +192,8 @@ int POST_body(client &client_class)
 	req.erase(0, size);
 	client_class.add_post_written_len(size);
 	std::cout << "cline_written_len = " << client_class.get_post_written_len() << "\n";
+	if(status == 200)
+		close(client_class.get_post_fd());
 	return status;
 }
 

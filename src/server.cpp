@@ -246,6 +246,8 @@ void Server::check_header_body(int client_soc, int bytesread){
             _Clients[client_soc].set_request_done(true);
             return ;
         }
+        _Clients[client_soc].set_method(method);
+        std::cout << method << '\n';
         if (method == "GET" || method == "DELETE"){
             _Clients[client_soc].set_request_done(true);
             if (_Clients[client_soc].get_body().size() > 0){
@@ -253,10 +255,11 @@ void Server::check_header_body(int client_soc, int bytesread){
                 while (recv(client_soc, trash, 9999, 0) > 0);
             }
             _Clients[client_soc].set_body("");
+            _Clients[client_soc].set_request(_Clients[client_soc].get_header());
+            return ;
         }
-        
+
         _Clients[client_soc].set_append_with_bytes(const_cast<char *>((_Clients[client_soc].get_header() + _Clients[client_soc].get_body()).c_str()), bytesread);
-        _Clients[client_soc].set_method(method);
 		if(method == "POST"){
 			std::cout << "test2\n";
 			int status = handle_request(_Clients[client_soc]);
