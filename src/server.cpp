@@ -170,14 +170,10 @@ int Server::getting_req(int kernel_q, int client_soc){
 
     (void)kernel_q;
     char s[4096]={0};
-    if (_Clients[client_soc].get_request().size() > 0){
-        std::string tmp = _Clients[client_soc].get_request();
-        std::string tmp2 = s;
-        tmp2.append(tmp);
-        _Clients[client_soc].set_request(tmp2);
-    }
 
     int _bytesread = recv(client_soc, s, 4095, 0);
+
+    std::cout << "s result is ------------------- : " << s << "    and bytes read are :" << _bytesread  << "    " << "----------------------"<<'\n';
 
     if (_bytesread < 0){
         std::cout << "Recv returned -1 removing client fd number : " <<_Clients[client_soc].get_socketfd() << '\n';
@@ -193,8 +189,8 @@ int Server::getting_req(int kernel_q, int client_soc){
         std::cout << "Request received: " << a << '\n';
         std::cout << _Clients[client_soc].get_socketfd() << '\n';
 
-        _Clients[client_soc].set_request(a);
-        check_header_body(client_soc);
+        _Clients[client_soc].set_append_with_bytes(s, _bytesread);
+        check_header_body(client_soc, _bytesread);
         if (_Clients[client_soc].is_request_done()){
             std::cout << "------------------------- had l9lawi imta kidkhl lhna ---------------------\n";
             struct kevent changes;
@@ -209,12 +205,12 @@ int Server::getting_req(int kernel_q, int client_soc){
     return (_bytesread);
 }
 
-void Server::check_header_body(int client_soc){
+void Server::check_header_body(int client_soc, int bytesread){
     if (!_Clients[client_soc].is_header_done()){
+        std::cout << "here----------=================--------------\n";
         std::string header = _Clients[client_soc].get_request();
         std::string tmp = header;
         unsigned long pos = tmp.find("\r\n\r\n");
-
         if (pos != std::string::npos){
             _Clients[client_soc].set_header_done(true);
             std::string head = tmp.substr(0, pos + 4);
@@ -255,7 +251,7 @@ void Server::check_header_body(int client_soc){
             _Clients[client_soc].set_body("");
         }
         
-        _Clients[client_soc].set_request(_Clients[client_soc].get_header() + _Clients[client_soc].get_body() );
+        _Clients[client_soc].set_append_with_bytes(const_cast<char *>((_Clients[client_soc].get_header() + _Clients[client_soc].get_body()).c_str()), bytesread);
         _Clients[client_soc].set_method(method);
 		if(method == "POST"){
 			std::cout << "test2\n";

@@ -120,6 +120,10 @@ void client::set_filename(std::string filename){
 	_filename = filename;
 }
 
+void client::set_append_with_bytes(char *req, int bytes_read){
+    this->_request.append(req,  bytes_read);
+}
+
 void client::set_request(std::string req){
     this->_request.append(req);
 }
@@ -192,7 +196,7 @@ void client::set_request_done(bool done){
 }
 
 void client::set_body(std::string body){
-    this->body.append(body);
+    this->body=(body);
 }
 
 void client::set_header(std::string header){

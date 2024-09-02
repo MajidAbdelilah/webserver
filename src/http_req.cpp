@@ -135,11 +135,14 @@ int POST_body(client &client_class)
 	std::cout << "POST_BODY---------------------------------\n";
 	std::string &req = client_class.get_request();
 	std::string bound = ("\r\n--"+client_class.get_post_boundary());
-	std::cout << bound << '\n';
+	// std::cout << bound << '\n';
+	std::cout <<'|'<<req<<'|';
 	unsigned long index = req.find(bound);
 	if(index != std::string::npos)
 	{
 	long long size = write(client_class.get_post_fd(), req.c_str(), index);
+	if(size == -1)
+		return -1;
 	req.erase(0, size);
 	client_class.add_post_written_len(size);
 	std::cout << "cline_written_len = " << client_class.get_post_written_len() << "\n";
@@ -171,9 +174,9 @@ int POST_body(client &client_class)
 			}
 			std::cout << "kdgfiehqfiouhweifuhewf--------------------\n";
 	}
-	std::cout << "fd: " << client_class.get_post_fd() << std::endl;
+	// std::cout << "fd: " << client_class.get_post_fd() << std::endl;
 	// std::cout << req << "\n";
-	std::cout << "efwefewfewf------\n";
+	// std::cout << "efwefewfewf------\n";
 	std::string boundary = client_class.get_post_boundary();
 	long long write_size = 0;
 	if((req.size() + client_class.get_post_written_len()) >= (client_class.get_post_filelength() - (client_class.get_post_boundary().size() + 6)))
@@ -194,7 +197,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	std::string &req = client_class.get_request();
 	std::cout << "req.size() = " << req.size() << "\n";
 	std::cout << "\n\n\nPOST REQUEST START \n\n";
-	// std::cout << req << std::endl;
+	std::cout << req << std::endl;
 	std::cout << "\nPOST REQUEST END\n";
 
 	std::string line = get_line(req);
@@ -263,19 +266,22 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		std::cout << "request has a body\n";
 		// std::cout << req << "\n";
 	}
-	line = get_line(req);
-	client_class.add_post_written_len(line.size());
 	std::cout << "get_line loop start\n";
+	line = get_line(req);
+	parse_headers(line, req_map);
+	client_class.add_post_written_len(line.size());
+	std::cout << line;
 	while(line != "\r\n")
 	{
-		std::cout << line << std::endl;
+		// std::cout << line << std::endl;
 		if(line.find(client_class.get_post_boundary()) != std::string::npos)
 		{
 			while(line != "\r\n")
 			{
-				parse_headers(line, req_map);
 				line = get_line(req);
+				parse_headers(line, req_map);
 				client_class.add_post_written_len(line.size());
+				std::cout << line;
 				if(line.find("Content-Disposition:") != std::string::npos)
 				{
 					long long i = line.find("filename=\"") + 10;
@@ -294,7 +300,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	}
 	std::cout << "get_line loop end\n";
 	std::cout << "POST HEADER PARSED, req = \n";
-	// std::cout << req;
+	std::cout << req;
 	std::cout << "req.size() = " << req.size() << "\n";
 	if(req.size() > 0)
 	{
@@ -393,7 +399,8 @@ int GET(client &client_class, std::map<std::string, std::string> &req_map)
 
 int handle_request(client &client_class)
 {
-	if(client_class.get_request().size() == 0)
+	std::cout << "entering post request handling ==================== \n " << client_class.get_request() << '\n';
+	if(client_class.get_request().size() == 0) 
 	{
 		std::cout << ("No request to handle\n");
 		return 500;

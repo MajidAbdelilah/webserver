@@ -143,6 +143,7 @@ class client {
         std::string get_response_header();
         bool is_chunked();
         void set_chunked(bool);
+        void set_append_with_bytes(char *s, int );
         void set_requestvalid(bool);
         bool is_requestvalid();
         void set_content_length(long long);

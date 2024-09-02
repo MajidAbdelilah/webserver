@@ -59,7 +59,7 @@ class Server {
         std::string GetRequestToParse();
         void close_remove_event(int , int &);
         int handle_write_request(struct kevent&, int);
-        void check_header_body(int);
+        void check_header_body(int, int);
         void register_read(int fd, int kq);
 };
 
