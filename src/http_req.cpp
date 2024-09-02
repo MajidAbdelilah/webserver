@@ -336,7 +336,7 @@ int GET(client &client_class, std::map<std::string, std::string> &req_map)
 		std::cout << ("URI not found\n");
 		return 400;
 	}	
-	if(req_map["Version"] != "HTTP/1.1" || req_map.find("Version") == req_map.end())
+	if(req_map.find("Version") == req_map.end() || req_map["Version"] != "HTTP/1.1\r\n")
 	{
 		std::cout << ("Version is not HTTP/1.1\n");
 		return 400;
