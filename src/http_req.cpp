@@ -179,17 +179,20 @@ int POST_body(client &client_class)
 	// std::cout << "efwefewfewf------\n";
 	std::string boundary = client_class.get_post_boundary();
 	long long write_size = 0;
+	int status = 0;
 	if((req.size() + client_class.get_post_written_len()) >= (client_class.get_post_filelength() - (client_class.get_post_boundary().size() + 6)))
 	{
 		write_size = (client_class.get_post_filelength() - client_class.get_post_written_len()) - (client_class.get_post_boundary().size() + 6);
+		status = 200;
 	}else {
 		write_size = req.size();
+		status = -100;
 	}
 	long long size = write(client_class.get_post_fd(), req.c_str(), write_size);
 	req.erase(0, size);
 	client_class.add_post_written_len(size);
 	std::cout << "cline_written_len = " << client_class.get_post_written_len() << "\n";
-	return -100;
+	return status;
 }
 
 int POST_header(client &client_class, std::map<std::string, std::string> &req_map)
@@ -307,7 +310,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		return POST_body(client_class);
 	}
 	// client_class.set_request("");
-	return 200;
+	return -100;
 }
 int GET(client &client_class, std::map<std::string, std::string> &req_map)
 {

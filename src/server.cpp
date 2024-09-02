@@ -232,8 +232,12 @@ void Server::check_header_body(int client_soc, int bytesread){
         if (_Clients[client_soc].get_method() != ""){
             std::cout << "test\n";
             // reading body part of post request // majid post request/ body parsing and opening file and putting data in it 
-			handle_request(_Clients[client_soc]);
-			return ;
+			int status = handle_request(_Clients[client_soc]);
+            if(status  == 200){
+                _Clients[client_soc].clear_all();
+            }
+            std::cout << "status = " << status << "---\n";
+            return ;
 		}
         std::string first_line = _Clients[client_soc].get_header();
         std::string method = first_line.substr(0, first_line.find(" "));
@@ -255,7 +259,11 @@ void Server::check_header_body(int client_soc, int bytesread){
         _Clients[client_soc].set_method(method);
 		if(method == "POST"){
 			std::cout << "test2\n";
-			handle_request(_Clients[client_soc]);
+			int status = handle_request(_Clients[client_soc]);
+            if(status  == 200){
+                _Clients[client_soc].clear_all();
+            }
+            std::cout << "status = " << status << "---\n";
 		}
         return ;
     }
