@@ -38,6 +38,7 @@ int Server::run(){
     int count =0;
     while (1){
         struct kevent events[MAX_EVENTS];
+        std::cout << "Waiting for events\n";
         count = kevent(kernel_queue, NULL, 0, events, MAX_EVENTS, NULL);
         if (count == -1)
             throw("kevent error");
@@ -123,6 +124,8 @@ int Server::handle_write_request(struct kevent &events, int kq) {
             if (_Clients[fd].get_response_header().size() == (unsigned long)size){
                 _Clients[fd].set_response_header("");
                 _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
+                Server::register_read(fd, kq);
+                _Clients[fd].clear_all();
             }
             else {
                 if (_Clients[fd].get_response_header().size() < (unsigned long)size){
