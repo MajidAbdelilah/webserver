@@ -105,11 +105,11 @@ int Server::handle_write_request(struct kevent &events, int kq) {
     }
     
     int length = _Clients[fd].get_response().size();
-    // std::cout << "-----------------RESPONSE TYPE LENGTH-------------------\n";
+    std::cout << "-----------------RESPONSE TYPE LENGTH-------------------\n";
     // std::cout << _Clients[fd].get_content_type() << '\n';
     // std::cout << _Clients[fd].get_content_length() << '\n';
-    // std::cout << _Clients[fd].get_response() << '\n';
-    // std::cout << "-----------------END-------------------\n";
+    std::cout << _Clients[fd].get_response() << '\n';
+    std::cout << "-----------------END-------------------\n";
 
     int size = send(fd, _Clients[fd].get_response().c_str(), length, 0);
     std::cout << "data sent : " << size << '\n';
@@ -172,8 +172,9 @@ int Server::getting_req(int kernel_q, int client_soc){
     char s[4096]={0};
 
     int _bytesread = recv(client_soc, s, 4095, 0);
+    _Clients[client_soc].set_bytesread(_bytesread);
 
-    std::cout << "s result is ------------------- : " << s << "    and bytes read are :" << _bytesread  << "    " << "----------------------"<<'\n';
+    // std::cout << "s result is ------------------- : " << s << "    and bytes read are :" << _bytesread  << "    " << "----------------------"<<'\n';
 
     if (_bytesread < 0){
         std::cout << "Recv returned -1 removing client fd number : " <<_Clients[client_soc].get_socketfd() << '\n';
@@ -185,12 +186,11 @@ int Server::getting_req(int kernel_q, int client_soc){
         Server::close_remove_event(client_soc, kernel_q);
     }
     else {
-        std::string a(s);
-        std::cout << "Request received: " << a << '\n';
+        // std::cout << "Request received: " << a << '\n';
         std::cout << _Clients[client_soc].get_socketfd() << '\n';
-
         _Clients[client_soc].set_append_with_bytes(s, _bytesread);
         check_header_body(client_soc, _bytesread);
+
         if (_Clients[client_soc].is_request_done()){
             std::cout << "------------------------- had l9lawi imta kidkhl lhna ---------------------\n";
             struct kevent changes;
@@ -198,7 +198,8 @@ int Server::getting_req(int kernel_q, int client_soc){
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             EV_SET(&changes, client_soc, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
-			handle_request(_Clients[client_soc]);
+            if (_Clients[client_soc].get_method() != "POST")
+			    handle_request(_Clients[client_soc]);
             _Clients[client_soc].build_response();
         }
     }
@@ -208,7 +209,7 @@ int Server::getting_req(int kernel_q, int client_soc){
 void Server::check_header_body(int client_soc, int bytesread){
     if (!_Clients[client_soc].is_header_done()){
         std::cout << "here----------=================--------------\n";
-        std::string header = _Clients[client_soc].get_request();
+        std::string header(_Clients[client_soc].get_request().c_str(), _Clients[client_soc].get_request_size());
         std::string tmp = header;
         unsigned long pos = tmp.find("\r\n\r\n");
         if (pos != std::string::npos){
@@ -233,10 +234,17 @@ void Server::check_header_body(int client_soc, int bytesread){
             std::cout << "test\n";
             // reading body part of post request // majid post request/ body parsing and opening file and putting data in it 
 			int status = handle_request(_Clients[client_soc]);
+            if(status == -100)
+            {
+                std::string res = "HTTP/1.1 100 Continue\r\n\r\n";
+                send(client_soc, res.c_str(), res.size(), 0);
+            }
             if(status  == 200){
-                _Clients[client_soc].clear_all();
+                // _Clients[client_soc].clear_all();
+                _Clients[client_soc].set_request_done(true);
             }
             std::cout << "status = " << status << "---\n";
+            std::cout << "status first one\n";
             return ;
 		}
         std::string first_line = _Clients[client_soc].get_header();
@@ -263,10 +271,18 @@ void Server::check_header_body(int client_soc, int bytesread){
 		if(method == "POST"){
 			std::cout << "test2\n";
 			int status = handle_request(_Clients[client_soc]);
+            if(status == -100)
+            {
+                std::string res = "HTTP/1.1 100 Continue\r\n\r\n";
+                send(client_soc, res.c_str(), res.size(), 0);
+            }
             if(status  == 200){
-                _Clients[client_soc].clear_all();
+                std::cout << "Entering status 200 \n";
+                _Clients[client_soc].set_request_done(true);
+                // _Clients[client_soc].clear_all();
             }
             std::cout << "status = " << status << "---\n";
+            std::cout << "status second one\n";
 		}
         return ;
     }

@@ -32,6 +32,7 @@ int parse_initial_line(std::string line, std::map<std::string, std::string> &req
 	req["URI"] = line.substr(0, pos);
 	line.erase(0, pos + 1);
 	req["Version"] = line;
+
 	return 0;
 }
 
@@ -136,24 +137,27 @@ int POST_body(client &client_class)
 	std::string &req = client_class.get_request();
 	std::string bound = ("\r\n--"+client_class.get_post_boundary());
 	// std::cout << bound << '\n';
-	std::cout <<'|'<<req<<'|';
+	// std::cout <<'|'<<req<<'|';
 	unsigned long index = req.find(bound);
 	if(index != std::string::npos)
 	{
-	long long size = write(client_class.get_post_fd(), req.c_str(), index);
-	if(size == -1)
-		return -1;
-	req.erase(0, size);
-	client_class.add_post_written_len(size);
-	std::cout << "cline_written_len = " << client_class.get_post_written_len() << "\n";
+			long long size = write(client_class.get_post_fd(), req.c_str(), index);
+			if(size == -1)
+				return -1;
+			req.erase(0, size);
+			client_class.add_post_written_len(size);
+			client_class.decrement_request_size(size);
+			std::cout << "cline_written_len = " << client_class.get_post_written_len() << "\n";
 
 			std::cout << "im here here\n";
 			std::string line  = get_line(req);
 			client_class.add_post_written_len(line.size());
-			std::cout << line;
+			client_class.decrement_request_size(line.size());
+			// std::cout << line;
 			line  = get_line(req);
-			std::cout << line;
+			// std::cout << line;
 			client_class.add_post_written_len(line.size());
+			client_class.decrement_request_size(line.size());
 			while(line != "\r\n")
 			{
 				// parse_headers(line, req_map);
@@ -170,7 +174,8 @@ int POST_body(client &client_class)
 				}
 				line = get_line(req);
 				client_class.add_post_written_len(line.size());
-				std::cout << line;
+				client_class.decrement_request_size(line.size());
+				// std::cout << line;
 			}
 			std::cout << "kdgfiehqfiouhweifuhewf--------------------\n";
 	}
@@ -180,21 +185,52 @@ int POST_body(client &client_class)
 	std::string boundary = client_class.get_post_boundary();
 	long long write_size = 0;
 	int status = 0;
-	if((req.size() + client_class.get_post_written_len()) >= (client_class.get_post_filelength() - (client_class.get_post_boundary().size() + 6)))
+	std::cout << "req.size() + client_class.get_post_written_len() = " << req.size() + client_class.get_post_written_len() << "\n";
+	std::cout << "(client_class.get_post_filelength() - (boundary.size() + 6)) = " << (client_class.get_post_filelength() - (boundary.size() + 6)) << "\n";
+	if((req.size() + client_class.get_post_written_len()) 
+			>= (client_class.get_post_filelength() - (boundary.size() + 6)))
 	{
-		write_size = (client_class.get_post_filelength() - client_class.get_post_written_len()) - (client_class.get_post_boundary().size() + 6);
-		status = 200;
+		write_size = client_class.get_post_filelength() - (boundary.size() + 6) - client_class.get_post_written_len();
+		long long size = 0;
+		while(size < write_size)
+		{
+			std::cout << "first while write\n";
+			size += write(client_class.get_post_fd(), req.c_str(), write_size - size);
+		}
+		req.erase(0, size);
+		client_class.add_post_written_len(size);
+		client_class.decrement_request_size(size);
+		std::cout << "cline_written_len = " << client_class.get_post_written_len() << "\n";
+		if(size == write_size)
+		{
+			close(client_class.get_post_fd());
+			return 200;
+		}
+		else
+		 	return -100;
 	}else {
 		write_size = req.size();
-		status = -100;
+		long long size = 0;
+		while(size < write_size)
+		{
+			std::cout << "second while write\n";
+			size += write(client_class.get_post_fd(), req.c_str(), write_size - size);
+		}
+		req.erase(0, size);
+		client_class.add_post_written_len(size);
+		client_class.decrement_request_size(size);
+		std::cout << "cline_written_len = " << client_class.get_post_written_len() << "\n";
+		return -100;
 	}
-	long long size = write(client_class.get_post_fd(), req.c_str(), write_size);
-	req.erase(0, size);
-	client_class.add_post_written_len(size);
-	std::cout << "cline_written_len = " << client_class.get_post_written_len() << "\n";
-	if(status == 200)
-		close(client_class.get_post_fd());
 	return status;
+}
+
+void fill_client_data(client &client_class, std::map<std::string, std::string> &req_map){
+	client_class.set_method(req_map["URI"]);
+	client_class.set_version(req_map["Version"].substr(0, req_map["Version"].size() - 2));
+	client_class.set_connection_close(req_map["Connection"] == "keep-alive\r\n" ? 0 : 1);
+	client_class.set_content_type(req_map["Content-Type"].substr(0, req_map["Content-Type"].find(";")));
+
 }
 
 int POST_header(client &client_class, std::map<std::string, std::string> &req_map)
@@ -202,7 +238,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	std::string &req = client_class.get_request();
 	std::cout << "req.size() = " << req.size() << "\n";
 	std::cout << "\n\n\nPOST REQUEST START \n\n";
-	std::cout << req << std::endl;
+	// std::cout << req << std::endl;
 	std::cout << "\nPOST REQUEST END\n";
 
 	std::string line = get_line(req);
@@ -253,6 +289,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		std::cout << "Content-Length not found\n";
 		return 400;
 	}
+	fill_client_data(client_class, req_map);
 	client_class.set_post_boundary(req_map["Content-Type"].substr(req_map["Content-Type"].find("boundary=") + 9));
 	std::cout << "Boundary: " << client_class.get_post_boundary() << std::endl;
 	std::string uri = req_map["URI"][0] == '/' ? req_map["URI"].substr(1) : req_map["URI"];
@@ -275,6 +312,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	line = get_line(req);
 	parse_headers(line, req_map);
 	client_class.add_post_written_len(line.size());
+	client_class.decrement_request_size(line.size());
 	std::cout << line;
 	while(line != "\r\n")
 	{
@@ -286,6 +324,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 				line = get_line(req);
 				parse_headers(line, req_map);
 				client_class.add_post_written_len(line.size());
+				client_class.decrement_request_size(line.size());
 				std::cout << line;
 				if(line.find("Content-Disposition:") != std::string::npos)
 				{
@@ -305,7 +344,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	}
 	std::cout << "get_line loop end\n";
 	std::cout << "POST HEADER PARSED, req = \n";
-	std::cout << req;
+	// std::cout << req;
 	std::cout << "req.size() = " << req.size() << "\n";
 	if(req.size() > 0)
 	{
@@ -404,7 +443,7 @@ int GET(client &client_class, std::map<std::string, std::string> &req_map)
 
 int handle_request(client &client_class)
 {
-	std::cout << "entering post request handling ==================== \n " << client_class.get_request() << '\n';
+	// std::cout << "entering post request handling ==================== \n " << client_class.get_request() << '\n';
 	if(client_class.get_request().size() == 0) 
 	{
 		std::cout << ("No request to handle\n");
@@ -415,6 +454,7 @@ int handle_request(client &client_class)
 		{
 			std::cout << ("POST body request found\n");
 			int status = POST_body(client_class);
+			client_class.set_status_code(status);
 			return status;
 		}
 
@@ -433,7 +473,7 @@ int handle_request(client &client_class)
 	{
 		line = req.substr(0, pos);
 	}
-	std::cout << line << std::endl;
+	// std::cout << line << std::endl;
 	std::map<std::string, std::string> req_map;
 	if (parse_initial_line(line, req_map) == -1)
 	{
@@ -501,6 +541,8 @@ int handle_request(client &client_class)
 	{
 		std::cout << ("POST request found\n");
 		int status = POST_header(client_class, req_map);
+		client_class.set_status_code(status);
+
 		return status;
 	}
 	else

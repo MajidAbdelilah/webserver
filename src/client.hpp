@@ -61,6 +61,8 @@ class client {
         bool post_request_parsed;
 		bool post_body_header_parsed;
         unsigned long post_written_len;
+        unsigned long request_size;
+        int _bytesread;
     public:
         client();
         client(int fd);
@@ -74,8 +76,15 @@ class client {
         std::string get_post_filedata();
         std::string get_post_fileboundary();
         std::string get_post_fileboundaryend();
-        
-        void add_post_written_len(unsigned long size)
+        unsigned long get_request_size() const
+        {
+            return request_size;
+        }
+        void decrement_request_size(const unsigned long &size)
+        {
+            request_size -= size;
+        }
+        void add_post_written_len(const unsigned long &size)
         {
             post_written_len += size;
         }
@@ -136,6 +145,8 @@ class client {
         std::string get_uri();
         std::string get_version();
         std::string get_host();
+        int get_bytesread();
+        void set_bytesread(int);
         std::string get_port();
         std::string get_path();
         std::string get_query();

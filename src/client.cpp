@@ -31,6 +31,8 @@ client::client(int fd) : _socketfd(fd){
     this->post_boundary = "";
     this->post_request_parsed = false;
     post_written_len = 0;
+    _bytesread = 0;
+    request_size = 0;
 }
 
 client::client(){
@@ -61,11 +63,21 @@ client::client(){
 	this->post_body_header_parsed = false;
     this->post_request_parsed = false;
     post_written_len = 0;
-
+    _bytesread = 0;
+    request_size = 0;
 }
 
 client::~client(){
     this->clear_all();
+}
+
+
+int client::get_bytesread(){
+    return (_bytesread);
+}
+
+void client::set_bytesread(int bytes){
+    this->_bytesread  = bytes;
 }
 
 
@@ -122,11 +134,13 @@ void client::set_filename(std::string filename){
 
 void client::set_append_with_bytes(char *req, int bytes_read){
     this->_request.append(req,  bytes_read);
+    request_size += bytes_read;
 }
 
 
 void client::set_request(std::string req){
     this->_request.append(req);
+    request_size += req.size();
 }
 
 void extern_set_append_with_bytes(std::string &a, const char *req, int bytes_read){
@@ -161,6 +175,7 @@ int client::get_socketfd(){
 
 void client::clear_request(){
     this->_request.clear();
+    request_size = 0;
 }
 
 void client::clear_response(){
@@ -412,6 +427,16 @@ std::string client::tostring(long long num){
 
 
 void client::build_response(){
+    if (method == "POST"){
+        set_status_message(status_code); // setting the message
+        _response  = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
+        + "Content-Type: " + content_type + CRLF\
+        + "Content-Length: " + tostring(0)+ CRLF \
+        + (!connection_close ? "Connection: keep-alive\r\nKeep-Alive: timeout=10, max=20" : "Connection: close" ) + CRLF + CRLF;
+    // setting the header
+    response_header = _response;
+    return ;
+    }
     if (_filename != ""){
         filefd = open(_filename.c_str(), O_RDONLY);
         if (filefd < 0){
@@ -619,6 +644,7 @@ void client::clear_all(){
     postfileboundaryend.clear();
     post_boundary.clear();
     content_length_valid = 0;
+    _bytesread = 0;
 }
 
 
