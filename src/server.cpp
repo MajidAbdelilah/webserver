@@ -124,8 +124,8 @@ int Server::handle_write_request(struct kevent &events, int kq) {
             if (_Clients[fd].get_response_header().size() == (unsigned long)size){
                 _Clients[fd].set_response_header("");
                 _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
-                Server::register_read(fd, kq);
-                _Clients[fd].clear_all();
+                Server::register_read(fd, kq); //to fix 
+                _Clients[fd].clear_all(); //to fix
             }
             else {
                 if (_Clients[fd].get_response_header().size() < (unsigned long)size){
