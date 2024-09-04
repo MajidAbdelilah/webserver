@@ -429,7 +429,7 @@ std::string client::tostring(long long num){
 void client::build_response(){
     if (method == "POST"){
         set_status_message(status_code); // setting the message
-        _response  = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
+        _response  = version.erase(version.size() -2) + " " + tostring((long long)status_code) + " " + status_message + CRLF\
         + "Content-Type: " + content_type + CRLF\
         + "Content-Length: " + tostring(0)+ CRLF \
         + (!connection_close ? "Connection: keep-alive\r\nKeep-Alive: timeout=10, max=20" : "Connection: close" ) + CRLF + CRLF;
@@ -450,7 +450,7 @@ void client::build_response(){
     }
     set_status_message(status_code); // setting the message
     long long length = get_content_length();
-    response_header = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
+    response_header = version.erase(version.size() -2) + " " + tostring((long long)status_code) + " " + status_message + CRLF\
         + "Content-Type: " + content_type + CRLF\
         + "Content-Length: " + tostring(length)+ CRLF \
         + (!connection_close ? "Connection: keep-alive\r\nKeep-Alive: timeout=10, max=20" : "Connection: close" ) + CRLF + CRLF;
@@ -679,4 +679,9 @@ void client::clear_post_elements(){
     postfd = 0;
     content_length_valid = false;
     encoding_length_conflict = false;
+}
+
+
+void client::clear_request_response_elements(){
+
 }

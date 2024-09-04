@@ -106,11 +106,11 @@ int Server::handle_write_request(struct kevent &events, int kq) {
     }
     
     int length = _Clients[fd].get_response().size();
-    std::cout << "-----------------RESPONSE TYPE LENGTH-------------------\n";
+    // std::cout << "-----------------RESPONSE TYPE LENGTH-------------------\n";
     // std::cout << _Clients[fd].get_content_type() << '\n';
     // std::cout << _Clients[fd].get_content_length() << '\n';
-    std::cout << _Clients[fd].get_response() << '\n';
-    std::cout << "-----------------END-------------------\n";
+    // std::cout << _Clients[fd].get_response() << '\n';
+    // std::cout << "-----------------END-------------------\n";
 
     int size = send(fd, _Clients[fd].get_response().c_str(), length, 0);
     std::cout << "data sent : " << size << '\n';
@@ -147,9 +147,9 @@ int Server::handle_write_request(struct kevent &events, int kq) {
         else if (_Clients[fd].get_response_header() == "" && _Clients[fd].get_ifstreamempty()){
             std::cout << "checking if the file is empty && kevent is registred\n";
             int s = _Clients[fd].get_connection_close();
-            _Clients[fd].clear_all();
             Server::register_read(fd, kq);
             if (s){
+                _Clients[fd].clear_all();
                 std::cout << RED "Closed fd number : " << fd <<  WHT << '\n';
                 close_remove_event(fd, kq);
             }
@@ -193,7 +193,6 @@ int Server::getting_req(int kernel_q, int client_soc){
         std::cout << _Clients[client_soc].get_socketfd() << '\n';
         _Clients[client_soc].set_append_with_bytes(s, _bytesread);
         check_header_body(client_soc, _bytesread);
-
         if (_Clients[client_soc].is_request_done()){
             std::cout << "------------------------- had l9lawi imta kidkhl lhna ---------------------\n";
             struct kevent changes;
@@ -210,6 +209,7 @@ int Server::getting_req(int kernel_q, int client_soc){
 }
 
 void Server::check_header_body(int client_soc, int bytesread){
+    std::cout << "------------number of bytesreads " << bytesread << '\n';
     if (!_Clients[client_soc].is_header_done()){
         std::cout << "here----------=================--------------\n";
         std::string header(_Clients[client_soc].get_request().c_str(), _Clients[client_soc].get_request_size());
