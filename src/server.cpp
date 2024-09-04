@@ -239,8 +239,8 @@ void Server::check_header_body(int client_soc, int bytesread){
 			int status = handle_request(_Clients[client_soc]);
             if(status == -100)
             {
-                std::string res = "HTTP/1.1 100 Continue\r\n\r\n";
-                send(client_soc, res.c_str(), res.size(), 0);
+                // std::string res = "HTTP/1.1 100 Continue\r\n\r\n";
+                // send(client_soc, res.c_str(), res.size(), 0);
             }
             if(status  == 200){
                 // _Clients[client_soc].clear_all();
@@ -273,8 +273,8 @@ void Server::check_header_body(int client_soc, int bytesread){
 			int status = handle_request(_Clients[client_soc]);
             if(status == -100)
             {
-                std::string res = "HTTP/1.1 100 Continue\r\n\r\n";
-                send(client_soc, res.c_str(), res.size(), 0);
+                // std::string res = "HTTP/1.1 100 Continue\r\n\r\n";
+                // send(client_soc, res.c_str(), res.size(), 0);
             }
             if(status  == 200){
                 std::cout << "Entering status 200 \n";
