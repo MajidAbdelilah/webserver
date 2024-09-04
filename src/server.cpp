@@ -124,8 +124,10 @@ int Server::handle_write_request(struct kevent &events, int kq) {
             if (_Clients[fd].get_response_header().size() == (unsigned long)size){
                 _Clients[fd].set_response_header("");
                 _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
-                Server::register_read(fd, kq); //to fix 
-                _Clients[fd].clear_all(); //to fix
+                // if (_Clients[fd].get_method() == "POST"){
+                    Server::register_read(fd, kq); //to fix 
+                    _Clients[fd].clear_all(); //to fix
+                // }
             }
             else {
                 if (_Clients[fd].get_response_header().size() < (unsigned long)size){
@@ -189,7 +191,7 @@ int Server::getting_req(int kernel_q, int client_soc){
         Server::close_remove_event(client_soc, kernel_q);
     }
     else {
-        // std::cout << "Request received: " << a << '\n';
+        std::cout << "Request received: " << s << '\n';
         std::cout << _Clients[client_soc].get_socketfd() << '\n';
         _Clients[client_soc].set_append_with_bytes(s, _bytesread);
         check_header_body(client_soc, _bytesread);
@@ -232,9 +234,7 @@ void Server::check_header_body(int client_soc, int bytesread){
     if (_Clients[client_soc].is_header_done())
     {
         std::cout << _Clients[client_soc].get_method() << '\n';
-		std::cout << "here______\n";
         if (_Clients[client_soc].get_method() != ""){
-            std::cout << "test\n";
             // reading body part of post request // majid post request/ body parsing and opening file and putting data in it 
 			int status = handle_request(_Clients[client_soc]);
             if(status == -100)
@@ -246,8 +246,6 @@ void Server::check_header_body(int client_soc, int bytesread){
                 // _Clients[client_soc].clear_all();
                 _Clients[client_soc].set_request_done(true);
             }
-            std::cout << "status = " << status << "---\n";
-            std::cout << "status first one\n";
             return ;
 		}
         std::string first_line = _Clients[client_soc].get_header();
@@ -272,7 +270,6 @@ void Server::check_header_body(int client_soc, int bytesread){
 
         _Clients[client_soc].set_append_with_bytes(const_cast<char *>((_Clients[client_soc].get_header() + _Clients[client_soc].get_body()).c_str()), bytesread);
 		if(method == "POST"){
-			std::cout << "test2\n";
 			int status = handle_request(_Clients[client_soc]);
             if(status == -100)
             {
@@ -284,8 +281,6 @@ void Server::check_header_body(int client_soc, int bytesread){
                 _Clients[client_soc].set_request_done(true);
                 // _Clients[client_soc].clear_all();
             }
-            std::cout << "status = " << status << "---\n";
-            std::cout << "status second one\n";
 		}
         return ;
     }

@@ -3,15 +3,28 @@ Waiting for events
 [0;32mClient connected fd number : [0;37m5
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: POST /assets/ HTTP/1.1
+User-Agent: PostmanRuntime/7.33.0
+Accept: */*
+Postman-Token: 66f06ef3-81be-421c-b925-22127cd3d1a5
+Host: localhost:8080
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Content-Type: multipart/form-data; boundary=--------------------------293993611093306511463216
+Content-Length: 741879
+
+----------------------------293993611093306511463216
+Content-Disposition: form-data; name=""; filename="webserv"
+Content-Type: application/octet-stream
+
+œ˙Ì˛
 5
-------------number of bytesreads 486
+------------number of bytesreads 4095
 here----------=================--------------
 
-here______
 POST
-test2
 POST request found
-req.size() = 486
+req.size() = 4095
 
 
 
@@ -26,7 +39,7 @@ User-Agent: PostmanRuntime/7.33.0
 
 Accept: */*
 
-Postman-Token: c8e10935-b1e7-4a8d-baeb-3b7d39871978
+Postman-Token: 66f06ef3-81be-421c-b925-22127cd3d1a5
 
 Host: localhost:8080
 
@@ -34,2387 +47,772 @@ Accept-Encoding: gzip, deflate, br
 
 Connection: keep-alive
 
-Content-Type: multipart/form-data; boundary=--------------------------114409192753777404895166
+Content-Type: multipart/form-data; boundary=--------------------------293993611093306511463216
 
-Content-Length: 742903
+Content-Length: 741879
 
 
 
 get_line loop end
-req.size() = 157
-Boundary: --------------------------114409192753777404895166
+req.size() = 3766
+Boundary: --------------------------293993611093306511463216
 
 URI: assets/
-Content-Length: 742903
+Content-Length: 741879
 request has a body
 get_line loop start
-----------------------------114409192753777404895166
+----------------------------293993611093306511463216
 Content-Disposition: form-data; name=""; filename="webserv"
 filename = = webserv
 Content-Type: application/octet-stream
 
 get_line loop end
 POST HEADER PARSED, req = 
-req.size() = 0
-status = -100---
-status second one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 4252
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 4252
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 8347
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 8347
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 12442
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 12442
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 16537
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 16537
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 20632
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 20632
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 24727
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 24727
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 28822
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 28822
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 32917
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 32917
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 37012
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 37012
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 41107
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 41107
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 45202
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 45202
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 49297
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 49297
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 53392
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 53392
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 57487
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 57487
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 61582
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 61582
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 65677
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 65677
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 69772
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 69772
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 73867
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 73867
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 77962
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 77962
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 82057
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 82057
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 86152
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 86152
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 90247
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 90247
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 94342
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 94342
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 98437
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 98437
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 102532
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 102532
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 106627
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 106627
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 110722
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 110722
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 114817
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 114817
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 118912
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 118912
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 123007
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 123007
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 127102
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 127102
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 131197
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 131197
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 135292
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 135292
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 139387
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 139387
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 143482
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 143482
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 147577
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 147577
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 151672
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 151672
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 155767
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 155767
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 159862
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 159862
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 163957
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 163957
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 168052
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 168052
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 172147
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 172147
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 176242
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 176242
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 180337
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 180337
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 184432
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 184432
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 188527
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 188527
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 192622
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 192622
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 196717
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 196717
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 200812
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 200812
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 204907
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 204907
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 209002
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 209002
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 213097
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 213097
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 217192
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 217192
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 221287
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 221287
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 225382
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 225382
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 229477
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 229477
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 233572
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 233572
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 237667
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 237667
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 241762
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 241762
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 245857
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 245857
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 249952
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 249952
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 254047
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 254047
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 258142
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 258142
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 262237
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 262237
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 266332
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 266332
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 270427
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 270427
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 274522
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 274522
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 278617
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 278617
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 282712
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 282712
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 286807
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 286807
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 290902
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 290902
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 294997
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 294997
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 299092
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 299092
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 303187
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 303187
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 307282
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 307282
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 311377
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 311377
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 315472
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 315472
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 319567
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 319567
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 323662
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 323662
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 327757
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 327757
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 331852
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 331852
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 335947
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 335947
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 340042
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 340042
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 344137
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 344137
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 348232
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 348232
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 352327
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 352327
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 356422
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 356422
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 360517
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 360517
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 364612
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 364612
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 368707
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 368707
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 372802
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 372802
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 376897
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 376897
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 380992
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 380992
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
-POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 385087
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 385087
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/assets/
-here______
-test
-POST body request found
+req.size() = 3609
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 389182
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 3766
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 389182
-status = -100---
-status first one
+cline_written_len = 3766
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 393277
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 7861
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 393277
-status = -100---
-status first one
+cline_written_len = 7861
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 397372
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 11956
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 397372
-status = -100---
-status first one
+cline_written_len = 11956
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 401467
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 16051
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 401467
-status = -100---
-status first one
+cline_written_len = 16051
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: ‡Ë"µ
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 405562
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 20146
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 405562
-status = -100---
-status first one
+cline_written_len = 20146
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: ãì@
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 409657
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 24241
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 409657
-status = -100---
-status first one
+cline_written_len = 24241
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 413752
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 28336
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 413752
-status = -100---
-status first one
+cline_written_len = 28336
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: HãEÿHãHãU‡H) Hâ–Hôπ0
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 417847
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 32431
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 417847
-status = -100---
-status first one
+cline_written_len = 32431
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: E‡Hã8HãuËË
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 421942
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 36526
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 421942
-status = -100---
-status first one
+cline_written_len = 36526
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: È
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 426037
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 40621
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 426037
-status = -100---
-status first one
+cline_written_len = 40621
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: UHâÂHÉÏHâ}¯Hã}¯Ë
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 430132
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 44716
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 430132
-status = -100---
-status first one
+cline_written_len = 44716
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: âE‡DâM‹Hã}ãuÏãUËãM‰DãE‡DãM‹Dã]Hã]Dâ$Hâ\$HâE–DâUÃËw˜ˇˇHÉƒH[]√UHâÂHâ}¯∏
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 434227
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 48811
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 434227
-status = -100---
-status first one
+cline_written_len = 48811
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 438322
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 52906
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 438322
-status = -100---
-status first one
+cline_written_len = 52906
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: Ä
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 442417
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 57001
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 442417
-status = -100---
-status first one
+cline_written_len = 57001
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: Lâ◊A∫
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 446512
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 61096
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 446512
-status = -100---
-status first one
+cline_written_len = 61096
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 450607
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 65191
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 450607
-status = -100---
-status first one
+cline_written_len = 65191
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: HÅ¡Ä
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 454702
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 69286
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 454702
-status = -100---
-status first one
+cline_written_len = 69286
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 458797
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 73381
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 458797
-status = -100---
-status first one
+cline_written_len = 73381
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: Hâ∆Ë`”
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 462892
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 77476
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 462892
-status = -100---
-status first one
+cline_written_len = 77476
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 466987
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 81571
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 466987
-status = -100---
-status first one
+cline_written_len = 81571
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 471082
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 85666
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 471082
-status = -100---
-status first one
+cline_written_len = 85666
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: Hæ
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 475177
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 89761
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 475177
-status = -100---
-status first one
+cline_written_len = 89761
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 1¿Hâ}¯]√@
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 479272
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 93856
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 479272
-status = -100---
-status first one
+cline_written_len = 93856
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: H¡ÈH∫
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 483367
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 97951
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 483367
-status = -100---
-status first one
+cline_written_len = 97951
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: HâsËı
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 487462
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 102046
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 487462
-status = -100---
-status first one
+cline_written_len = 102046
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: â∆Éü
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 491557
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 106141
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 491557
-status = -100---
-status first one
+cline_written_len = 106141
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 495652
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 110236
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 495652
-status = -100---
-status first one
+cline_written_len = 110236
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 499747
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 114331
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 499747
-status = -100---
-status first one
+cline_written_len = 114331
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: î¬Ä‚∂¬HÉƒ ]√@
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 503842
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 118426
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 503842
-status = -100---
-status first one
+cline_written_len = 118426
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 507937
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 122521
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 507937
-status = -100---
-status first one
+cline_written_len = 122521
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: ¡HâCHHâK@Ö
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 512032
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 126616
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 512032
-status = -100---
-status first one
+cline_written_len = 126616
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 516127
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 130711
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 516127
-status = -100---
-status first one
+cline_written_len = 130711
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: EÿH
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 520222
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 134806
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 520222
-status = -100---
-status first one
+cline_written_len = 134806
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 524317
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 138901
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 524317
-status = -100---
-status first one
+cline_written_len = 138901
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 528412
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 142996
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 528412
-status = -100---
-status first one
+cline_written_len = 142996
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: p
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 532507
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 147091
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 532507
-status = -100---
-status first one
+cline_written_len = 147091
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 536602
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 151186
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 536602
-status = -100---
-status first one
+cline_written_len = 151186
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: â¡HÅ¡ 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 540697
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 155281
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 540697
-status = -100---
-status first one
+cline_written_len = 155281
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: H	˛HøÒÒÒÒ¯Ú¯ÛHâ>Hã{X∆F∆FHâ{(Hâs HâŒHâCËº˙˛ˇHãC ∆@¯∆@¯HãsPHã{PHâsËˇí
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 544792
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 159376
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 544792
-status = -100---
-status first one
+cline_written_len = 159376
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: ËHã}¯HãuHãUËËõ
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 548887
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 163471
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 548887
-status = -100---
-status first one
+cline_written_len = 163471
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 552982
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 167566
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 552982
-status = -100---
-status first one
+cline_written_len = 167566
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: ˇHã}∏Hâ∆Ë"Î˛ˇÈ
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 557077
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 171661
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 557077
-status = -100---
-status first one
+cline_written_len = 171661
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: Hø
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 561172
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 175756
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 561172
-status = -100---
-status first one
+cline_written_len = 175756
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 565267
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 179851
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 565267
-status = -100---
-status first one
+cline_written_len = 179851
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 569362
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 183946
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 569362
-status = -100---
-status first one
+cline_written_len = 183946
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 573457
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 188041
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 573457
-status = -100---
-status first one
+cline_written_len = 188041
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: Ü
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 577552
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 192136
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 577552
-status = -100---
-status first one
+cline_written_len = 192136
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: âC8HâK0Ö
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 581647
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 196231
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 581647
-status = -100---
-status first one
+cline_written_len = 196231
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 585742
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 200326
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 585742
-status = -100---
-status first one
+cline_written_len = 200326
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: â H¡ÍHæ
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 589837
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 204421
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 589837
-status = -100---
-status first one
+cline_written_len = 204421
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: HâÅ–
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 593932
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 208516
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 593932
-status = -100---
-status first one
+cline_written_len = 208516
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 1¿â¬Hãª»
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 598027
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 212611
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 598027
-status = -100---
-status first one
+cline_written_len = 212611
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: Hã≥p
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 602122
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 216706
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 602122
-status = -100---
-status first one
+cline_written_len = 216706
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: HãÉ¿
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 606217
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 220801
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 606217
-status = -100---
-status first one
+cline_written_len = 220801
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: ç5÷—
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 610312
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 224896
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 610312
-status = -100---
-status first one
+cline_written_len = 224896
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: É
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 614407
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 228991
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 614407
-status = -100---
-status first one
+cline_written_len = 228991
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: =
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 618502
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 233086
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 618502
-status = -100---
-status first one
+cline_written_len = 233086
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 622597
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 237181
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 622597
-status = -100---
-status first one
+cline_written_len = 237181
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: C(È
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 626692
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 241276
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 626692
-status = -100---
-status first one
+cline_written_len = 241276
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: ¡ÈH∫
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 630787
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 245371
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 630787
-status = -100---
-status first one
+cline_written_len = 245371
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 634882
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 249466
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 634882
-status = -100---
-status first one
+cline_written_len = 249466
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 638977
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
+req.size() + client_class.get_post_written_len() = 253561
+(client_class.get_post_filelength() - (boundary.size() + 6)) = 741821
 second while write
-cline_written_len = 638977
-status = -100---
-status first one
+cline_written_len = 253561
 Waiting for events
 [0;32mReading request from client fd number : 5[0;37m
+Request received: 
 5
 ------------number of bytesreads 4095
 /assets/
-here______
-test
 POST body request found
 POST_BODY---------------------------------
-req.size() + client_class.get_post_written_len() = 643072
-(client_class.get_post_filelength() - (boundary.size() + 6)) = 742845
-second while write
-cline_written_len = 643072
-status = -100---
-status first one
-Waiting for events
-[0;32mReading request from client fd number : 5[0;37m
-5
-------------number of bytesreads 4095
-/asset
+req.size() + client_class.get_post_written_len() = 257656
+(client_class.get_post_fileleng

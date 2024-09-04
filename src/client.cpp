@@ -30,12 +30,14 @@ client::client(int fd) : _socketfd(fd){
     this->postfileboundaryend = "";
     this->post_boundary = "";
     this->post_request_parsed = false;
+    this->post_body_header_parsed = false;
     post_written_len = 0;
     _bytesread = 0;
     request_size = 0;
 }
 
 client::client(){
+	_filename = "";
     this->header_done = false;
     this->body_done = false;
     this->request_done = false;
@@ -683,5 +685,40 @@ void client::clear_post_elements(){
 
 
 void client::clear_request_response_elements(){
-
+    if (filefd > 0){
+        close(filefd);
+    }
+    if (postfd > 0){
+        close(postfd);
+    }
+    _filename = "";
+    this->header_done = false;
+    this->body_done = false;
+    this->request_done = false;
+    this->status_code = 0;
+    this->body = "";
+    this->header = "";
+    this->_request = "";
+    this->_response = "";
+    this->content_length = 0;
+    this->chunked = false;
+    this->requestvalid = false;
+    this->connection_close = false;
+    this->filefd = 0;
+    this->ifstream_empty = false;
+    this->postfd = 0;
+    this->postfilelength = 0;
+    this->content_length_valid = false;
+    this->encoding_length_conflict = false;
+    this->postfilename = "";
+    this->postfiletype = "";
+    this->postfiledata = "";
+    this->postfileboundary = "";
+    this->postfileboundaryend = "";
+    this->post_boundary = "";
+    this->post_request_parsed = false;
+    this->post_body_header_parsed = false;
+    post_written_len = 0;
+    _bytesread = 0;
+    request_size = 0;
 }

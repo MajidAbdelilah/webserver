@@ -182,6 +182,7 @@ class client {
         void clear_response();
         void clear_status_code();
         void clear_socketfd();
+        void clear_request_response_elements();
         void clear_post_elements();
         void clear_all();
 
