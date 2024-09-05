@@ -446,11 +446,14 @@ void client::build_response(){
         if (filefd < 0){
             filefd = -2;
             set_status_code(404);
+            set_content_length(0);
         }
-        if (filefd != -2 && -1 ==fstat(filefd, &filestat)){
+        else if (filefd != -2 && -1 ==fstat(filefd, &filestat)){
+            set_content_length(0);
             perror("fstat");
         }
-        set_content_length(filestat.st_size);
+        else
+            set_content_length(filestat.st_size);
     }
     set_status_message(status_code); // setting the message
     long long length = get_content_length();
