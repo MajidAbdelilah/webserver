@@ -460,6 +460,7 @@ void client::build_response(){
         + "Content-Type: " + content_type + CRLF\
         + "Content-Length: " + tostring(length)+ CRLF \
         + (!connection_close ? "Connection: keep-alive\r\nKeep-Alive: timeout=10, max=20" : "Connection: close" ) + CRLF + CRLF;
+    std::cout << response_header << "\n";
     std::cout << "here 4---------\n";
     // setting the header
     _response = response_header;

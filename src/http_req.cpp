@@ -6,7 +6,13 @@
 #include <sys/fcntl.h>
 
 
+void fill_client_data(client &client_class, std::map<std::string, std::string> &req_map){
+	client_class.set_method(req_map["URI"]);
+	client_class.set_version(req_map["Version"].substr(0, req_map["Version"].size() - 2));
+	client_class.set_connection_close(req_map["Connection"] == "keep-alive\r\n" ? 0 : 1);
+	client_class.set_content_type(req_map["Content-Type"].substr(0, req_map["Content-Type"].find(";")));
 
+}
 std::string get_line(std::string &req)
 {
 	std::string line;
@@ -105,6 +111,7 @@ int DELETE(client &client_class, std::map<std::string, std::string> &req_map)
 	}
 	std::cout << "URI: " << uri << std::endl;
 
+	fill_client_data(client_class, req_map);
 
     
 	int status = std::remove(uri.c_str());
@@ -225,13 +232,7 @@ int POST_body(client &client_class)
 	return status;
 }
 
-void fill_client_data(client &client_class, std::map<std::string, std::string> &req_map){
-	client_class.set_method(req_map["URI"]);
-	client_class.set_version(req_map["Version"].substr(0, req_map["Version"].size() - 2));
-	client_class.set_connection_close(req_map["Connection"] == "keep-alive\r\n" ? 0 : 1);
-	client_class.set_content_type(req_map["Content-Type"].substr(0, req_map["Content-Type"].find(";")));
 
-}
 
 int POST_header(client &client_class, std::map<std::string, std::string> &req_map)
 {
@@ -412,6 +413,7 @@ int GET(client &client_class, std::map<std::string, std::string> &req_map)
 	std::cout << "URI: " << uri << std::endl;
 	uri = uri.substr(0, uri.find("?"));
 	client_class.set_filename(uri);
+	fill_client_data(client_class, req_map);
 
 	// std::cout << content << std::endl;
 
@@ -504,8 +506,7 @@ int handle_request(client &client_class)
 	{
 		std::cout << ("GET request found\n");
 		int status =  GET(client_class, req_map);
-		if(status == 200)
-		{
+		
 			client_class.set_status_code(int(status));
 			client_class.set_connection_close(req_map["Connection"] == "keep-alive" ? 0 : 1);
 			client_class.set_method(req_map["Method"]);
@@ -514,7 +515,7 @@ int handle_request(client &client_class)
 			client_class.set_host(req_map["Host"].substr(0, req_map["Host"].find(":")));
 			client_class.set_port(req_map["Host"].substr(req_map["Host"].find(":") + 1));
 			client_class.set_path(req_map["URI"].substr(0, req_map["URI"].find("?")));
-		}
+		
 		client_class.set_requestvalid(bool(status == 200 || status == 404));
 		return status;
 
@@ -523,8 +524,7 @@ int handle_request(client &client_class)
 	{
 		std::cout << ("DELETE request found\n");
 		int status = DELETE(client_class, req_map);
-		if(status == 200)
-		{
+
 			client_class.set_status_code(int(status));
 			client_class.set_connection_close(req_map["Connection"] == "keep-alive" ? 0 : 1);
 			client_class.set_method(req_map["Method"]);
@@ -533,7 +533,7 @@ int handle_request(client &client_class)
 			client_class.set_host(req_map["Host"].substr(0, req_map["Host"].find(":")));
 			client_class.set_port(req_map["Host"].substr(req_map["Host"].find(":") + 1));
 			client_class.set_path(req_map["URI"].substr(0, req_map["URI"].find("?")));
-		}
+		
 		client_class.set_requestvalid(bool(status == 200 || status == 404));
 		return status;
 	}
