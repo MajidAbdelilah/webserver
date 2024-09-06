@@ -2,8 +2,10 @@
 #include "server.hpp"
 #include <cctype>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <sys/fcntl.h>
+#include <unistd.h>
 
 
 void fill_client_data(client &client_class, std::map<std::string, std::string> &req_map){
@@ -144,7 +146,7 @@ int POST_body(client &client_class)
 	std::string &req = client_class.get_request();
 	std::string bound = ("\r\n--"+client_class.get_post_boundary());
 	// std::cout << bound << '\n';
-	// std::cout <<'|'<<req<<'|';
+	std::cout <<'|'<<req<<'|';
 	unsigned long index = req.find(bound);
 	if(index != std::string::npos)
 	{
@@ -231,7 +233,110 @@ int POST_body(client &client_class)
 	}
 	return status;
 }
+// ----------------------------418835119977164444166495--
+// --------------------------418835119977164444166495
+int POST_CHUNKED_BODY(client &client_class)
+{
+	std::string &req = client_class.get_request();
+	std::cout << "POST_CHUNKED_BODY--------------start-------------------\n";
+	std::cout << req << '\n';
+	std::cout << "POST_CHUNKED_BODY---------------end------------------\n";
+	std::cout << "chunk_size = " << client_class.get_POST_chunk_size()<< "\n";
+	if(client_class.get_POST_chunk_size() == 0 && req.size() >= 3)
+	{
+		std::string line = "\r\n";
+		std::cout << line << "\n";
+		while(line == "\r\n" && line.size() == 2)
+		{
+			line = get_line(req);
+			std::cout << "--------------------------\n";
+			std::cout << line << std::endl;
+			std::cout << "--------------------------\n";
+		}
+		std::cout << line << std::endl;
+		client_class.set_POST_chunk_size(std::stoll(line, 0, 16));
+		std::cout << "chunk_size = " << client_class.get_POST_chunk_size()<< "\n";
+		if(client_class.get_POST_chunk_size() == 0 && line == "0\r\n")
+		{
+			std::cout << "chunk_size = 0\n";
+			return 200;
+		}
+	}
+	long long chunk_size = (long long)req.size() < client_class.get_POST_chunk_size() ? req.size() : client_class.get_POST_chunk_size();
+	std::string chunk = req.substr(0, chunk_size);
+	req.erase(0, chunk_size);
 
+	std::cout << "chunk = " << chunk << "\n";
+
+	unsigned long separet_boundry = chunk.find("--" + client_class.get_post_boundary());
+	unsigned long end_of_file_boundry = chunk.find("--" + client_class.get_post_boundary().substr(0, client_class.get_post_boundary().find("\r\n")) + "--\r\n");
+	std::cout << "end_of_file_boundry = " << end_of_file_boundry << "\n";
+	if(separet_boundry != std::string::npos && end_of_file_boundry == std::string::npos)
+	{
+		long long size = write(client_class.get_post_fd(), chunk.c_str(), separet_boundry);
+		if(size == -1)
+			return -1;
+		chunk.erase(0, size);
+		client_class.set_POST_chunk_size(client_class.get_POST_chunk_size() - size);
+		std::cout << "get_line loop start\n";
+		std::string line = "";
+		while(line != "\r\n")
+		{
+			line = get_line(chunk);
+			client_class.set_POST_chunk_size(client_class.get_POST_chunk_size() - line.size());
+			std::cout << client_class.get_POST_chunk_size() << "\n";
+			client_class.decrement_request_size(line.size());
+			std::cout << line;
+			if(line.find("Content-Disposition:") != std::string::npos)
+			{
+				long long i = line.find("filename=\"") + 10;
+				std::string filename = "";
+				while(line[i] != '\"')
+					filename += line[i++];
+				std::cout << "filename = = " << filename << "\n";
+				client_class.set_post_filename(filename);
+				client_class.set_post_fd(open(filename.c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
+			}
+		}
+		std::cout << "chunk_size = " <<client_class.get_POST_chunk_size() << "\n";
+		std::cout << "get_line loop end\n";
+		if(client_class.get_POST_chunk_size() <= 0)
+		{
+			// req = chunk + req;
+			return POST_CHUNKED_BODY(client_class);
+		}else {
+			std::cout << "error 400\n";
+			return 400;
+		}
+	}
+	if(end_of_file_boundry != std::string::npos)
+	{
+		std::cout << "end of file boundry\n";
+		
+		long long size = write(client_class.get_post_fd(), chunk.c_str(), end_of_file_boundry);
+		if(size == -1)
+			return -1;
+		chunk.erase(0, size);
+		client_class.set_POST_chunk_size(client_class.get_POST_chunk_size() - size);
+		std::cout << "chunk_size = " <<client_class.get_POST_chunk_size()<< "\n";
+		req.erase(req.begin(), req.end());
+		client_class.set_POST_chunk_size(0);
+		return 200;
+	}
+
+	long long size = write(client_class.get_post_fd(), chunk.c_str(), chunk.size());
+	if(size == -1)
+		return -1;
+	chunk.erase(0, size);
+	client_class.set_POST_chunk_size(client_class.get_POST_chunk_size() - size);
+	std::cout << "chunk_size11111 = " <<client_class.get_POST_chunk_size()<< "\n";
+	req = chunk + req;
+	if(req.size() > 2)
+	{
+		return POST_CHUNKED_BODY(client_class);
+	}
+	return -100;
+}
 
 
 int POST_header(client &client_class, std::map<std::string, std::string> &req_map)
@@ -239,7 +344,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	std::string &req = client_class.get_request();
 	std::cout << "req.size() = " << req.size() << "\n";
 	std::cout << "\n\n\nPOST REQUEST START \n\n";
-	// std::cout << req << std::endl;
+	std::cout << req << std::endl;
 	std::cout << "\nPOST REQUEST END\n";
 
 	std::string line = get_line(req);
@@ -285,7 +390,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		std::cout << "Content-Type is not multipart/form-data\n";
 		return 400;
 	}
-	if(req_map.find("Content-Length") == req_map.end())
+	if(req_map.find("Content-Length") == req_map.end() && req_map["Transfer-Encoding"] != "chunked\r\n")
 	{
 		std::cout << "Content-Length not found\n";
 		return 400;
@@ -298,7 +403,8 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		uri = "index.html";
 	uri = uri.substr(0, uri.find("?"));
 	std::cout << "URI: " << uri << std::endl;
-	client_class.set_post_filelength(std::stoll(req_map["Content-Length"]));
+	if(req_map.find("Content-Length") != req_map.end())
+		client_class.set_post_filelength(std::stoll(req_map["Content-Length"]));
 	std::cout << "Content-Length: " << client_class.get_post_filelength() << std::endl;
 	client_class.set_post_request_parsed(true);
 	if(req.find("\r\n\r\n") == std::string::npos)
@@ -308,6 +414,62 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	}else {
 		std::cout << "request has a body\n";
 		// std::cout << req << "\n";
+	}
+	if(req_map.find("Transfer-Encoding") != req_map.end() && req_map["Transfer-Encoding"] == "chunked\r\n")
+	{
+		std::cout << "chunked body\n";
+		client_class.set_POST_Chuncked(true);
+		std::cout << "get_line loop start\n";
+		line = get_line(req);
+		std::cout << line << std::endl;
+		client_class.set_POST_chunk_size(std::stoll(line, 0, 16));
+		std::cout << "chunk_size = " << client_class.get_POST_chunk_size()<< "\n";
+		if(client_class.get_POST_chunk_size() == 0 && line == "0\r\n")
+		{
+			std::cout << "chunk_size = 0\n";
+			return 200;
+		}
+		line = get_line(req);
+		client_class.set_POST_chunk_size(client_class.get_POST_chunk_size() - line.size());
+		std::cout << line << std::endl;
+		while(line != "\r\n")
+		{
+			// std::cout << line << std::endl;
+			if(line.find(client_class.get_post_boundary()) != std::string::npos)
+			{
+				while(line != "\r\n")
+				{
+					line = get_line(req);
+					parse_headers(line, req_map);
+					client_class.set_POST_chunk_size(client_class.get_POST_chunk_size() - line.size());
+					std::cout << client_class.get_POST_chunk_size() << "\n";
+					client_class.decrement_request_size(line.size());
+					std::cout << line;
+					if(line.find("Content-Disposition:") != std::string::npos)
+					{
+						long long i = line.find("filename=\"") + 10;
+						std::string filename = "";
+						while(line[i] != '\"')
+							filename += line[i++];
+						std::cout << "filename = = " << filename << "\n";
+						client_class.set_post_filename(filename);
+						client_class.set_post_fd(open(filename.c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
+					}
+				}
+
+			}else {
+				return 400;
+			}
+		}
+		std::cout << "get_line loop end\n";
+		
+		if(client_class.get_POST_chunk_size() <= 0)
+		{
+			return POST_CHUNKED_BODY(client_class);
+		}else {
+			return 400;
+		}
+
 	}
 	std::cout << "get_line loop start\n";
 	line = get_line(req);
@@ -345,7 +507,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	}
 	std::cout << "get_line loop end\n";
 	std::cout << "POST HEADER PARSED, req = \n";
-	// std::cout << req;
+	std::cout << req << "\n";
 	std::cout << "req.size() = " << req.size() << "\n";
 	if(req.size() > 0)
 	{
@@ -455,6 +617,12 @@ int handle_request(client &client_class)
 	if(client_class.get_post_request_parsed())
 		{
 			std::cout << ("POST body request found\n");
+			if(client_class.get_POST_Chuncked())
+			{
+				int status = POST_CHUNKED_BODY(client_class);
+				client_class.set_status_code(status);
+				return status;
+			}
 			int status = POST_body(client_class);
 			client_class.set_status_code(status);
 			return status;

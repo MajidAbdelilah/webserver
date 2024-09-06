@@ -34,6 +34,8 @@ client::client(int fd) : _socketfd(fd){
     post_written_len = 0;
     _bytesread = 0;
     request_size = 0;
+    POST_Chuncked = false;
+    POST_chunk_size = 0;
 }
 
 client::client(){
@@ -67,6 +69,8 @@ client::client(){
     post_written_len = 0;
     _bytesread = 0;
     request_size = 0;
+    POST_Chuncked = false;
+    POST_chunk_size = 0;
 }
 
 client::~client(){

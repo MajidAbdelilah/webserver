@@ -62,6 +62,8 @@ class client {
 		bool post_body_header_parsed;
         unsigned long post_written_len;
         unsigned long request_size;
+        bool POST_Chuncked;
+        long long POST_chunk_size;
         int _bytesread;
     public:
         client();
@@ -76,6 +78,14 @@ class client {
         std::string get_post_filedata();
         std::string get_post_fileboundary();
         std::string get_post_fileboundaryend();
+        void set_POST_chunk_size(long long size)
+        {
+            POST_chunk_size = size;
+        }
+        long long get_POST_chunk_size() const
+        {
+            return POST_chunk_size;
+        }
         unsigned long get_request_size() const
         {
             return request_size;
@@ -93,7 +103,14 @@ class client {
         {
             return post_written_len;
         }
-        
+        void set_POST_Chuncked(bool status)
+        {
+            POST_Chuncked = status;
+        }
+        bool get_POST_Chuncked() const
+        {
+            return POST_Chuncked;
+        }
 
         long long get_post_filelength();
         bool get_content_length_valid();
