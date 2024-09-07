@@ -433,7 +433,7 @@ std::string client::tostring(long long num){
 
 
 void client::build_response(){
-    std::cout << "here 1---------\n";
+    DEBUG && std::cout << "here 1---------\n";
     if (method == "POST"){
         set_status_message(status_code); // setting the message
         _response  = version.erase(version.size() -2 * (version.size() >= 2)) + " " + tostring((long long)status_code) + " " + status_message + CRLF\
@@ -444,7 +444,7 @@ void client::build_response(){
     response_header = _response;
     return ;
     }
-    std::cout << "here 2---------\n";
+    DEBUG && std::cout << "here 2---------\n";
     if (_filename != ""){
         filefd = open(_filename.c_str(), O_RDONLY);
         if (filefd < 0){
@@ -461,14 +461,14 @@ void client::build_response(){
     }
     set_status_message(status_code); // setting the message
     long long length = get_content_length();
-    std::cout << "here 3---------\n";
-    std::cout << version.size() << "\n";
+    DEBUG && std::cout << "here 3---------\n";
+    DEBUG && std::cout << version.size() << "\n";
     response_header = version.erase(version.size() -2 * (version.size() >= 2)) + " " + tostring((long long)status_code) + " " + status_message + CRLF\
         + "Content-Type: " + content_type + CRLF\
         + "Content-Length: " + tostring(length)+ CRLF \
         + (!connection_close ? "Connection: keep-alive\r\nKeep-Alive: timeout=10, max=20" : "Connection: close" ) + CRLF + CRLF;
-    std::cout << response_header << "\n";
-    std::cout << "here 4---------\n";
+    DEBUG && std::cout << response_header << "\n";
+    DEBUG && std::cout << "here 4---------\n";
     // setting the header
     _response = response_header;
     if (_filename != "" && filefd > 0){

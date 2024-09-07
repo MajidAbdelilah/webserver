@@ -18,6 +18,6 @@ int main (int ac, char **av){
         webserv.run();
     }
     catch(const char * e){
-        std::cout << e << std::endl;
+        DEBUG && std::cout << e << std::endl;
     }
 }
