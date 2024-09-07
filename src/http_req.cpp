@@ -400,7 +400,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	}
 	if(req_map.find("Content-Length") == req_map.end() && req_map["Transfer-Encoding"] != "chunked\r\n")
 	{
-		DEBUG && std::cout << "Content-Length not found\n";
+		std::cout << "Content-Length not found\n";
 		return 400;
 	}
 	fill_client_data(client_class, req_map);
@@ -425,6 +425,13 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	}
 	if(req_map.find("Transfer-Encoding") != req_map.end() && req_map["Transfer-Encoding"] == "chunked\r\n")
 	{
+		if(req_map.find("Content-Length") != req_map.end())
+		{
+			 std::cout << "Content-Length exist in chunked transfer NOT allowed\n";
+			client_class.set_request_done(true);
+			client_class.set_status_code(400);
+			return 400;
+		}
 		DEBUG && std::cout << "chunked body\n";
 		client_class.set_POST_Chuncked(true);
 		DEBUG && std::cout << "get_line loop start\n";
@@ -478,6 +485,13 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 			return 400;
 		}
 
+	}
+	if(req_map.find("Content-Length") == req_map.end())
+	{
+		 std::cout << "Content-Length doesnt exist in normal transfer NOT allowed\n";
+		client_class.set_request_done(true);
+		client_class.set_status_code(400);
+		return 400;
 	}
 	DEBUG && std::cout << "get_line loop start\n";
 	line = get_line(req);

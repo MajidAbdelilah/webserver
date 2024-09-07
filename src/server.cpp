@@ -246,6 +246,15 @@ void Server::check_header_body(int client_soc, int bytesread){
                 // _Clients[client_soc].clear_all();
                 _Clients[client_soc].set_request_done(true);
             }
+               if(status != -100 && status != -1)
+            {
+                _Clients[client_soc].set_request_done(true);
+            }
+            if(status == -1)
+            {
+                std::cout << "write error" << '\n';
+                _Clients[client_soc].set_request_done(true);
+            }
             return ;
 		}
         std::string first_line = _Clients[client_soc].get_header();
@@ -280,6 +289,15 @@ void Server::check_header_body(int client_soc, int bytesread){
                 DEBUG && std::cout << "Entering status 200 \n";
                 _Clients[client_soc].set_request_done(true);
                 // _Clients[client_soc].clear_all();
+            }
+            if(status != -100 && status != -1)
+            {
+                _Clients[client_soc].set_request_done(true);
+            }
+            if(status == -1)
+            {
+                std::cout << "write error" << '\n';
+                _Clients[client_soc].set_request_done(true);
             }
 		}
         return ;
