@@ -410,19 +410,19 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		DEBUG && std::cout << "Boundary not found\n";
 		return 400;
 	}
-	if(req_map["Content-Type"].find("multipart/form-data") == std::string::npos && req_map["Content-Type"].find("boundary=") != std::string::npos)
+	if(req_map["Content-Type"].find("multipart/form-data") == std::string::npos && req_map["Content-Type"].find("text/plain") == std::string::npos)
 	{
 		DEBUG && std::cout << "Content-Type is not multipart/form-data\n";
 		return 400;
 	}
-	if(req_map.find("Content-Length") == req_map.end() && req_map["Transfer-Encoding"] != "chunked\r\n" &&  req_map["Content-Type"].find("text/plain") != std::string::npos)
+	if(req_map.find("Content-Length") == req_map.end() && req_map["Transfer-Encoding"] != "chunked\r\n")
 	{
 		std::cout << "Content-Length not found\n";
 		return 400;
 	}
 
 	fill_client_data(client_class, req_map);
-	if(req_map.find("Content-Length") != req_map.end())
+	if(req_map["Content-Type"].find("multipart/form-data") != std::string::npos)
 		client_class.set_post_boundary(req_map["Content-Type"].substr(req_map["Content-Type"].find("boundary=") + 9));
 	DEBUG && std::cout << "Boundary: " << client_class.get_post_boundary() << std::endl;
 	std::string uri = req_map["URI"][0] == '/' ? req_map["URI"].substr(1) : req_map["URI"];
@@ -451,7 +451,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 			client_class.set_status_code(400);
 			return 400;
 		}
-		if(req_map["Content-Type"] == "text/plain\r\n")
+		if(req_map["Content-Type"].find("multipart/form-data") == std::string::npos)
 		{
 			const std::chrono::time_point<std::chrono::system_clock> p1 = std::chrono::system_clock::now();
 			const std::string name = "client_" + std::to_string(std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count());
