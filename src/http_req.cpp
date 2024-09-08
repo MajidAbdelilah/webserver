@@ -254,12 +254,12 @@ int POST_CHUNKED_BODY(client &client_class)
 			DEBUG && std::cout << line << std::endl;
 			DEBUG && std::cout << "--------------------------\n";
 		}
-		DEBUG && std::cout << line << std::endl;
+		DEBUG && std::cout << "line = " << line << std::endl;
 		client_class.set_POST_chunk_size(std::stoll(line, 0, 16));
 		DEBUG && std::cout << "chunk_size = " << client_class.get_POST_chunk_size()<< "\n";
 		if(client_class.get_POST_chunk_size() == 0 && line == "0\r\n")
 		{
-			DEBUG && std::cout << "chunk_size = 0\n";
+			DEBUG && std::cout << "chunk_size =-=-=-=-=-=-=-= = 0\n";
 			return 200;
 		}
 	}
@@ -322,9 +322,13 @@ int POST_CHUNKED_BODY(client &client_class)
 		chunk.erase(0, size);
 		client_class.set_POST_chunk_size(client_class.get_POST_chunk_size() - size);
 		DEBUG && std::cout << "chunk_size = " <<client_class.get_POST_chunk_size()<< "\n";
-		req.erase(req.begin(), req.end());
+		// req.erase(0, end_of_file_boundry + client_class.get_post_boundary().size() + 4);
+		chunk.erase(chunk.begin(), chunk.end());
+		std::cout << "req = " << req << "\n";
 		client_class.set_POST_chunk_size(0);
-		return 200;
+		std::cout << "chunk = " << chunk << "\n";
+		// client_class.set_POST_chunk_size(0);
+		// return 200;
 	}
 	if(chunk.size() == 2 && chunk == "\r\n")
 	{
