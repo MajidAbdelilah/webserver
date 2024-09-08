@@ -436,12 +436,13 @@ void client::build_response(){
     DEBUG && std::cout << "here 1---------\n";
     if (method == "POST"){
         set_status_message(status_code); // setting the message
-        _response  = version.erase(version.size() -2 * (version.size() >= 2)) + " " + tostring((long long)status_code) + " " + status_message + CRLF\
+        _response  = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
         + "Content-Type: " + content_type + CRLF\
         + "Content-Length: " + tostring(0)+ CRLF \
-        + (!connection_close ? "Connection: keep-alive\r\nKeep-Alive: timeout=10, max=20" : "Connection: close" ) + CRLF + CRLF;
+        + (!connection_close ? "Connection: keep-alive\r\n": "Connection: close" ) + CRLF + CRLF;
     // setting the header
     response_header = _response;
+    DEBUG && std::cout << "response post test ----"<< response_header << "\n";
     return ;
     }
     DEBUG && std::cout << "here 2---------\n";
@@ -463,7 +464,7 @@ void client::build_response(){
     long long length = get_content_length();
     DEBUG && std::cout << "here 3---------\n";
     DEBUG && std::cout << version.size() << "\n";
-    response_header = version.erase(version.size() -2 * (version.size() >= 2)) + " " + tostring((long long)status_code) + " " + status_message + CRLF\
+    response_header = version + " " + tostring((long long)status_code) + " " + status_message + CRLF\
         + "Content-Type: " + content_type + CRLF\
         + "Content-Length: " + tostring(length)+ CRLF \
         + (!connection_close ? "Connection: keep-alive\r\nKeep-Alive: timeout=10, max=20" : "Connection: close" ) + CRLF + CRLF;
@@ -478,6 +479,9 @@ void client::build_response(){
             perror("read");
         }
         _response.append(buffer, bytes_read);
+        std::cout << "-------------\n";
+        std::cout << _response << "\n";
+        std::cout << "-------------\n";
     }
     ifstream_empty = false;
     clear_request();

@@ -56,7 +56,11 @@ int Server::run(){
                 _Clients[client_socketfd] = client(client_socketfd);
             }
             else if (_Clients.find(events[i].ident) != _Clients.end()){
-                 if (events[i].filter == EVFILT_READ){
+                if (events[i].flags & EV_EOF){
+                    std::cout << RED "Client disconnected fd number " << events[i].ident << '\n'  << WHT;
+                    close_remove_event(events[i].ident, kernel_queue);
+                }
+                else if (events[i].filter == EVFILT_READ){
                     std::cout << GRN "Reading request from client fd number : " << events[i].ident << WHT << '\n';
                     int r = getting_req(kernel_queue, events[i].ident); // parse request send to majid;
 					(void)r;
@@ -65,10 +69,6 @@ int Server::run(){
                 {
                      std::cout << "IT ENTERS WRITE FILTEEEEER \n";
                     Server::handle_write_request(events[i], kernel_queue);
-                }
-                if (events[i].flags & EV_EOF){
-                    std::cout << RED "Client disconnected\n" WHT;
-                    close_remove_event(events[i].ident, kernel_queue);
                 }
             }
         }
@@ -125,8 +125,8 @@ int Server::handle_write_request(struct kevent &events, int kq) {
                 _Clients[fd].set_response_header("");
                 _Clients[fd].set_response(_Clients[fd].get_response().substr(size));
                 // if (_Clients[fd].get_method() == "POST"){
-                    Server::register_read(fd, kq); //to fix 
                     _Clients[fd].clear_all(); //to fix
+                    Server::register_read(fd, kq); //to fix 
                 // }
             }
             else {
@@ -149,11 +149,16 @@ int Server::handle_write_request(struct kevent &events, int kq) {
         else if (_Clients[fd].get_response_header() == "" && _Clients[fd].get_ifstreamempty()){
             DEBUG && std::cout << "checking if the file is empty && kevent is registred\n";
             int s = _Clients[fd].get_connection_close();
+            std::cout <<  " connection close "<< s << '\n';
             Server::register_read(fd, kq);
             if (s){
-                _Clients[fd].clear_all();
                 DEBUG && std::cout << RED "Closed fd number : " << fd <<  WHT << '\n';
+                _Clients[fd].clear_all();
                 close_remove_event(fd, kq);
+            }
+            else{
+                _Clients[fd].clear_all();
+                Server::register_read(fd, kq);
             }
         }
         else{
@@ -197,14 +202,14 @@ int Server::getting_req(int kernel_q, int client_soc){
         check_header_body(client_soc, _bytesread);
         if (_Clients[client_soc].is_request_done()){
             DEBUG && std::cout << "------------------------- had l9lawi imta kidkhl lhna ---------------------\n";
+            if (_Clients[client_soc].get_method() != "POST")
+			    handle_request(_Clients[client_soc]);
+            _Clients[client_soc].build_response();
             struct kevent changes;
             EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             EV_SET(&changes, client_soc, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
-            if (_Clients[client_soc].get_method() != "POST")
-			    handle_request(_Clients[client_soc]);
-            _Clients[client_soc].build_response();
         }
     }
     return (_bytesread);

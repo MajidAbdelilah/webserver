@@ -12,7 +12,7 @@
 void fill_client_data(client &client_class, std::map<std::string, std::string> &req_map){
 	// client_class.set_method(req_map["URI"]);
 	client_class.set_version(req_map["Version"].substr(0, req_map["Version"].size() - 2));
-	client_class.set_connection_close(req_map["Connection"] == "keep-alive\r\n" ? 0 : 1);
+	client_class.set_connection_close(req_map["Connection"].find("keep-alive") != std::string::npos ? 0 : 1);
 	client_class.set_content_type(req_map["Content-Type"].substr(0, req_map["Content-Type"].find(";")));
 
 }
@@ -202,11 +202,10 @@ int POST_body(client &client_class)
 	{
 		write_size = client_class.get_post_filelength() - (boundary.size() + 6) - client_class.get_post_written_len();
 		long long size = 0;
-		while(size < write_size)
-		{
+		
 			DEBUG && std::cout << "first while write\n";
 			size += write(client_class.get_post_fd(), req.c_str(), write_size - size);
-		}
+		
 		req.erase(0, size);
 		client_class.add_post_written_len(size);
 		client_class.decrement_request_size(size);
@@ -221,11 +220,10 @@ int POST_body(client &client_class)
 	}else {
 		write_size = req.size();
 		long long size = 0;
-		while(size < write_size)
-		{
+		
 			DEBUG && std::cout << "second while write\n";
 			size += write(client_class.get_post_fd(), req.c_str(), write_size - size);
-		}
+		
 		req.erase(0, size);
 		client_class.add_post_written_len(size);
 		client_class.decrement_request_size(size);
@@ -726,10 +724,10 @@ int handle_request(client &client_class)
 		int status =  GET(client_class, req_map);
 		
 			client_class.set_status_code(int(status));
-			client_class.set_connection_close(req_map["Connection"] == "keep-alive" ? 0 : 1);
+			client_class.set_connection_close(req_map["Connection"].find("keep-alive") != std::string::npos  ? 0 : 1);
 			client_class.set_method(req_map["Method"]);
 			client_class.set_uri(req_map["URI"]);
-			client_class.set_version(req_map["Version"]);
+			client_class.set_version(req_map["Version"].substr(0, req_map["Version"].size() - 2));
 			client_class.set_host(req_map["Host"].substr(0, req_map["Host"].find(":")));
 			client_class.set_port(req_map["Host"].substr(req_map["Host"].find(":") + 1));
 			client_class.set_path(req_map["URI"].substr(0, req_map["URI"].find("?")));
@@ -744,10 +742,10 @@ int handle_request(client &client_class)
 		int status = DELETE(client_class, req_map);
 
 			client_class.set_status_code(int(status));
-			client_class.set_connection_close(req_map["Connection"] == "keep-alive" ? 0 : 1);
+			client_class.set_connection_close(req_map["Connection"].find("keep-alive") != std::string::npos ? 0 : 1);
 			client_class.set_method(req_map["Method"]);
 			client_class.set_uri(req_map["URI"]);
-			client_class.set_version(req_map["Version"]);
+			client_class.set_version(req_map["Version"].substr(0, req_map["Version"].size() - 2));
 			client_class.set_host(req_map["Host"].substr(0, req_map["Host"].find(":")));
 			client_class.set_port(req_map["Host"].substr(req_map["Host"].find(":") + 1));
 			client_class.set_path(req_map["URI"].substr(0, req_map["URI"].find("?")));
