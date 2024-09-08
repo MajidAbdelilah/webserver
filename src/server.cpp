@@ -237,6 +237,7 @@ void Server::check_header_body(int client_soc, int bytesread){
         if (_Clients[client_soc].get_method() != ""){
             // reading body part of post request // majid post request/ body parsing and opening file and putting data in it 
 			int status = handle_request(_Clients[client_soc]);
+            _Clients[client_soc].set_status_code(status);
             if(status == -100)
             {
                 // std::string res = "HTTP/1.1 100 Continue\r\n\r\n";
@@ -280,6 +281,7 @@ void Server::check_header_body(int client_soc, int bytesread){
         _Clients[client_soc].set_append_with_bytes(const_cast<char *>((_Clients[client_soc].get_header() + _Clients[client_soc].get_body()).c_str()), bytesread);
 		if(method == "POST"){
 			int status = handle_request(_Clients[client_soc]);
+            _Clients[client_soc].set_status_code(status);
             if(status == -100)
             {
                 // std::string res = "HTTP/1.1 100 Continue\r\n\r\n";
@@ -288,6 +290,7 @@ void Server::check_header_body(int client_soc, int bytesread){
             if(status  == 200){
                 DEBUG && std::cout << "Entering status 200 \n";
                 _Clients[client_soc].set_request_done(true);
+                return;
                 // _Clients[client_soc].clear_all();
             }
             if(status != -100 && status != -1)

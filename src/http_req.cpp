@@ -1,6 +1,7 @@
 #include "http_req.hpp"
 #include "server.hpp"
 #include <cctype>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -9,7 +10,7 @@
 
 
 void fill_client_data(client &client_class, std::map<std::string, std::string> &req_map){
-	client_class.set_method(req_map["URI"]);
+	// client_class.set_method(req_map["URI"]);
 	client_class.set_version(req_map["Version"].substr(0, req_map["Version"].size() - 2));
 	client_class.set_connection_close(req_map["Connection"] == "keep-alive\r\n" ? 0 : 1);
 	client_class.set_content_type(req_map["Content-Type"].substr(0, req_map["Content-Type"].find(";")));
@@ -260,6 +261,7 @@ int POST_CHUNKED_BODY(client &client_class)
 		if(client_class.get_POST_chunk_size() == 0 && line == "0\r\n")
 		{
 			DEBUG && std::cout << "chunk_size =-=-=-=-=-=-=-= = 0\n";
+			client_class.set_status_code(200);
 			return 200;
 		}
 	}
@@ -351,6 +353,17 @@ int POST_CHUNKED_BODY(client &client_class)
 }
 
 
+int POST_RAW(client &client_class)
+{
+	std::string &req = client_class.get_request();
+	DEBUG && std::cout << "req.size() = " << req.size() << "\n";
+	DEBUG && std::cout << "\n\n\nPOST RAW REQUEST START \n\n";
+	DEBUG && std::cout << req << std::endl;
+	DEBUG && std::cout << "\nPOST RAW REQUEST END\n";
+
+	return 200;	
+}
+
 int POST_header(client &client_class, std::map<std::string, std::string> &req_map)
 {
 	std::string &req = client_class.get_request();
@@ -392,23 +405,25 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 
 	DEBUG && std::cout << "req.size() = " << req.size() << "\n";
 	
-	if(req_map["Content-Type"].find("boundary=") == std::string::npos)
+	if(req_map["Content-Type"].find("boundary=") == std::string::npos && req_map["Content-Type"].find("multipart/form-data") != std::string::npos)
 	{
 		DEBUG && std::cout << "Boundary not found\n";
 		return 400;
 	}
-	if(req_map["Content-Type"].find("multipart/form-data") == std::string::npos)
+	if(req_map["Content-Type"].find("multipart/form-data") == std::string::npos && req_map["Content-Type"].find("boundary=") != std::string::npos)
 	{
 		DEBUG && std::cout << "Content-Type is not multipart/form-data\n";
 		return 400;
 	}
-	if(req_map.find("Content-Length") == req_map.end() && req_map["Transfer-Encoding"] != "chunked\r\n")
+	if(req_map.find("Content-Length") == req_map.end() && req_map["Transfer-Encoding"] != "chunked\r\n" &&  req_map["Content-Type"].find("text/plain") != std::string::npos)
 	{
 		std::cout << "Content-Length not found\n";
 		return 400;
 	}
+
 	fill_client_data(client_class, req_map);
-	client_class.set_post_boundary(req_map["Content-Type"].substr(req_map["Content-Type"].find("boundary=") + 9));
+	if(req_map.find("Content-Length") != req_map.end())
+		client_class.set_post_boundary(req_map["Content-Type"].substr(req_map["Content-Type"].find("boundary=") + 9));
 	DEBUG && std::cout << "Boundary: " << client_class.get_post_boundary() << std::endl;
 	std::string uri = req_map["URI"][0] == '/' ? req_map["URI"].substr(1) : req_map["URI"];
 	if(uri == "")
@@ -422,7 +437,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	if(req.find("\r\n\r\n") == std::string::npos)
 	{
 		DEBUG && std::cout << "request doesnt have a body\n";
-		return 400;
+		return -100;
 	}else {
 		DEBUG && std::cout << "request has a body\n";
 		// DEBUG && std::cout << req << "\n";
@@ -435,6 +450,15 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 			client_class.set_request_done(true);
 			client_class.set_status_code(400);
 			return 400;
+		}
+		if(req_map["Content-Type"] == "text/plain\r\n")
+		{
+			const std::chrono::time_point<std::chrono::system_clock> p1 = std::chrono::system_clock::now();
+			const std::string name = "client_" + std::to_string(std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count());
+			client_class.set_post_fd(open(name.c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
+			client_class.set_POST_Chuncked(true);
+			DEBUG && std::cout << "chunked RAW body\n";
+			return POST_CHUNKED_BODY(client_class);
 		}
 		DEBUG && std::cout << "chunked body\n";
 		client_class.set_POST_Chuncked(true);
