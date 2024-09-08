@@ -127,12 +127,12 @@ int DELETE(client &client_class, std::map<std::string, std::string> &req_map)
         DEBUG && std::cout << "File successfully deleted\n";
     }
 
-	client_class.set_body("<html>"
-					"<body>"
-						"<h1>File deleted.</h1>"
-					"</body>"
-				  "</html>");
-	client_class.set_content_length(client_class.get_body().size());
+	// client_class.set_body("<html>"
+	// 				"<body>"
+	// 					"<h1>File deleted.</h1>"
+	// 				"</body>"
+	// 			  "</html>");
+	// client_class.set_content_length(client_class.get_body().size());
 	DEBUG && std::cout << "content_len: " << client_class.get_body().size() << std::endl;
 	client_class.set_content_type("text/html");
 

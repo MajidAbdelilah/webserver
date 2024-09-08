@@ -28,7 +28,7 @@
 #define PORT 8080
 #define BUFFER_SIZE 30000
 #define MAX_EVENTS 1000
-#define DEBUG 0
+#define DEBUG 1
 
 
 class Parsed_request_and_body;
