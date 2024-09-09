@@ -2,6 +2,7 @@
 #include "server.hpp"
 #include <cctype>
 #include <chrono>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -10,7 +11,7 @@
 
 
 void fill_client_data(client &client_class, std::map<std::string, std::string> &req_map){
-	// client_class.set_method(req_map["URI"]);
+	client_class.set_method(req_map["Method"]);
 	client_class.set_version(req_map["Version"].substr(0, req_map["Version"].size() - 2));
 	client_class.set_connection_close(req_map["Connection"].find("keep-alive") != std::string::npos ? 0 : 1);
 	client_class.set_content_type(req_map["Content-Type"].substr(0, req_map["Content-Type"].find(";")));
@@ -213,6 +214,7 @@ int POST_body(client &client_class)
 		if(size == write_size)
 		{
 			close(client_class.get_post_fd());
+			client_class.set_post_request_parsed(false);
 			return 200;
 		}
 		else
@@ -254,12 +256,20 @@ int POST_CHUNKED_BODY(client &client_class)
 			DEBUG && std::cout << "--------------------------\n";
 		}
 		DEBUG && std::cout << "line = " << line << std::endl;
-		client_class.set_POST_chunk_size(std::stoll(line, 0, 16));
+		try{
+			client_class.set_POST_chunk_size(std::stoll(line, 0, 16));
+		}catch(std::exception &e)
+		{
+			DEBUG && std::cout << "error 400\n";
+			return 400;
+		}
 		DEBUG && std::cout << "chunk_size = " << client_class.get_POST_chunk_size()<< "\n";
 		if(client_class.get_POST_chunk_size() == 0 && line == "0\r\n")
 		{
 			DEBUG && std::cout << "chunk_size =-=-=-=-=-=-=-= = 0\n";
 			client_class.set_status_code(200);
+			client_class.set_post_request_parsed(false);
+			close(client_class.get_post_fd());
 			return 200;
 		}
 	}
@@ -428,18 +438,31 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		uri = "index.html";
 	uri = uri.substr(0, uri.find("?"));
 	DEBUG && std::cout << "URI: " << uri << std::endl;
-	if(req_map.find("Content-Length") != req_map.end())
-		client_class.set_post_filelength(std::stoll(req_map["Content-Length"]));
+	try {
+		if(req_map.find("Content-Length") != req_map.end())
+			client_class.set_post_filelength(std::stoll(req_map["Content-Length"]));
+	} catch (std::exception &e) {
+		DEBUG && std::cout << "error 400\n";
+		return 400;
+	}
 	DEBUG && std::cout << "Content-Length: " << client_class.get_post_filelength() << std::endl;
-	client_class.set_post_request_parsed(true);
-	if(req.find("\r\n\r\n") == std::string::npos)
+	if(req.find("\r\n\r\n") == std::string::npos && req_map["Content-Type"].find("multipart/form-data") != std::string::npos)
 	{
 		DEBUG && std::cout << "request doesnt have a body\n";
+		DEBUG && std::cout << "req.size() = " << req.size() << "\n";
+		std::cout << "req = " << req << "\n";
+		return -100;
+	}if(req_map["Content-Type"].find("multipart/form-data") == std::string::npos && req.size() == 0)
+	{
+		DEBUG && std::cout << "request doesnt have a body\n";
+		DEBUG && std::cout << req << "\n";
 		return -100;
 	}else {
 		DEBUG && std::cout << "request has a body\n";
 		// DEBUG && std::cout << req << "\n";
 	}
+
+	client_class.set_post_request_parsed(true);
 	if(req_map.find("Transfer-Encoding") != req_map.end() && req_map["Transfer-Encoding"] == "chunked\r\n")
 	{
 		if(req_map.find("Content-Length") != req_map.end())
@@ -463,7 +486,12 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		DEBUG && std::cout << "get_line loop start\n";
 		line = get_line(req);
 		DEBUG && std::cout << line << std::endl;
-		client_class.set_POST_chunk_size(std::stoll(line, 0, 16));
+		try {
+			client_class.set_POST_chunk_size(std::stoll(line, 0, 16));	
+		} catch (std::exception &e) {
+			DEBUG && std::cout << "error 400\n";
+			return 400;
+		}
 		DEBUG && std::cout << "chunk_size = " << client_class.get_POST_chunk_size()<< "\n";
 		if(client_class.get_POST_chunk_size() == 0 && line == "0\r\n")
 		{
@@ -473,11 +501,14 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		line = get_line(req);
 		client_class.set_POST_chunk_size(client_class.get_POST_chunk_size() - line.size());
 		DEBUG && std::cout << line << std::endl;
+		bool found_boundry = false;
 		while(line != "\r\n")
 		{
-			// DEBUG && std::cout << line << std::endl;
+			DEBUG && std::cout << line << std::endl;
 			if(line.find(client_class.get_post_boundary()) != std::string::npos)
 			{
+				std::cout << "boundary found-----------------=======================\n";
+				found_boundry = true;
 				while(line != "\r\n")
 				{
 					line = get_line(req);
@@ -497,10 +528,12 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 						client_class.set_post_fd(open(filename.c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
 					}
 				}
-
-			}else {
-				return 400;
 			}
+		}
+		if(found_boundry == false)
+		{
+			DEBUG && std::cout << "boundary not found\n";
+			return 400;
 		}
 		DEBUG && std::cout << "get_line loop end\n";
 		

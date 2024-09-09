@@ -210,6 +210,7 @@ int Server::getting_req(int kernel_q, int client_soc){
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             EV_SET(&changes, client_soc, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
+            _Clients[client_soc].set_request_done(false);
         }
     }
     return (_bytesread);
@@ -250,10 +251,12 @@ void Server::check_header_body(int client_soc, int bytesread){
             }
             if(status  == 200){
                 // _Clients[client_soc].clear_all();
+                _Clients[client_soc].set_connection_close(1);
                 _Clients[client_soc].set_request_done(true);
             }
                if(status != -100 && status != -1)
             {
+                _Clients[client_soc].set_connection_close(1);
                 _Clients[client_soc].set_request_done(true);
             }
             if(status == -1)
@@ -295,11 +298,13 @@ void Server::check_header_body(int client_soc, int bytesread){
             if(status  == 200){
                 DEBUG && std::cout << "Entering status 200 \n";
                 _Clients[client_soc].set_request_done(true);
+                _Clients[client_soc].set_connection_close(1);
                 return;
                 // _Clients[client_soc].clear_all();
             }
             if(status != -100 && status != -1)
             {
+                _Clients[client_soc].set_connection_close(1);
                 _Clients[client_soc].set_request_done(true);
             }
             if(status == -1)
