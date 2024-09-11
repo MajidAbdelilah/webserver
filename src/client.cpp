@@ -36,6 +36,8 @@ client::client(int fd) : _socketfd(fd){
     request_size = 0;
     POST_Chuncked = false;
     POST_chunk_size = 0;
+    get_delete_done = false;
+    get_delete_trash = false;
 }
 
 client::client(){
@@ -71,6 +73,8 @@ client::client(){
     request_size = 0;
     POST_Chuncked = false;
     POST_chunk_size = 0;
+    get_delete_done = false;
+    get_delete_trash = false;
 }
 
 client::~client(){

@@ -66,6 +66,8 @@ class client {
         long long POST_chunk_size;
         int _bytesread;
     public:
+        bool get_delete_done;
+        bool get_delete_trash;
         client();
         client(int fd);
         ~client();
@@ -102,6 +104,10 @@ class client {
         unsigned long get_post_written_len() const
         {
             return post_written_len;
+        }
+        void clear_post_written_len()
+        {
+            post_written_len = 0;
         }
         void set_POST_Chuncked(bool status)
         {

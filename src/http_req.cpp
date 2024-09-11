@@ -59,6 +59,7 @@ int parse_headers(std::string line, std::map<std::string, std::string> &req)
 
 int DELETE(client &client_class, std::map<std::string, std::string> &req_map)
 {
+
 	std::string req = client_class.get_request();
 	DEBUG && std::cout << "\n\n\nDELETE REQUEST START \n\n";
 	// DEBUG && std::cout << req << std::endl;
@@ -138,18 +139,33 @@ int DELETE(client &client_class, std::map<std::string, std::string> &req_map)
 	DEBUG && std::cout << "content_len: " << client_class.get_body().size() << std::endl;
 	client_class.set_content_type("text/html");
 
+    client_class.get_delete_done = true;
 	return 200;
 }
 
 
 int POST_body(client &client_class)
 {
+	static bool done = false;
+
 	DEBUG && std::cout << "POST_BODY---------------------------------\n";
 	std::string &req = client_class.get_request();
 	std::string bound = ("\r\n--"+client_class.get_post_boundary());
 	// DEBUG && std::cout << bound << '\n';
 	DEBUG && std::cout <<'|'<<req<<'|';
 	unsigned long index = req.find(bound);
+	if(done == true)
+	{
+		DEBUG && std::cout << "done = true\n";
+		if(req.find(bound.substr(0, bound.find("\r\n")) + "--\r\n") != std::string::npos)
+		{
+			client_class.clear_post_written_len();
+			client_class.set_post_request_parsed(false);
+			DEBUG && std::cout << "done = true 2\n";
+			done = false;
+			return 200;
+		}
+	}
 	if(index != std::string::npos)
 	{
 			long long size = write(client_class.get_post_fd(), req.c_str(), index);
@@ -178,6 +194,11 @@ int POST_body(client &client_class)
 					std::string filename = "";
 					while(line[i] != '\"')
 						filename += line[i++];
+
+					std::string tmp = "";
+					if(client_class.get_delete_trash)
+						tmp = "/tmp/";
+					filename = tmp + filename;
 					DEBUG && std::cout << "filename = = " << filename << "\n";
 					close(client_class.get_post_fd());
 					client_class.set_post_filename(filename);
@@ -198,6 +219,8 @@ int POST_body(client &client_class)
 	int status = 0;
 	DEBUG && std::cout << "req.size() + client_class.get_post_written_len() = " << req.size() + client_class.get_post_written_len() << "\n";
 	DEBUG && std::cout << "(client_class.get_post_filelength() - (boundary.size() + 6)) = " << (client_class.get_post_filelength() - (boundary.size() + 6)) << "\n";
+	std::cout << "client_class.get_post_filelength() = " << client_class.get_post_filelength() << "\n";
+	std::cout << "boundary.size() + 6 = " << boundary.size() + 6 << "\n";
 	if((req.size() + client_class.get_post_written_len()) 
 			>= (client_class.get_post_filelength() - (boundary.size() + 6)))
 	{
@@ -214,8 +237,9 @@ int POST_body(client &client_class)
 		if(size == write_size)
 		{
 			close(client_class.get_post_fd());
-			client_class.set_post_request_parsed(false);
-			return 200;
+			// client_class.clear_post_written_len();
+			done = true;
+			return POST_body(client_class);
 		}
 		else
 		 	return -100;
@@ -306,6 +330,10 @@ int POST_CHUNKED_BODY(client &client_class)
 				std::string filename = "";
 				while(line[i] != '\"')
 					filename += line[i++];
+				std::string tmp = "";
+				if(client_class.get_delete_trash)
+					tmp = "/tmp/";
+				filename = tmp + filename;
 				DEBUG && std::cout << "filename = = " << filename << "\n";
 				client_class.set_post_filename(filename);
 				client_class.set_post_fd(open(filename.c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
@@ -372,6 +400,7 @@ int POST_RAW(client &client_class)
 	return 200;	
 }
 
+
 int POST_header(client &client_class, std::map<std::string, std::string> &req_map)
 {
 	std::string &req = client_class.get_request();
@@ -387,7 +416,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		DEBUG && std::cout << ("Error parsing initial line\n");
 		return 400;
 	}
-	if(req_map["Method"] != "POST" || req_map.find("Method") == req_map.end())
+	if((req_map["Method"] != "POST" && !client_class.get_delete_trash) || req_map.find("Method") == req_map.end())
 	{
 		DEBUG && std::cout << ("Method is not POST\n");
 		return 400;
@@ -441,6 +470,7 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 	try {
 		if(req_map.find("Content-Length") != req_map.end())
 			client_class.set_post_filelength(std::stoll(req_map["Content-Length"]));
+		std::cout << "try catch Content-Length: " << client_class.get_post_filelength() << std::endl;
 	} catch (std::exception &e) {
 		DEBUG && std::cout << "error 400\n";
 		return 400;
@@ -475,8 +505,12 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 		if(req_map["Content-Type"].find("multipart/form-data") == std::string::npos)
 		{
 			const std::chrono::time_point<std::chrono::system_clock> p1 = std::chrono::system_clock::now();
-			const std::string name = "client_" + std::to_string(std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count());
-			client_class.set_post_fd(open(name.c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
+			std::string name = "client_" + std::to_string(std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count());
+			std::string tmp = "";
+			if(client_class.get_delete_trash)
+				tmp = "/tmp/";
+			name = tmp + name;
+			client_class.set_post_fd(open((name).c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
 			client_class.set_POST_Chuncked(true);
 			DEBUG && std::cout << "chunked RAW body\n";
 			return POST_CHUNKED_BODY(client_class);
@@ -523,6 +557,10 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 						std::string filename = "";
 						while(line[i] != '\"')
 							filename += line[i++];
+						std::string tmp = "";
+						if(client_class.get_delete_trash)
+							tmp = "/tmp/";
+						filename = tmp + filename;
 						DEBUG && std::cout << "filename = = " << filename << "\n";
 						client_class.set_post_filename(filename);
 						client_class.set_post_fd(open(filename.c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
@@ -576,6 +614,10 @@ int POST_header(client &client_class, std::map<std::string, std::string> &req_ma
 					std::string filename = "";
 					while(line[i] != '\"')
 						filename += line[i++];
+					std::string tmp = "";
+					if(client_class.get_delete_trash)
+						tmp = "/tmp/";
+					filename = tmp + filename;
 					DEBUG && std::cout << "filename = = " << filename << "\n";
 					client_class.set_post_filename(filename);
 					client_class.set_post_fd(open(filename.c_str(), O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666));
@@ -681,7 +723,15 @@ int GET(client &client_class, std::map<std::string, std::string> &req_map)
 		client_class.set_content_type("text/plain");
 		// call smoumni cgi here
 	}
+    
+    if(req.size() > 4)
+	{
+		// client_class.set_post_fd(int(open("/tmp/test", O_WRONLY | O_APPEND | O_CREAT | O_TRUNC, 0666)));
+		// client_class.set_request(req);
+		client_class.get_delete_trash = true;
+		return POST_header(client_class, req_map);
 
+	}
 	return 200;
 }
 
@@ -691,6 +741,7 @@ int handle_request(client &client_class)
 	// DEBUG && std::cout << "entering post request handling ==================== \n " << client_class.get_request() << '\n';
 	if(client_class.get_request().size() == 0) 
 	{
+		std::cout << "req = " << client_class.get_request() << "\n";
 		DEBUG && std::cout << ("No request to handle\n");
 		return 500;
 	}
@@ -710,9 +761,15 @@ int handle_request(client &client_class)
 		}
 
 	std::string req = client_class.get_request();
-	// DEBUG && std::cout << "\n\n\nREQUEST START \n\n";
-	// DEBUG && std::cout << req << std::endl;
-	// DEBUG && std::cout << "\nREQUEST END\n";
+	DEBUG && std::cout << "\n\n\nREQUEST START \n\n";
+	DEBUG && std::cout << req << std::endl;
+	DEBUG && std::cout << "\nREQUEST END\n";
+	std::map<std::string, std::string> trash;
+	if(client_class.get_status_code() == 200 || client_class.get_status_code() == 404)
+	{
+		DEBUG && std::cout << "Request already handled\n";
+		return 200;
+	}
 	if(req.find("\r\n\r\n") == std::string::npos)
 	{
 		DEBUG && std::cout << ("Request not complete\n");

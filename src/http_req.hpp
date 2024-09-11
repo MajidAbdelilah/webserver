@@ -13,3 +13,5 @@
 // returns the exit status of the operation
 int handle_request(client &client);
 
+std::string get_line(std::string &req);
+int parse_initial_line(std::string line, std::map<std::string, std::string> &req);

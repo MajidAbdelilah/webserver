@@ -2,6 +2,7 @@
 #include "http_req.hpp"
 #include <iostream>
 #include <string>
+#include <sys/event.h>
 #include <sys/socket.h>
 #include <utility>
 #include "client.hpp"
@@ -43,7 +44,7 @@ int Server::run(){
         if (count == -1)
             throw("kevent error");
         for (int i = 0 ; i < count; i++){
-            if (std::find(_Socketsfd.begin(), _Socketsfd.end(), events[i].ident) != _Socketsfd.end()){
+            if ( events[i].filter & EVFILT_READ &&  std::find(_Socketsfd.begin(), _Socketsfd.end(), events[i].ident) != _Socketsfd.end()){
                 int client_socketfd = accept(events[i].ident, NULL,0);
                 if (client_socketfd < 0)
                     throw("Client fd accept error"); // accepting client connection
@@ -202,119 +203,60 @@ int Server::getting_req(int kernel_q, int client_soc){
         check_header_body(client_soc, _bytesread);
         if (_Clients[client_soc].is_request_done()){
             DEBUG && std::cout << "------------------------- had l9lawi imta kidkhl lhna ---------------------\n";
-            if (_Clients[client_soc].get_method() != "POST")
-			    handle_request(_Clients[client_soc]);
+            // if (_Clients[client_soc].get_method() != "POST")
+			//     handle_request(_Clients[client_soc]);
             _Clients[client_soc].build_response();
+            _Clients[client_soc].set_request("");
             struct kevent changes;
             EV_SET(&changes, client_soc, EVFILT_READ, EV_DELETE, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             EV_SET(&changes, client_soc, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
             kevent(kernel_q, &changes, 1, NULL, 0 , NULL);
             _Clients[client_soc].set_request_done(false);
+            _Clients[client_soc].clear_request();
         }
     }
     return (_bytesread);
 }
 
 void Server::check_header_body(int client_soc, int bytesread){
-    DEBUG && std::cout << "------------number of bytesreads " << bytesread << '\n';
-    if (!_Clients[client_soc].is_header_done()){
-        DEBUG && std::cout << "here----------=================--------------\n";
-        std::string header(_Clients[client_soc].get_request().c_str(), _Clients[client_soc].get_request_size());
-        std::string tmp = header;
-        unsigned long pos = tmp.find("\r\n\r\n");
-        if (pos != std::string::npos){
-            _Clients[client_soc].set_header_done(true);
-            std::string head = tmp.substr(0, pos + 4);
-            _Clients[client_soc].set_header(head);
-            _Clients[client_soc].set_body(tmp.substr(pos + 4));
-            _Clients[client_soc].clear_request();
-        }
-        else {
-            _Clients[client_soc].set_header_done(false);
-            _Clients[client_soc].set_body_done(false);
-            _Clients[client_soc].set_request_done(false);
-            return ;
-        }
-    }
-    if (_Clients[client_soc].is_header_done())
-    {
-        DEBUG && std::cout << _Clients[client_soc].get_method() << '\n';
-        if (_Clients[client_soc].get_method() != ""){
-            // reading body part of post request // majid post request/ body parsing and opening file and putting data in it 
-			int status = handle_request(_Clients[client_soc]);
-            _Clients[client_soc].set_status_code(status);
-            if(status == -100)
-            {
-                // std::string res = "HTTP/1.1 100 Continue\r\n\r\n";
-                // send(client_soc, res.c_str(), res.size(), 0);
-            }
-            if(status  == 200){
-                // _Clients[client_soc].clear_all();
-                _Clients[client_soc].set_connection_close(1);
-                _Clients[client_soc].set_request_done(true);
-            }
-               if(status != -100 && status != -1)
-            {
-                _Clients[client_soc].set_connection_close(1);
-                _Clients[client_soc].set_request_done(true);
-            }
-            if(status == -1)
-            {
-                std::cout << "write error" << '\n';
-                _Clients[client_soc].set_request_done(true);
-            }
-            return ;
-		}
-        std::string first_line = _Clients[client_soc].get_header();
-        std::string method = first_line.substr(0, first_line.find(" "));
-        if (method != "POST" && method != "GET" && method != "DELETE"){
-            _Clients[client_soc].set_status_code(405);
-            _Clients[client_soc].set_request_done(true);
-            return ;
-        }
-        _Clients[client_soc].set_method(method);
-        DEBUG && std::cout << method << '\n';
-        if (method == "GET" || method == "DELETE"){
-            _Clients[client_soc].set_request_done(true);
-            if (_Clients[client_soc].get_body().size() > 0){
-                char trash[10000] = {0};
-                while (recv(client_soc, trash, 9999, 0) > 0);
-            }
-            _Clients[client_soc].set_body("");
-            _Clients[client_soc].set_request(_Clients[client_soc].get_header());
-            return ;
-        }
+    (void) bytesread;
 
-        _Clients[client_soc].set_append_with_bytes(const_cast<char *>((_Clients[client_soc].get_header() + _Clients[client_soc].get_body()).c_str()), bytesread);
-		if(method == "POST"){
-			int status = handle_request(_Clients[client_soc]);
-            _Clients[client_soc].set_status_code(status);
-            if(status == -100)
-            {
-                // std::string res = "HTTP/1.1 100 Continue\r\n\r\n";
-                // send(client_soc, res.c_str(), res.size(), 0);
-            }
-            if(status  == 200){
-                DEBUG && std::cout << "Entering status 200 \n";
-                _Clients[client_soc].set_request_done(true);
-                _Clients[client_soc].set_connection_close(1);
-                return;
-                // _Clients[client_soc].clear_all();
-            }
-            if(status != -100 && status != -1)
-            {
-                _Clients[client_soc].set_connection_close(1);
-                _Clients[client_soc].set_request_done(true);
-            }
-            if(status == -1)
-            {
-                std::cout << "write error" << '\n';
-                _Clients[client_soc].set_request_done(true);
-            }
-		}
-        return ;
+   
+    if (_Clients[client_soc].is_header_done() == false){
+        std::string req = _Clients[client_soc].get_request();
+        size_t pos = req.find("\r\n\r\n");
+        std::string line = req.substr(0, req.find("\r\n"));
+        std::map<std::string, std::string> req_map;
+        if (parse_initial_line(line, req_map) == 0){
+
+            _Clients[client_soc].set_header(req.substr(0, pos));
+            _Clients[client_soc].set_body(req.substr(pos + 4));
+            _Clients[client_soc].set_header_done(true);
+            // _Clients[client_soc].set_request(req);
+        }else {
+            // tranch_body = true;
+        }
     }
+    else{
+    }
+    int status = handle_request(_Clients[client_soc]);
+       std::cout << "status is : " << status << '\n';
+      
+        if(status == 200 || status == 404)
+        {
+            _Clients[client_soc].set_request_done(true);
+        }
+        else if (status == -100)
+            {
+                _Clients[client_soc].set_request_done(false);
+            }
+        else
+        {
+                _Clients[client_soc].set_request_done(true);
+        }
+   
+       
 }
 
 
